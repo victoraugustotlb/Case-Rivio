@@ -9,3 +9,11 @@
 - [x] Design system, navegação responsiva e Início (dashboard).
 - [x] Reorientar para histórico + código ao médico: Início, Documentos (escanear/conferir), Saúde, Compartilhar, Perfil, VITA Clínico.
 - [ ] Salvar dados de verdade (contas e armazenamento) — aguardando decisão do usuário.
+
+# VITA Web — documentos reais
+- [x] Contas de paciente (e-mail/senha e Google), telas protegidas.
+- [x] Envio de arquivo/foto, leitura por IA, conferência e salvamento no histórico.
+- [x] Códigos de compartilhamento salvos; médico abre só o autorizado.
+- [ ] Teste completo logado — precisa de uma conta criada pelo usuário no preview.
+- [ ] Contas profissionais com validação de CRM.
+- [ ] Integração real com wearables.
