@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      documents: {
+        Row: {
+          confirmed: boolean
+          created_at: string
+          doc_date: string | null
+          fields: Json
+          file_path: string | null
+          file_type: string | null
+          id: string
+          kind: string
+          origin: string
+          source: string | null
+          summary: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          confirmed?: boolean
+          created_at?: string
+          doc_date?: string | null
+          fields?: Json
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          kind?: string
+          origin?: string
+          source?: string | null
+          summary?: string | null
+          title: string
+          user_id?: string
+        }
+        Update: {
+          confirmed?: boolean
+          created_at?: string
+          doc_date?: string | null
+          fields?: Json
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          kind?: string
+          origin?: string
+          source?: string | null
+          summary?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      share_codes: {
+        Row: {
+          categories: string[]
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          period_months: number
+          revoked: boolean
+          signals: string[]
+          user_id: string
+        }
+        Insert: {
+          categories?: string[]
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          period_months: number
+          revoked?: boolean
+          signals?: string[]
+          user_id?: string
+        }
+        Update: {
+          categories?: string[]
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          period_months?: number
+          revoked?: boolean
+          signals?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
