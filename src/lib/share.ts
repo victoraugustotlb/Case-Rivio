@@ -39,3 +39,20 @@ export function accessState(expiresAt: Date, revoked: boolean, now: Date = new D
   if (revoked) return "revogado";
   return now.getTime() >= expiresAt.getTime() ? "expirado" : "valido";
 }
+
+const KIND_TO_CATEGORY: Record<string, ShareCategory> = {
+  Exame: "exames", Laudo: "laudos", Consulta: "consultas", Receita: "receitas", Vacina: "vacinas",
+};
+
+/** O médico só vê documentos da categoria autorizada e adicionados dentro do período. */
+export function docVisible(
+  doc: { kind: string; created_at: string },
+  share: { categories: string[]; period_months: number },
+  now: Date = new Date(),
+): boolean {
+  const cat = KIND_TO_CATEGORY[doc.kind];
+  if (!cat || !share.categories.includes(cat)) return false;
+  const limit = new Date(now);
+  limit.setMonth(limit.getMonth() - share.period_months);
+  return new Date(doc.created_at).getTime() >= limit.getTime();
+}
