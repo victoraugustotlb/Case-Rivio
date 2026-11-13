@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CompartilharRouteImport } from './routes/compartilhar'
+import { Route as MedicoRouteImport } from './routes/medico'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as SaudeRouteImport } from './routes/saude'
+import { Route as DocumentosIndexRouteImport } from './routes/documentos.index'
+import { Route as DocumentosIdRouteImport } from './routes/documentos.$id'
+import { Route as DocumentosAdicionarRouteImport } from './routes/documentos.adicionar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompartilharRoute = CompartilharRouteImport.update({
+  id: '/compartilhar',
+  path: '/compartilhar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicoRoute = MedicoRouteImport.update({
+  id: '/medico',
+  path: '/medico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SaudeRoute = SaudeRouteImport.update({
+  id: '/saude',
+  path: '/saude',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosIndexRoute = DocumentosIndexRouteImport.update({
+  id: '/documentos/',
+  path: '/documentos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosIdRoute = DocumentosIdRouteImport.update({
+  id: '/documentos/$id',
+  path: '/documentos/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosAdicionarRoute = DocumentosAdicionarRouteImport.update({
+  id: '/documentos/adicionar',
+  path: '/documentos/adicionar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/compartilhar': typeof CompartilharRoute
+  '/medico': typeof MedicoRoute
+  '/perfil': typeof PerfilRoute
+  '/saude': typeof SaudeRoute
+  '/documentos/$id': typeof DocumentosIdRoute
+  '/documentos/adicionar': typeof DocumentosAdicionarRoute
+  '/documentos/': typeof DocumentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/compartilhar': typeof CompartilharRoute
+  '/medico': typeof MedicoRoute
+  '/perfil': typeof PerfilRoute
+  '/saude': typeof SaudeRoute
+  '/documentos/$id': typeof DocumentosIdRoute
+  '/documentos/adicionar': typeof DocumentosAdicionarRoute
+  '/documentos': typeof DocumentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/compartilhar': typeof CompartilharRoute
+  '/medico': typeof MedicoRoute
+  '/perfil': typeof PerfilRoute
+  '/saude': typeof SaudeRoute
+  '/documentos/$id': typeof DocumentosIdRoute
+  '/documentos/adicionar': typeof DocumentosAdicionarRoute
+  '/documentos/': typeof DocumentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/compartilhar'
+    | '/medico'
+    | '/perfil'
+    | '/saude'
+    | '/documentos/$id'
+    | '/documentos/adicionar'
+    | '/documentos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/compartilhar'
+    | '/medico'
+    | '/perfil'
+    | '/saude'
+    | '/documentos/$id'
+    | '/documentos/adicionar'
+    | '/documentos'
+  id:
+    | '__root__'
+    | '/'
+    | '/compartilhar'
+    | '/medico'
+    | '/perfil'
+    | '/saude'
+    | '/documentos/$id'
+    | '/documentos/adicionar'
+    | '/documentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompartilharRoute: typeof CompartilharRoute
+  MedicoRoute: typeof MedicoRoute
+  PerfilRoute: typeof PerfilRoute
+  SaudeRoute: typeof SaudeRoute
+  DocumentosIdRoute: typeof DocumentosIdRoute
+  DocumentosAdicionarRoute: typeof DocumentosAdicionarRoute
+  DocumentosIndexRoute: typeof DocumentosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compartilhar': {
+      id: '/compartilhar'
+      path: '/compartilhar'
+      fullPath: '/compartilhar'
+      preLoaderRoute: typeof CompartilharRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medico': {
+      id: '/medico'
+      path: '/medico'
+      fullPath: '/medico'
+      preLoaderRoute: typeof MedicoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saude': {
+      id: '/saude'
+      path: '/saude'
+      fullPath: '/saude'
+      preLoaderRoute: typeof SaudeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos/': {
+      id: '/documentos/'
+      path: '/documentos'
+      fullPath: '/documentos/'
+      preLoaderRoute: typeof DocumentosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos/$id': {
+      id: '/documentos/$id'
+      path: '/documentos/$id'
+      fullPath: '/documentos/$id'
+      preLoaderRoute: typeof DocumentosIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos/adicionar': {
+      id: '/documentos/adicionar'
+      path: '/documentos/adicionar'
+      fullPath: '/documentos/adicionar'
+      preLoaderRoute: typeof DocumentosAdicionarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompartilharRoute: CompartilharRoute,
+  MedicoRoute: MedicoRoute,
+  PerfilRoute: PerfilRoute,
+  SaudeRoute: SaudeRoute,
+  DocumentosIdRoute: DocumentosIdRoute,
+  DocumentosAdicionarRoute: DocumentosAdicionarRoute,
+  DocumentosIndexRoute: DocumentosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

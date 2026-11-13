@@ -7,4 +7,5 @@
 - [ ] Confirmar execução no Figma real — depende de instalação e execução pelo usuário; não há sessão Figma disponível.
 # VITA — Web app
 - [x] Design system, navegação responsiva e Início (dashboard).
-- [ ] Próximos módulos: Prontuário, Consultas, Medicamentos, Perfil, SOS.
+- [x] Reorientar para histórico + código ao médico: Início, Documentos (escanear/conferir), Saúde, Compartilhar, Perfil, VITA Clínico.
+- [ ] Salvar dados de verdade (contas e armazenamento) — aguardando decisão do usuário.
