@@ -47,6 +47,7 @@ function Adicionar() {
     if (!ACCEPT.includes(f.type)) { setError("Envie um PDF ou uma foto (JPG, PNG ou WEBP)."); return; }
     if (f.size > MAX) { setError("O arquivo passa de 20 MB. Envie um arquivo menor."); return; }
     setStep("analisando");
+    let uploaded = false;
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Sessão expirada. Entre novamente.");
@@ -55,6 +56,7 @@ function Adicionar() {
       const up = await supabase.storage.from("medical-documents").upload(path, f, { contentType: f.type });
       if (up.error) throw new Error("Não foi possível enviar o arquivo.");
       setFile({ path, type: f.type, preview: URL.createObjectURL(f), origin });
+      uploaded = true;
       const r = await extract({ data: { path } });
       if (!r.legivel) {
         setError("Não conseguimos ler um documento médico nesse arquivo. Você pode preencher os campos à mão.");
@@ -63,7 +65,7 @@ function Adicionar() {
       setStep("conferir");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha na leitura. Tente novamente.");
-      setStep(file ? "conferir" : "escolher");
+      setStep(uploaded ? "conferir" : "escolher");
       setDraft((d) => d ?? { title: "", kind: "Exame", doc_date: "", source: "", summary: "", fields: [] });
     }
   };
