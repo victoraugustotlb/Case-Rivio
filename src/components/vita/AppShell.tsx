@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Activity, Bell, FolderHeart, Home, ScanLine, Share2, User } from "lucide-react";
+import { Activity, Bell, FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } from "lucide-react";
 
 const nav = [
   { label: "Início", to: "/", icon: Home },
@@ -39,8 +39,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <Link to="/documentos/adicionar" className="mt-auto flex min-h-11 items-center justify-center gap-2 rounded-lg bg-sidebar-primary font-semibold text-sidebar-primary-foreground">
-          <ScanLine className="h-5 w-5" aria-hidden /> Escanear documento
+          <FileUp className="h-5 w-5" aria-hidden /> Adicionar arquivo
         </Link>
+        <Link to="/entrar" className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-lg text-sm hover:bg-sidebar-accent"><LogOut className="h-4 w-4" aria-hidden /> Sair</Link>
       </aside>
 
       <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b bg-background/90 px-4 py-3 backdrop-blur lg:ml-64 lg:px-8">

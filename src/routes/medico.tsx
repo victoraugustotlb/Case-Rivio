@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Clock, FileText, HeartPulse, LogOut, Stethoscope } from "lucide-react";
+import { AlertCircle, Clock, FileText, HeartPulse, LogOut, Stethoscope } from "lucide-react";
 import { normalizeCode } from "@/lib/share";
 import { docs, heartRate7d } from "@/lib/vita-data";
 
@@ -21,22 +21,24 @@ export const Route = createFileRoute("/medico")({
 function Medico() {
   const [input, setInput] = useState("");
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"resumo" | "documentos" | "sinais">("resumo");
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState<"resumo" | "documentos" | "sinais" | "linha">("resumo");
   const code = normalizeCode(input);
   const valid = /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code);
 
   if (!open) {
     return (
       <div className="grid min-h-screen place-items-center bg-background px-4 font-sans text-foreground">
-        <form onSubmit={(e) => { e.preventDefault(); if (valid) setOpen(true); }} className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-soft">
+        <form onSubmit={(e) => { e.preventDefault(); if (!valid) return; if (code.startsWith("EXP")) { setError("Este código expirou. Peça ao paciente para gerar um novo."); return; } setError(""); setOpen(true); }} className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-soft">
           <div className="flex items-center gap-2 font-display text-2xl font-bold text-primary"><Stethoscope className="h-6 w-6" aria-hidden /> VITA Clínico</div>
           <h1 className="mt-6 font-display text-xl font-semibold">Abrir histórico do paciente</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Digite o código que o paciente mostrou.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Dr. Rafael Lima · CRM-SP 123456 — digite o código que o paciente mostrou.</p>
           <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="XXXX-XXXX" aria-label="Código de acesso" autoComplete="off"
             className="mt-5 min-h-14 w-full rounded-lg border bg-background px-4 text-center font-display text-2xl tracking-widest uppercase" />
+          {error && <p role="alert" className="mt-3 flex items-center gap-2 rounded-lg bg-danger-soft p-3 text-sm"><AlertCircle className="h-4 w-4 shrink-0" aria-hidden />{error}</p>}
           <button type="submit" disabled={!valid} className="mt-4 min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">Abrir</button>
-          <p className="mt-4 text-center text-xs text-muted-foreground">Demonstração: qualquer código de 8 caracteres abre um paciente fictício.</p>
-          <Link to="/" className="mt-2 block text-center text-sm text-primary underline">Voltar ao app do paciente</Link>
+          <p className="mt-4 text-center text-xs text-muted-foreground">Demonstração: qualquer código de 8 caracteres abre um paciente fictício; códigos que começam com EXP simulam acesso expirado.</p>
+          <Link to="/entrar" className="mt-2 block text-center text-sm text-primary underline">Sair da conta profissional</Link>
         </form>
       </div>
     );
@@ -55,11 +57,11 @@ function Medico() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div><h1 className="font-display text-3xl font-bold">Mariana Souza</h1><p className="text-muted-foreground">38 anos · Escopo: exames, laudos, consultas, receitas, FC e pressão · últimos 5 anos</p></div>
         </div>
-        <div role="tablist" className="mt-6 flex gap-1 border-b">
-          {(["resumo", "documentos", "sinais"] as const).map((t) => (
+        <div role="tablist" className="mt-6 flex gap-1 overflow-x-auto border-b">
+          {(["resumo", "linha", "documentos", "sinais"] as const).map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} type="button" onClick={() => setTab(t)}
               className={`min-h-11 border-b-2 px-4 font-medium ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>
-              {t === "resumo" ? "Resumo clínico" : t === "documentos" ? "Documentos" : "Sinais e dispositivos"}
+              {t === "resumo" ? "Resumo clínico" : t === "linha" ? "Linha do tempo" : t === "documentos" ? "Documentos" : "Sinais e dispositivos"}
             </button>
           ))}
         </div>
@@ -70,6 +72,18 @@ function Medico() {
               <ul className="mt-3 space-y-1 text-sm">{docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").map((d) => <li key={d.id} className="flex justify-between gap-2"><span>{d.title}</span><span className="text-muted-foreground">{d.date}</span></li>)}</ul></section>
             <section className="rounded-2xl border bg-card p-5"><h2 className="font-semibold">Sinais recentes</h2><p className="mt-3">PA 128/82 mmHg · Omron · hoje</p><p>FC repouso 74 bpm · Apple Watch</p><p className="mt-2 text-xs text-muted-foreground">Dados de dispositivos são informativos.</p></section>
           </div>
+        )}
+        {tab === "linha" && (
+          <ol className="mt-6 space-y-4 border-l-2 border-primary/30 pl-6">
+            {docs.map((d) => (
+              <li key={d.id} className="relative rounded-2xl border bg-card p-4">
+                <span className="absolute -left-[33px] top-5 h-3 w-3 rounded-full bg-primary" />
+                <p className="text-xs text-muted-foreground">{d.date} · {d.kind}</p>
+                <p className="font-semibold">{d.title}</p>
+                <p className="text-sm text-muted-foreground">{d.source} · {d.origin}{d.confirmed ? " · conferido pela paciente" : " · não conferido"}</p>
+              </li>
+            ))}
+          </ol>
         )}
         {tab === "documentos" && (
           <table className="mt-6 w-full overflow-hidden rounded-2xl border bg-card text-left text-sm">

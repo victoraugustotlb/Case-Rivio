@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompartilharRouteImport } from './routes/compartilhar'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MedicoRouteImport } from './routes/medico'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as SaudeRouteImport } from './routes/saude'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const CompartilharRoute = CompartilharRouteImport.update({
   id: '/compartilhar',
   path: '/compartilhar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MedicoRoute = MedicoRouteImport.update({
@@ -62,6 +68,7 @@ const DocumentosAdicionarRoute = DocumentosAdicionarRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/compartilhar': typeof CompartilharRoute
+  '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
   '/perfil': typeof PerfilRoute
   '/saude': typeof SaudeRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/compartilhar': typeof CompartilharRoute
+  '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
   '/perfil': typeof PerfilRoute
   '/saude': typeof SaudeRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/compartilhar': typeof CompartilharRoute
+  '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
   '/perfil': typeof PerfilRoute
   '/saude': typeof SaudeRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/compartilhar'
+    | '/entrar'
     | '/medico'
     | '/perfil'
     | '/saude'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/compartilhar'
+    | '/entrar'
     | '/medico'
     | '/perfil'
     | '/saude'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/compartilhar'
+    | '/entrar'
     | '/medico'
     | '/perfil'
     | '/saude'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompartilharRoute: typeof CompartilharRoute
+  EntrarRoute: typeof EntrarRoute
   MedicoRoute: typeof MedicoRoute
   PerfilRoute: typeof PerfilRoute
   SaudeRoute: typeof SaudeRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/compartilhar'
       fullPath: '/compartilhar'
       preLoaderRoute: typeof CompartilharRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/medico': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompartilharRoute: CompartilharRoute,
+  EntrarRoute: EntrarRoute,
   MedicoRoute: MedicoRoute,
   PerfilRoute: PerfilRoute,
   SaudeRoute: SaudeRoute,
