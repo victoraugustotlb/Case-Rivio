@@ -2,7 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Activity, ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, Share2, Upload, Watch } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
-import { devices, docs } from "@/lib/vita-data";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { devices } from "@/lib/vita-data";
+import { documentsQuery } from "@/lib/documents";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -15,19 +19,23 @@ export const Route = createFileRoute("/_authenticated/inicio")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(documentsQuery),
   component: Inicio,
 });
 
 function Inicio() {
   const [hidden, setHidden] = useState(true);
-  const counts = { exames: docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").length, total: docs.length, pend: docs.filter((d) => !d.confirmed).length };
+  const { data: docs } = useSuspenseQuery(documentsQuery);
+  const [nome, setNome] = useState("");
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setNome(((data.user?.user_metadata?.full_name as string) || "").split(" ")[0])); }, []);
+  const counts = { exames: docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").length, total: docs.length, pend: 0 };
   return (
     <AppShell>
       <div className="mx-auto max-w-6xl space-y-8">
         <section className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
           <div className="min-w-0">
             <p className="text-sm text-muted-foreground">Olá,</p>
-            <h1 className="truncate font-display text-3xl font-bold tracking-tight lg:text-4xl">Mariana</h1>
+            <h1 className="truncate font-display text-3xl font-bold tracking-tight lg:text-4xl">{nome || "Bem-vindo(a)"}</h1>
           </div>
           <button type="button" onClick={() => setHidden((h) => !h)} aria-pressed={!hidden}
             className="flex min-h-11 items-center gap-2 rounded-full border bg-card px-4 text-sm font-medium hover:bg-muted">
@@ -81,13 +89,14 @@ function Inicio() {
           <section aria-labelledby="recentes">
             <h2 id="recentes" className="mb-3 font-display text-xl font-semibold">Adicionados recentemente</h2>
             <ol className="rounded-2xl border bg-card p-2">
+              {docs.length === 0 && <li className="p-6 text-center text-sm text-muted-foreground">Nenhum documento ainda. <Link to="/documentos/adicionar" className="font-medium text-primary underline">Adicione o primeiro</Link>.</li>}
               {docs.slice(0, 4).map((d) => (
                 <li key={d.id}>
                   <Link to="/documentos/$id" params={{ id: d.id }} className="flex items-center gap-3 rounded-xl p-3 hover:bg-muted">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><FileText className="h-5 w-5" aria-hidden /></span>
                     <div className="min-w-0 flex-1">
                       <p className={`truncate font-medium ${hidden ? "sensitive-blur" : ""}`}>{d.title}</p>
-                      <p className="text-sm text-muted-foreground">{d.kind} · {d.source} · {d.date}</p>
+                      <p className="text-sm text-muted-foreground">{[d.kind, d.source, d.doc_date].filter(Boolean).join(" · ")}</p>
                     </div>
                   </Link>
                 </li>
