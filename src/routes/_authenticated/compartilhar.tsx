@@ -99,7 +99,17 @@ function Compartilhar() {
         </div>
         <p className="flex gap-2 rounded-xl bg-primary-soft p-4 text-sm"><Info className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Encerrar o acesso impede novas consultas, mas não desfaz o que o médico já viu.</p>
         {errors.length > 0 && <p className="text-sm text-muted-foreground">{errors[0]}</p>}
-        <button type="button" disabled={errors.length > 0} onClick={() => setCode(formatShareCode())}
+        {fail && <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm">{fail}</p>}
+        <button type="button" disabled={errors.length > 0 || busy} onClick={async () => {
+          setBusy(true); setFail("");
+          for (let i = 0; i < 3; i++) {
+            const c = formatShareCode();
+            const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, period_months: periodMonths, expires_at: new Date(Date.now() + validityHours * 3600_000).toISOString() });
+            if (!error) { setCode(c); setBusy(false); return; }
+            if (error.code !== "23505") break;
+          }
+          setFail("Não foi possível gerar o código. Tente novamente."); setBusy(false);
+        }}
           className="min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">Gerar código</button>
       </div>
     </AppShell>
