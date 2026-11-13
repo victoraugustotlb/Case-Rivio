@@ -2,8 +2,8 @@
 
 # Estrela-guia
 
-Pacientes acompanham o próprio tratamento e cuidam da sua saúde.
+Médicos veem todo o histórico do paciente e evitam exames desnecessários.
 
 ## Métrica
 
-Doses de medicamento confirmadas como tomadas a cada dia
+Históricos abertos por médicos com o código do paciente a cada semana
