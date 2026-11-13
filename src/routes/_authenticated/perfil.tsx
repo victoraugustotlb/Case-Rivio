@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChevronRight, Download, History, KeyRound, ShieldCheck, Trash2, User } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 
-export const Route = createFileRoute("/perfil")({
+export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
     meta: [
       { title: "Perfil e privacidade — VITA" },
@@ -29,7 +29,7 @@ function Perfil() {
   return (
     <AppShell>
       <div className="mx-auto max-w-2xl">
-        <PageTitle title="Perfil" subtitle="Mariana Souza · 38 anos" />
+        <PageTitle title="Perfil" subtitle="Sua conta e privacidade" />
         <section className="rounded-2xl border bg-card p-5">
           <h2 className="font-semibold">Acessos recentes</h2>
           <ul className="mt-3 divide-y text-sm">

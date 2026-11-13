@@ -10,23 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CompartilharRouteImport } from './routes/compartilhar'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MedicoRouteImport } from './routes/medico'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as SaudeRouteImport } from './routes/saude'
-import { Route as DocumentosIndexRouteImport } from './routes/documentos.index'
-import { Route as DocumentosIdRouteImport } from './routes/documentos.$id'
-import { Route as DocumentosAdicionarRouteImport } from './routes/documentos.adicionar'
+import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
+import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedSaudeRouteImport } from './routes/_authenticated/saude'
+import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
+import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
+import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompartilharRoute = CompartilharRouteImport.update({
-  id: '/compartilhar',
-  path: '/compartilhar',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntrarRoute = EntrarRouteImport.update({
@@ -39,73 +40,92 @@ const MedicoRoute = MedicoRouteImport.update({
   path: '/medico',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PerfilRoute = PerfilRouteImport.update({
+const AuthenticatedCompartilharRoute =
+  AuthenticatedCompartilharRouteImport.update({
+    id: '/compartilhar',
+    path: '/compartilhar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const SaudeRoute = SaudeRouteImport.update({
+const AuthenticatedSaudeRoute = AuthenticatedSaudeRouteImport.update({
   id: '/saude',
   path: '/saude',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const DocumentosIndexRoute = DocumentosIndexRouteImport.update({
-  id: '/documentos/',
-  path: '/documentos/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentosIdRoute = DocumentosIdRouteImport.update({
-  id: '/documentos/$id',
-  path: '/documentos/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentosAdicionarRoute = DocumentosAdicionarRouteImport.update({
-  id: '/documentos/adicionar',
-  path: '/documentos/adicionar',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedDocumentosIndexRoute =
+  AuthenticatedDocumentosIndexRouteImport.update({
+    id: '/documentos/',
+    path: '/documentos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDocumentosIdRoute =
+  AuthenticatedDocumentosIdRouteImport.update({
+    id: '/documentos/$id',
+    path: '/documentos/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDocumentosAdicionarRoute =
+  AuthenticatedDocumentosAdicionarRouteImport.update({
+    id: '/documentos/adicionar',
+    path: '/documentos/adicionar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/compartilhar': typeof CompartilharRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
-  '/perfil': typeof PerfilRoute
-  '/saude': typeof SaudeRoute
-  '/documentos/$id': typeof DocumentosIdRoute
-  '/documentos/adicionar': typeof DocumentosAdicionarRoute
-  '/documentos/': typeof DocumentosIndexRoute
+  '/compartilhar': typeof AuthenticatedCompartilharRoute
+  '/inicio': typeof AuthenticatedInicioRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/saude': typeof AuthenticatedSaudeRoute
+  '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
+  '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
+  '/documentos/': typeof AuthenticatedDocumentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/compartilhar': typeof CompartilharRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
-  '/perfil': typeof PerfilRoute
-  '/saude': typeof SaudeRoute
-  '/documentos/$id': typeof DocumentosIdRoute
-  '/documentos/adicionar': typeof DocumentosAdicionarRoute
-  '/documentos': typeof DocumentosIndexRoute
+  '/compartilhar': typeof AuthenticatedCompartilharRoute
+  '/inicio': typeof AuthenticatedInicioRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/saude': typeof AuthenticatedSaudeRoute
+  '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
+  '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
+  '/documentos': typeof AuthenticatedDocumentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/compartilhar': typeof CompartilharRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
-  '/perfil': typeof PerfilRoute
-  '/saude': typeof SaudeRoute
-  '/documentos/$id': typeof DocumentosIdRoute
-  '/documentos/adicionar': typeof DocumentosAdicionarRoute
-  '/documentos/': typeof DocumentosIndexRoute
+  '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
+  '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/saude': typeof AuthenticatedSaudeRoute
+  '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
+  '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
+  '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/compartilhar'
     | '/entrar'
     | '/medico'
+    | '/compartilhar'
+    | '/inicio'
     | '/perfil'
     | '/saude'
     | '/documentos/$id'
@@ -114,9 +134,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/compartilhar'
     | '/entrar'
     | '/medico'
+    | '/compartilhar'
+    | '/inicio'
     | '/perfil'
     | '/saude'
     | '/documentos/$id'
@@ -125,26 +146,23 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/compartilhar'
+    | '/_authenticated'
     | '/entrar'
     | '/medico'
-    | '/perfil'
-    | '/saude'
-    | '/documentos/$id'
-    | '/documentos/adicionar'
-    | '/documentos/'
+    | '/_authenticated/compartilhar'
+    | '/_authenticated/inicio'
+    | '/_authenticated/perfil'
+    | '/_authenticated/saude'
+    | '/_authenticated/documentos/$id'
+    | '/_authenticated/documentos/adicionar'
+    | '/_authenticated/documentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CompartilharRoute: typeof CompartilharRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   MedicoRoute: typeof MedicoRoute
-  PerfilRoute: typeof PerfilRoute
-  SaudeRoute: typeof SaudeRoute
-  DocumentosIdRoute: typeof DocumentosIdRoute
-  DocumentosAdicionarRoute: typeof DocumentosAdicionarRoute
-  DocumentosIndexRoute: typeof DocumentosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -156,11 +174,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/compartilhar': {
-      id: '/compartilhar'
-      path: '/compartilhar'
-      fullPath: '/compartilhar'
-      preLoaderRoute: typeof CompartilharRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entrar': {
@@ -177,54 +195,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MedicoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/perfil': {
-      id: '/perfil'
+    '/_authenticated/compartilhar': {
+      id: '/_authenticated/compartilhar'
+      path: '/compartilhar'
+      fullPath: '/compartilhar'
+      preLoaderRoute: typeof AuthenticatedCompartilharRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inicio': {
+      id: '/_authenticated/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof AuthenticatedInicioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
       path: '/perfil'
       fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/saude': {
-      id: '/saude'
+    '/_authenticated/saude': {
+      id: '/_authenticated/saude'
       path: '/saude'
       fullPath: '/saude'
-      preLoaderRoute: typeof SaudeRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedSaudeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/documentos/': {
-      id: '/documentos/'
+    '/_authenticated/documentos/': {
+      id: '/_authenticated/documentos/'
       path: '/documentos'
       fullPath: '/documentos/'
-      preLoaderRoute: typeof DocumentosIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedDocumentosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/documentos/$id': {
-      id: '/documentos/$id'
+    '/_authenticated/documentos/$id': {
+      id: '/_authenticated/documentos/$id'
       path: '/documentos/$id'
       fullPath: '/documentos/$id'
-      preLoaderRoute: typeof DocumentosIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedDocumentosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/documentos/adicionar': {
-      id: '/documentos/adicionar'
+    '/_authenticated/documentos/adicionar': {
+      id: '/_authenticated/documentos/adicionar'
       path: '/documentos/adicionar'
       fullPath: '/documentos/adicionar'
-      preLoaderRoute: typeof DocumentosAdicionarRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedDocumentosAdicionarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
+  AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedSaudeRoute: typeof AuthenticatedSaudeRoute
+  AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
+  AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
+  AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
+  AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedSaudeRoute: AuthenticatedSaudeRoute,
+  AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
+  AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
+  AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CompartilharRoute: CompartilharRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   EntrarRoute: EntrarRoute,
   MedicoRoute: MedicoRoute,
-  PerfilRoute: PerfilRoute,
-  SaudeRoute: SaudeRoute,
-  DocumentosIdRoute: DocumentosIdRoute,
-  DocumentosAdicionarRoute: DocumentosAdicionarRoute,
-  DocumentosIndexRoute: DocumentosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

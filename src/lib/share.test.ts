@@ -27,3 +27,17 @@ describe("compartilhamento", () => {
     expect(accessState(t, false, new Date("2026-11-13T09:59:59Z"))).toBe("valido");
   });
 });
+
+import { docVisible as dv } from "./share";
+describe("docVisible", () => {
+  const now = new Date("2026-11-13T12:00:00Z");
+  it("mostra exame autorizado dentro do período", () => {
+    expect(dv({ kind: "Exame", created_at: "2026-10-01T00:00:00Z" }, { categories: ["exames"], period_months: 3 }, now)).toBe(true);
+  });
+  it("esconde categoria não autorizada", () => {
+    expect(dv({ kind: "Receita", created_at: "2026-10-01T00:00:00Z" }, { categories: ["exames"], period_months: 3 }, now)).toBe(false);
+  });
+  it("esconde documento fora do período", () => {
+    expect(dv({ kind: "Exame", created_at: "2026-05-01T00:00:00Z" }, { categories: ["exames"], period_months: 3 }, now)).toBe(false);
+  });
+});

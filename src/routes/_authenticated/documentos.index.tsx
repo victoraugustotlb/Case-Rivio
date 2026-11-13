@@ -2,9 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { FileText, ScanLine, Search } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
-import { docs, type DocKind } from "@/lib/vita-data";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { type DocKind } from "@/lib/vita-data";
+import { documentsQuery } from "@/lib/documents";
 
-export const Route = createFileRoute("/documentos/")({
+export const Route = createFileRoute("/_authenticated/documentos/")({
   head: () => ({
     meta: [
       { title: "Meus documentos — VITA" },
@@ -15,6 +17,7 @@ export const Route = createFileRoute("/documentos/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(documentsQuery),
   component: Documentos,
 });
 
@@ -23,6 +26,7 @@ const kinds: ("Todos" | DocKind)[] = ["Todos", "Exame", "Laudo", "Consulta", "Re
 function Documentos() {
   const [kind, setKind] = useState<(typeof kinds)[number]>("Todos");
   const [q, setQ] = useState("");
+  const { data: docs } = useSuspenseQuery(documentsQuery);
   const list = docs.filter((d) => (kind === "Todos" || d.kind === kind) && d.title.toLowerCase().includes(q.toLowerCase()));
   return (
     <AppShell>
@@ -46,7 +50,7 @@ function Documentos() {
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary"><FileText className="h-5 w-5" aria-hidden /></span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{d.title}</p>
-                  <p className="truncate text-sm text-muted-foreground">{d.source} · {d.date}</p>
+                  <p className="truncate text-sm text-muted-foreground">{[d.source, d.doc_date].filter(Boolean).join(" · ") || "Sem data"}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">{d.kind}</span>
@@ -55,7 +59,7 @@ function Documentos() {
               </Link>
             </li>
           ))}
-          {list.length === 0 && <li className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground md:col-span-2">Nenhum documento encontrado.</li>}
+          {list.length === 0 && <li className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground md:col-span-2">{docs.length === 0 ? <>Nenhum documento ainda. <Link to="/documentos/adicionar" className="font-medium text-primary underline">Adicione o primeiro exame, laudo ou receita</Link> para montar seu histórico.</> : "Nenhum documento encontrado."}</li>}
         </ul>
       </div>
     </AppShell>

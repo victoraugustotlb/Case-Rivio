@@ -1,9 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { ReactNode } from "react";
-import { Activity, Bell, FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } from "lucide-react";
+import { Activity, FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } from "lucide-react";
 
 const nav = [
-  { label: "Início", to: "/", icon: Home },
+  { label: "Início", to: "/inicio", icon: Home },
   { label: "Documentos", to: "/documentos", icon: FolderHeart },
   { label: "Saúde", to: "/saude", icon: Activity },
   { label: "Compartilhar", to: "/compartilhar", icon: Share2 },
@@ -11,21 +13,27 @@ const nav = [
 ] as const;
 
 function isActive(path: string, to: string) {
-  return to === "/" ? path === "/" : path.startsWith(to);
+  return path.startsWith(to);
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setName((data.user?.user_metadata?.["full_name"] as string) || data.user?.email || ""));
+  }, []);
+  const sair = async () => { await supabase.auth.signOut(); navigate({ to: "/entrar" }); };
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-sidebar p-5 text-sidebar-foreground lg:flex">
-        <Link to="/" className="flex items-center gap-2 px-2 font-display text-2xl font-bold tracking-tight text-sidebar-accent-foreground">
+        <Link to="/inicio" className="flex items-center gap-2 px-2 font-display text-2xl font-bold tracking-tight text-sidebar-accent-foreground">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-sidebar-primary text-sm text-sidebar-primary-foreground">V</span>
           VITA
         </Link>
         <div className="mt-8 rounded-xl bg-sidebar-accent p-3">
           <p className="text-xs text-sidebar-foreground/70">Perfil ativo</p>
-          <p className="font-semibold text-sidebar-accent-foreground">Mariana Souza</p>
+          <p className="truncate font-semibold text-sidebar-accent-foreground">{name || "…"}</p>
         </div>
         <nav aria-label="Navegação principal" className="mt-6 flex flex-col gap-1">
           {nav.map(({ label, to, icon: Icon }) => {
@@ -41,17 +49,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/documentos/adicionar" className="mt-auto flex min-h-11 items-center justify-center gap-2 rounded-lg bg-sidebar-primary font-semibold text-sidebar-primary-foreground">
           <FileUp className="h-5 w-5" aria-hidden /> Adicionar arquivo
         </Link>
-        <Link to="/entrar" className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-lg text-sm hover:bg-sidebar-accent"><LogOut className="h-4 w-4" aria-hidden /> Sair</Link>
+        <button type="button" onClick={sair} className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-lg text-sm hover:bg-sidebar-accent"><LogOut className="h-4 w-4" aria-hidden /> Sair</button>
       </aside>
 
       <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b bg-background/90 px-4 py-3 backdrop-blur lg:ml-64 lg:px-8">
         <span className="truncate font-display text-xl font-bold text-primary lg:hidden">VITA</span>
         <span className="hidden text-sm text-muted-foreground lg:block">Seu histórico de saúde em um só lugar</span>
         <div className="flex items-center gap-2">
-          <button type="button" aria-label="Notificações (1 nova)" className="relative grid h-11 w-11 place-items-center rounded-full hover:bg-muted">
-            <Bell className="h-5 w-5" aria-hidden />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
-          </button>
+          <button type="button" onClick={sair} aria-label="Sair" className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted lg:hidden"><LogOut className="h-5 w-5" aria-hidden /></button>
           <Link to="/documentos/adicionar" aria-label="Escanear documento" className="grid h-11 w-11 place-items-center rounded-full bg-primary text-primary-foreground lg:hidden">
             <ScanLine className="h-5 w-5" aria-hidden />
           </Link>
