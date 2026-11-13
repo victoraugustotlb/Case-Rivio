@@ -1,5 +1,5 @@
 # VITA — Gerador Figma
-- [ ] Entregar SVG geral e 200 telas SVG separadas para importar no Figma Web.
+- [x] Entregar SVG geral e 200 telas SVG separadas para importar no Figma Web; renderização e integridade verificadas.
 - [x] Criar plugin local com biblioteca visual, mobile, paciente web e clínico desktop/tablet.
 - [x] Incluir estados, consentimento granular, origem, correlação e ligações do protótipo.
 - [x] Validar geração simulada com testes e inspecionar as 200 telas renderizadas.
