@@ -52,8 +52,11 @@ export const extractDocument = createServerFn({ method: "POST" })
       input: [{ role: "user", content: [{ type: "input_text", text: "Extraia as informações deste documento em JSON." }, filePart] }],
       text: { format: { type: "json_schema", name: "documento_medico", schema: extractSchema, strict: true } },
     });
-    const out = res.output?.flatMap((o) => ("content" in o && Array.isArray(o.content) ? o.content : []))
-      .map((c) => ("text" in c && typeof c.text === "string" ? c.text : "")).join("") ?? "";
+    let out = "";
+    for (const o of res.output ?? []) {
+      if (o.type !== "message") continue;
+      for (const c of o.content as { type: string; text?: string }[]) if (c.type === "output_text" && c.text) out += c.text;
+    }
     try {
       return JSON.parse(out) as Extraction;
     } catch {

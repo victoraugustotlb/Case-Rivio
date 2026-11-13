@@ -21,7 +21,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setName((data.user?.user_metadata?.full_name as string) || data.user?.email || ""));
+    supabase.auth.getUser().then(({ data }) => setName((data.user?.user_metadata?.["full_name"] as string) || data.user?.email || ""));
   }, []);
   const sair = async () => { await supabase.auth.signOut(); navigate({ to: "/entrar" }); };
   return (

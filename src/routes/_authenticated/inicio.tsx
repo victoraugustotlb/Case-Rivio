@@ -26,7 +26,7 @@ function Inicio() {
   const [hidden, setHidden] = useState(true);
   const { data: docs } = useSuspenseQuery(documentsQuery);
   const [nome, setNome] = useState("");
-  useEffect(() => { supabase.auth.getUser().then(({ data }) => setNome(((data.user?.user_metadata?.full_name as string) || "").split(" ")[0])); }, []);
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setNome(((data.user?.user_metadata?.["full_name"] as string) || "").split(" ")[0] ?? "")); }, []);
   const counts = { exames: docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").length, total: docs.length, pend: 0 };
   return (
     <AppShell>
