@@ -3,7 +3,7 @@ import { ArrowLeft, FileImage, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
 import { docs } from "@/lib/vita-data";
 
-export const Route = createFileRoute("/documentos/$id")({
+export const Route = createFileRoute("/_authenticated/documentos/$id")({
   loader: ({ params }) => {
     const doc = docs.find((d) => d.id === params.id);
     if (!doc) throw notFound();

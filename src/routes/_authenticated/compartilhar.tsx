@@ -4,7 +4,7 @@ import { Check, Copy, Info, ShieldOff } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
 
-export const Route = createFileRoute("/compartilhar")({
+export const Route = createFileRoute("/_authenticated/compartilhar")({
   head: () => ({
     meta: [
       { title: "Compartilhar com médico — VITA" },

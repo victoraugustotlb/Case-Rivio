@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChevronRight, Download, History, KeyRound, ShieldCheck, Trash2, User } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 
-export const Route = createFileRoute("/perfil")({
+export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
     meta: [
       { title: "Perfil e privacidade — VITA" },

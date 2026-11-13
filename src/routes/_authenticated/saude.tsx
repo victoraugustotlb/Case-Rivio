@@ -4,7 +4,7 @@ import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { devices, heartRate7d } from "@/lib/vita-data";
 import { classifyBloodPressure, classifyGlucose, classifyHeartRate, statusLabel, type VitalStatus } from "@/lib/vitals";
 
-export const Route = createFileRoute("/saude")({
+export const Route = createFileRoute("/_authenticated/saude")({
   head: () => ({
     meta: [
       { title: "Saúde e dispositivos — VITA" },

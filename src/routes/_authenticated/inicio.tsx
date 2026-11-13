@@ -4,7 +4,7 @@ import { Activity, ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, S
 import { AppShell } from "@/components/vita/AppShell";
 import { devices, docs } from "@/lib/vita-data";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
     meta: [
       { title: "Início — VITA" },

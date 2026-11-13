@@ -4,7 +4,7 @@ import { FileText, ScanLine, Search } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { docs, type DocKind } from "@/lib/vita-data";
 
-export const Route = createFileRoute("/documentos/")({
+export const Route = createFileRoute("/_authenticated/documentos/")({
   head: () => ({
     meta: [
       { title: "Meus documentos — VITA" },

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Camera, Check, FileUp, Loader2, ScanLine, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
 
-export const Route = createFileRoute("/documentos/adicionar")({
+export const Route = createFileRoute("/_authenticated/documentos/adicionar")({
   head: () => ({
     meta: [
       { title: "Adicionar documento — VITA" },
