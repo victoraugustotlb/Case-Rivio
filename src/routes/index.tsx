@@ -1,160 +1,110 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  Activity, CalendarPlus, Check, Droplet, Eye, EyeOff, FileText, HeartPulse, Moon, PenLine, Pill, Siren, Video,
-} from "lucide-react";
+import { Activity, ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, Share2, Upload, Watch } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
-import {
-  classifyBloodPressure, classifyGlucose, classifyHeartRate, statusLabel, type VitalStatus,
-} from "@/lib/vitals";
+import { devices, docs } from "@/lib/vita-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Início — VITA Hub Pessoal de Saúde" },
-      { name: "description", content: "Resumo da sua saúde: próxima consulta, medicamentos do dia, sinais vitais e atividades recentes." },
-      { property: "og:title", content: "Início — VITA Hub Pessoal de Saúde" },
-      { property: "og:description", content: "Resumo diário da sua saúde no VITA." },
+      { title: "Início — VITA" },
+      { name: "description", content: "Seus exames, laudos, consultas antigas e dados de wearables reunidos para mostrar ao médico com um código." },
+      { property: "og:title", content: "Início — VITA" },
+      { property: "og:description", content: "Seu histórico de saúde completo em um só lugar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Dashboard,
+  component: Inicio,
 });
 
-const statusStyle: Record<VitalStatus, string> = {
-  normal: "bg-success-soft text-success",
-  atencao: "bg-warning-soft text-warning",
-  alerta: "bg-danger-soft text-destructive",
-};
-
-const vitals = [
-  { label: "Pressão arterial", value: "128/82", unit: "mmHg", icon: Activity, status: classifyBloodPressure(128, 82), when: "Hoje, 08:10" },
-  { label: "Frequência cardíaca", value: "74", unit: "bpm", icon: HeartPulse, status: classifyHeartRate(74), when: "Hoje, 08:10" },
-  { label: "Glicemia em jejum", value: "108", unit: "mg/dL", icon: Droplet, status: classifyGlucose(108), when: "Ontem, 07:30" },
-  { label: "Sono", value: "6h40", unit: "", icon: Moon, status: "normal" as VitalStatus, when: "Última noite · relógio" },
-];
-
-const actions = [
-  { label: "Agendar consulta", icon: CalendarPlus },
-  { label: "Resultados de exames", icon: FileText },
-  { label: "Registrar medição", icon: PenLine },
-  { label: "Cartão de emergência", icon: Siren },
-];
-
-const timeline = [
-  { title: "Hemograma completo disponível", meta: "Laboratório Vida · 11 nov", sensitive: true },
-  { title: "Consulta com Dra. Helena Prado", meta: "Cardiologia · 06 nov" },
-  { title: "Losartana 50 mg adicionada", meta: "Prescrição de Dra. Helena · 06 nov" },
-  { title: "Vacina Influenza registrada", meta: "UBS Centro · 28 out" },
-];
-
-function Dashboard() {
+function Inicio() {
   const [hidden, setHidden] = useState(true);
-  const [taken, setTaken] = useState(false);
-
+  const counts = { exames: docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").length, total: docs.length, pend: docs.filter((d) => !d.confirmed).length };
   return (
     <AppShell>
       <div className="mx-auto max-w-6xl space-y-8">
         <section className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Boa tarde,</p>
+            <p className="text-sm text-muted-foreground">Olá,</p>
             <h1 className="truncate font-display text-3xl font-bold tracking-tight lg:text-4xl">Mariana</h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setHidden((h) => !h)}
-            aria-pressed={!hidden}
-            className="flex min-h-11 items-center gap-2 rounded-full border bg-card px-4 text-sm font-medium hover:bg-muted"
-          >
+          <button type="button" onClick={() => setHidden((h) => !h)} aria-pressed={!hidden}
+            className="flex min-h-11 items-center gap-2 rounded-full border bg-card px-4 text-sm font-medium hover:bg-muted">
             {hidden ? <Eye className="h-4 w-4" aria-hidden /> : <EyeOff className="h-4 w-4" aria-hidden />}
-            {hidden ? "Mostrar valores" : "Ocultar valores"}
+            {hidden ? "Mostrar nomes" : "Ocultar nomes"}
           </button>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3">
           <article className="bg-hero rounded-2xl p-6 text-primary-foreground shadow-soft lg:col-span-2">
-            <p className="text-sm font-medium opacity-80">Próxima consulta · em 2 dias</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold">Dra. Helena Prado — Cardiologia</h2>
-            <p className="mt-1 opacity-90">Domingo, 15 nov · 10:30 · Teleconsulta</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" className="flex min-h-11 items-center gap-2 rounded-lg bg-primary-foreground px-4 font-semibold text-primary">
-                <Video className="h-4 w-4" aria-hidden /> Entrar na sala
-              </button>
-              <button type="button" className="min-h-11 rounded-lg border border-primary-foreground/40 px-4 font-medium hover:bg-primary-foreground/10">
-                Remarcar
-              </button>
-            </div>
+            <p className="text-sm font-medium opacity-80">Vai a uma consulta?</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold">Mostre todo o seu histórico ao médico com um código</h2>
+            <p className="mt-1 opacity-90">Você escolhe o que ele vê e por quanto tempo. Evita repetir exames que você já fez.</p>
+            <Link to="/compartilhar" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-foreground px-4 font-semibold text-primary">
+              <Share2 className="h-4 w-4" aria-hidden /> Gerar código para o médico
+            </Link>
           </article>
-
           <article className="rounded-2xl border bg-card p-6 shadow-soft">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary"><Pill className="h-5 w-5" aria-hidden /></span>
-              <div className="min-w-0">
-                <p className="text-sm text-muted-foreground">Próximo medicamento · 18:00</p>
-                <h2 className="truncate font-semibold">Losartana 50 mg</h2>
-              </div>
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">1 comprimido, após o jantar.</p>
-            <button
-              type="button"
-              onClick={() => setTaken(true)}
-              disabled={taken}
-              className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground disabled:bg-success-soft disabled:text-success"
-            >
-              <Check className="h-4 w-4" aria-hidden /> {taken ? "Dose registrada" : "Confirmar dose"}
-            </button>
+            <h2 className="font-semibold">Seu histórico</h2>
+            <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div><dt className="text-xs text-muted-foreground">Documentos</dt><dd className="font-display text-2xl font-semibold">{counts.total}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Exames</dt><dd className="font-display text-2xl font-semibold">{counts.exames}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Dispositivos</dt><dd className="font-display text-2xl font-semibold">{devices.length}</dd></div>
+            </dl>
+            {counts.pend > 0 && (
+              <Link to="/documentos" className="mt-5 flex min-h-11 items-center justify-between rounded-lg bg-warning-soft px-3 text-sm font-medium text-warning">
+                {counts.pend} documento para conferir <ChevronRight className="h-4 w-4" aria-hidden />
+              </Link>
+            )}
           </article>
         </section>
 
-        <section aria-labelledby="vitais">
-          <div className="mb-3 flex items-baseline justify-between gap-2">
-            <h2 id="vitais" className="font-display text-xl font-semibold">Sinais vitais</h2>
-            <p className="text-xs text-muted-foreground">Informativo — não substitui avaliação médica</p>
-          </div>
+        <section aria-labelledby="add">
+          <h2 id="add" className="mb-3 font-display text-xl font-semibold">Adicionar ao histórico</h2>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {vitals.map(({ label, value, unit, icon: Icon, status, when }) => (
-              <article key={label} className="rounded-2xl border bg-card p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <Icon className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusStyle[status]}`}>{statusLabel[status]}</span>
-                </div>
-                <p className="mt-3 text-sm text-muted-foreground">{label}</p>
-                <p className={`font-display text-2xl font-semibold ${hidden ? "sensitive-blur" : ""}`} aria-label={hidden ? `${label}: valor oculto` : undefined}>
-                  {value} <span className="text-sm font-normal text-muted-foreground">{unit}</span>
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">{when}</p>
-              </article>
+            {[
+              { label: "Escanear documento", hint: "Exame, laudo, receita", icon: ScanLine, to: "/documentos/adicionar" },
+              { label: "Enviar arquivo", hint: "PDF ou foto", icon: Upload, to: "/documentos/adicionar" },
+              { label: "Conectar wearable", hint: "Relógio, medidores", icon: Watch, to: "/saude" },
+              { label: "Ver documentos", hint: "Biblioteca completa", icon: FolderHeart, to: "/documentos" },
+            ].map(({ label, hint, icon: Icon, to }) => (
+              <Link key={label} to={to} className="flex min-h-28 flex-col justify-between rounded-2xl border bg-card p-4 transition-colors hover:border-primary hover:bg-primary-soft">
+                <Icon className="h-5 w-5 text-primary" aria-hidden />
+                <span><span className="block font-medium">{label}</span><span className="text-xs text-muted-foreground">{hint}</span></span>
+              </Link>
             ))}
           </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-          <section aria-labelledby="acoes">
-            <h2 id="acoes" className="mb-3 font-display text-xl font-semibold">Ações rápidas</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {actions.map(({ label, icon: Icon }) => (
-                <button key={label} type="button" className="flex min-h-24 flex-col items-start justify-between rounded-2xl border bg-card p-4 text-left font-medium transition-colors hover:border-primary hover:bg-primary-soft">
-                  <Icon className="h-5 w-5 text-primary" aria-hidden />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </section>
-
+        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
           <section aria-labelledby="recentes">
-            <h2 id="recentes" className="mb-3 font-display text-xl font-semibold">Atividades recentes</h2>
+            <h2 id="recentes" className="mb-3 font-display text-xl font-semibold">Adicionados recentemente</h2>
             <ol className="rounded-2xl border bg-card p-2">
-              {timeline.map((t) => (
-                <li key={t.title} className="flex gap-3 rounded-xl p-3">
-                  <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" aria-hidden />
-                  <div className="min-w-0">
-                    <p className={`font-medium ${t.sensitive && hidden ? "sensitive-blur" : ""}`}>{t.title}</p>
-                    <p className="text-sm text-muted-foreground">{t.meta}</p>
-                  </div>
+              {docs.slice(0, 4).map((d) => (
+                <li key={d.id}>
+                  <Link to="/documentos/$id" params={{ id: d.id }} className="flex items-center gap-3 rounded-xl p-3 hover:bg-muted">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><FileText className="h-5 w-5" aria-hidden /></span>
+                    <div className="min-w-0 flex-1">
+                      <p className={`truncate font-medium ${hidden ? "sensitive-blur" : ""}`}>{d.title}</p>
+                      <p className="text-sm text-muted-foreground">{d.kind} · {d.source} · {d.date}</p>
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ol>
+          </section>
+          <section aria-labelledby="disp">
+            <h2 id="disp" className="mb-3 font-display text-xl font-semibold">Dispositivos</h2>
+            <ul className="space-y-2">
+              {devices.map((d) => (
+                <li key={d.name} className="flex items-center gap-3 rounded-2xl border bg-card p-4">
+                  <Activity className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <div className="min-w-0 flex-1"><p className="truncate font-medium">{d.name}</p><p className="text-xs text-muted-foreground">Última sincronização {d.synced}</p></div>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.ok ? "bg-success-soft text-success" : "bg-warning-soft text-warning"}`}>{d.ok ? "Ativo" : "Atrasado"}</span>
+                </li>
+              ))}
+            </ul>
           </section>
         </div>
       </div>
