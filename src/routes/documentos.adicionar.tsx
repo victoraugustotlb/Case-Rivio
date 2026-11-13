@@ -6,9 +6,9 @@ import { AppShell } from "@/components/vita/AppShell";
 export const Route = createFileRoute("/documentos/adicionar")({
   head: () => ({
     meta: [
-      { title: "Escanear documento — VITA" },
+      { title: "Adicionar documento — VITA" },
       { name: "description", content: "Escaneie ou envie exames, laudos, receitas e consultas antigas para o seu histórico." },
-      { property: "og:title", content: "Escanear documento — VITA" },
+      { property: "og:title", content: "Adicionar documento — VITA" },
       { property: "og:description", content: "Adicione documentos médicos ao seu histórico." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -54,14 +54,14 @@ function Adicionar() {
 
         <div className="mt-6">
           {step === "escolher" && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button type="button" onClick={() => setStep("camera")} className="flex min-h-40 flex-col items-start justify-between rounded-2xl border bg-card p-5 text-left hover:border-primary hover:bg-primary-soft">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <button type="button" onClick={() => setStep("camera")} className="flex min-h-40 flex-col items-start justify-between rounded-2xl border bg-card p-5 text-left hover:border-primary hover:bg-primary-soft lg:hidden">
                 <Camera className="h-7 w-7 text-primary" aria-hidden />
                 <span><span className="block font-semibold">Escanear com a câmera</span><span className="text-sm text-muted-foreground">Exames, laudos, receitas e anotações de consultas em papel</span></span>
               </button>
-              <label className="flex min-h-40 cursor-pointer flex-col items-start justify-between rounded-2xl border bg-card p-5 hover:border-primary hover:bg-primary-soft">
+              <label onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length) setStep("analisando"); }} className="flex min-h-40 cursor-pointer flex-col items-start justify-between rounded-2xl border bg-card p-5 hover:border-primary hover:bg-primary-soft lg:min-h-72 lg:items-center lg:justify-center lg:gap-4 lg:border-2 lg:border-dashed lg:text-center">
                 <FileUp className="h-7 w-7 text-primary" aria-hidden />
-                <span><span className="block font-semibold">Enviar arquivo</span><span className="text-sm text-muted-foreground">PDF, JPG ou PNG do laboratório ou do e-mail</span></span>
+                <span><span className="block font-semibold"><span className="lg:hidden">Enviar arquivo</span><span className="hidden lg:inline">Arraste os arquivos aqui ou clique para selecionar</span></span><span className="text-sm text-muted-foreground">PDF, JPG ou PNG do laboratório ou do e-mail</span></span>
                 <input type="file" accept="application/pdf,image/*" className="sr-only" onChange={(e) => e.target.files?.length && setStep("analisando")} />
               </label>
             </div>
@@ -103,7 +103,7 @@ function Adicionar() {
                     </label>
                   ))}
                   <div className="flex gap-3 pt-2">
-                    <button type="button" onClick={() => setStep("camera")} className="min-h-11 flex-1 rounded-lg border font-medium">Refazer</button>
+                    <button type="button" onClick={() => setStep("escolher")} className="min-h-11 flex-1 rounded-lg border font-medium">Refazer</button>
                     <button type="submit" className="min-h-11 flex-1 rounded-lg bg-primary font-semibold text-primary-foreground">Salvar no histórico</button>
                   </div>
                 </form>
