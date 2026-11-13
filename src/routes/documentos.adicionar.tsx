@@ -115,7 +115,7 @@ function Adicionar() {
             <div className="rounded-2xl border bg-card p-8 text-center">
               <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-success-soft text-success"><Check className="h-7 w-7" aria-hidden /></span>
               <h2 className="mt-4 font-display text-2xl font-semibold">Documento salvo</h2>
-              <p className="mt-1 text-muted-foreground">{fields[1].value} já faz parte do seu histórico.</p>
+              <p className="mt-1 text-muted-foreground">{fields[1]?.value ?? "O documento"} já faz parte do seu histórico.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <button type="button" onClick={() => setStep("escolher")} className="min-h-11 rounded-lg border px-4 font-medium">Adicionar outro</button>
                 <button type="button" onClick={() => nav({ to: "/documentos" })} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">Ver documentos</button>
