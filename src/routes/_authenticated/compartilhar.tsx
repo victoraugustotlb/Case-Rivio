@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Copy, Info, ShieldOff } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
+import { supabase } from "@/integrations/supabase/client";
 import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
 
 export const Route = createFileRoute("/_authenticated/compartilhar")({
@@ -45,6 +46,8 @@ function Compartilhar() {
   const [validityHours, setValidity] = useState(24);
   const [code, setCode] = useState<string | null>(null);
   const [revoked, setRevoked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [fail, setFail] = useState("");
   const errors = validateShare({ categories, signals, periodMonths, validityHours });
 
   if (code) {
@@ -55,7 +58,7 @@ function Compartilhar() {
           <div className={`rounded-2xl border bg-card p-8 ${revoked ? "opacity-50" : ""}`}>
             <p className="text-sm text-muted-foreground">Código de acesso</p>
             <p className="mt-2 font-display text-5xl font-bold tracking-widest text-primary">{code}</p>
-            <p className="mt-4 text-sm text-muted-foreground">O médico acessa em <strong>vita/medico</strong> no computador dele.</p>
+            <p className="mt-4 text-sm text-muted-foreground">O médico acessa em <strong>{typeof window !== "undefined" ? window.location.host : ""}/medico</strong> no computador dele.</p>
             <ul className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
               {[...cats.filter((c) => categories.includes(c.id)), ...sigs.filter((s) => signals.includes(s.id))].map((x) => <li key={x.id} className="rounded-full bg-muted px-2 py-1">{x.label}</li>)}
               <li className="rounded-full bg-muted px-2 py-1">Últimos {periodLabel(periodMonths)}</li>
@@ -63,7 +66,7 @@ function Compartilhar() {
           </div>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             {!revoked && <button type="button" onClick={() => navigator.clipboard?.writeText(code)} className="inline-flex min-h-11 items-center gap-2 rounded-lg border bg-card px-4 font-medium"><Copy className="h-4 w-4" aria-hidden /> Copiar</button>}
-            {!revoked && <button type="button" onClick={() => setRevoked(true)} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-destructive px-4 font-semibold text-destructive-foreground"><ShieldOff className="h-4 w-4" aria-hidden /> Encerrar acesso</button>}
+            {!revoked && <button type="button" onClick={async () => { const { error } = await supabase.from("share_codes").update({ revoked: true }).eq("code", code); if (!error) setRevoked(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-destructive px-4 font-semibold text-destructive-foreground"><ShieldOff className="h-4 w-4" aria-hidden /> Encerrar acesso</button>}
             <button type="button" onClick={() => { setCode(null); setRevoked(false); }} className="min-h-11 rounded-lg px-4 font-medium text-primary">Novo compartilhamento</button>
             <Link to="/medico" className="min-h-11 content-center rounded-lg px-4 text-sm text-muted-foreground underline">Ver como o médico vê</Link>
           </div>

@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, Share2, Upload, Watch } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { devices } from "@/lib/vita-data";
 import { documentsQuery } from "@/lib/documents";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
