@@ -28,3 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Design deliverables
+- Deliver the Figma generator as a standalone local plugin, separate from the web app; native Figma nodes keep the design editable without requiring a live connector.
