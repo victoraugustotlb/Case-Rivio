@@ -10,33 +10,68 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocumentosIndexRouteImport } from './routes/documentos.index'
+import { Route as DocumentosIdRouteImport } from './routes/documentos.$id'
+import { Route as DocumentosAdicionarRouteImport } from './routes/documentos.adicionar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentosIndexRoute = DocumentosIndexRouteImport.update({
+  id: '/documentos/',
+  path: '/documentos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosIdRoute = DocumentosIdRouteImport.update({
+  id: '/documentos/$id',
+  path: '/documentos/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosAdicionarRoute = DocumentosAdicionarRouteImport.update({
+  id: '/documentos/adicionar',
+  path: '/documentos/adicionar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/documentos/$id': typeof DocumentosIdRoute
+  '/documentos/adicionar': typeof DocumentosAdicionarRoute
+  '/documentos/': typeof DocumentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/documentos/$id': typeof DocumentosIdRoute
+  '/documentos/adicionar': typeof DocumentosAdicionarRoute
+  '/documentos': typeof DocumentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/documentos/$id': typeof DocumentosIdRoute
+  '/documentos/adicionar': typeof DocumentosAdicionarRoute
+  '/documentos/': typeof DocumentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/documentos/$id' | '/documentos/adicionar' | '/documentos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/documentos/$id' | '/documentos/adicionar' | '/documentos'
+  id:
+    | '__root__'
+    | '/'
+    | '/documentos/$id'
+    | '/documentos/adicionar'
+    | '/documentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocumentosIdRoute: typeof DocumentosIdRoute
+  DocumentosAdicionarRoute: typeof DocumentosAdicionarRoute
+  DocumentosIndexRoute: typeof DocumentosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +83,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documentos/': {
+      id: '/documentos/'
+      path: '/documentos'
+      fullPath: '/documentos/'
+      preLoaderRoute: typeof DocumentosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos/$id': {
+      id: '/documentos/$id'
+      path: '/documentos/$id'
+      fullPath: '/documentos/$id'
+      preLoaderRoute: typeof DocumentosIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos/adicionar': {
+      id: '/documentos/adicionar'
+      path: '/documentos/adicionar'
+      fullPath: '/documentos/adicionar'
+      preLoaderRoute: typeof DocumentosAdicionarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocumentosIdRoute: DocumentosIdRoute,
+  DocumentosAdicionarRoute: DocumentosAdicionarRoute,
+  DocumentosIndexRoute: DocumentosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

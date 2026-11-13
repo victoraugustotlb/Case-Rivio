@@ -35,3 +35,4 @@ use the editor.
 ## Web app
 - Patient screens wrap content in `src/components/vita/AppShell` (sidebar ≥lg, bottom bar on mobile) so navigation stays consistent across pages.
 - Health-range rules live as pure functions in `src/lib/vitals.ts` with tests beside them; UI only displays their result.
+- Share-code and access rules live as pure functions in `src/lib/share.ts` with tests; demo data stays in `src/lib/vita-data.ts` until a backend exists.
