@@ -35,4 +35,7 @@ use the editor.
 ## Web app
 - Patient screens wrap content in `src/components/vita/AppShell` (sidebar ≥lg, bottom bar on mobile) so navigation stays consistent across pages.
 - Health-range rules live as pure functions in `src/lib/vitals.ts` with tests beside them; UI only displays their result.
-- Share-code and access rules live as pure functions in `src/lib/share.ts` with tests; demo data stays in `src/lib/vita-data.ts` until a backend exists.
+- Share-code and access rules (incl. which documents a code exposes) live as pure functions in `src/lib/share.ts` with tests.
+- Documents and share codes live in Lovable Cloud with owner-only RLS; files go in the private `medical-documents` bucket under `<userId>/`. The doctor view reads them only through the `openShare` server function after code validation, so doctors need no account.
+- Document reading runs in `extractDocument` (server) via the AI gateway with a strict JSON schema; the patient always confirms before saving.
+- Only wearable data may be demo data (`src/lib/vita-data.ts`); medical records never ship sample rows.
