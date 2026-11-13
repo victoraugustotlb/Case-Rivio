@@ -31,3 +31,7 @@ use the editor.
 
 ## Design deliverables
 - Deliver the Figma generator as a standalone local plugin, separate from the web app; native Figma nodes keep the design editable without requiring a live connector.
+
+## Web app
+- Patient screens wrap content in `src/components/vita/AppShell` (sidebar ≥lg, bottom bar on mobile) so navigation stays consistent across pages.
+- Health-range rules live as pure functions in `src/lib/vitals.ts` with tests beside them; UI only displays their result.

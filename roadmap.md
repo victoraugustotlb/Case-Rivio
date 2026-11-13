@@ -5,3 +5,6 @@
 - [x] Validar geração simulada com testes e inspecionar as 200 telas renderizadas.
 - [x] Preparar pacote com instalação, limites e especificação.
 - [ ] Confirmar execução no Figma real — depende de instalação e execução pelo usuário; não há sessão Figma disponível.
+# VITA — Web app
+- [x] Design system, navegação responsiva e Início (dashboard).
+- [ ] Próximos módulos: Prontuário, Consultas, Medicamentos, Perfil, SOS.
