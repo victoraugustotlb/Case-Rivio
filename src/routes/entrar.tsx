@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Stethoscope, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -32,6 +32,12 @@ function Entrar() {
   const [busy, setBusy] = useState(false);
   const nav = useNavigate();
   const medico = perfil === "medico";
+  useEffect(() => {
+    const go = () => nav({ to: "/inicio", replace: true });
+    supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
+    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && (e === "SIGNED_IN" || e === "INITIAL_SESSION")) go(); });
+    return () => data.subscription.unsubscribe();
+  }, [nav]);
 
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
