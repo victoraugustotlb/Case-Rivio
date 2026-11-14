@@ -4,6 +4,9 @@ import { Check, Copy, Info, ShieldCheck, ShieldOff, UserRound } from "lucide-rea
 import { WriteGate } from "@/components/vita/AccessStatus";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { createMinorShareCode } from "@/lib/family.functions";
 import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
 
 export const Route = createFileRoute("/_authenticated/compartilhar")({
@@ -17,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/compartilhar")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => z.object({ para: z.string().uuid().optional() }).catch({}).parse(s),
   component: Compartilhar,
 });
 
@@ -41,6 +45,8 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 }
 
 function Compartilhar() {
+  const { para } = Route.useSearch();
+  const createMinor = useServerFn(createMinorShareCode);
   const [categories, setCategories] = useState<ShareCategory[]>([]);
   const [signals, setSignals] = useState<ShareSignal[]>([]);
   const [includeProfile, setIncludeProfile] = useState(false);
@@ -83,6 +89,7 @@ function Compartilhar() {
     <AppShell>
       <div className="mx-auto max-w-3xl space-y-6">
         <PageTitle title="Compartilhar com médico" subtitle="Você escolhe o que ele vê. Nada vem marcado." />
+        {para && <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm">Este código abre o histórico do seu dependente menor de idade, gerado por você como responsável legal.</p>}
         <section className="rounded-2xl border bg-card p-5">
           <div className="flex items-start gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><UserRound className="h-5 w-5" aria-hidden /></span>
@@ -118,6 +125,11 @@ function Compartilhar() {
         <WriteGate action="A geração de novos códigos">
         <button type="button" disabled={errors.length > 0 || busy} onClick={async () => {
           setBusy(true); setFail("");
+          if (para) {
+            const r = await createMinor({ data: { memberId: para, categories, signals, includeProfile, periodMonths, validityHours } });
+            if (r.ok) setCode(r.code); else setFail(r.error);
+            setBusy(false); return;
+          }
           for (let i = 0; i < 3; i++) {
             const c = formatShareCode();
             const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, include_profile: includeProfile, period_months: periodMonths, expires_at: new Date(Date.now() + validityHours * 3600_000).toISOString() });

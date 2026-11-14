@@ -43,6 +43,13 @@
       "when": 1794666822337,
       "tag": "0005_accounts_plans_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794667780533,
+      "tag": "0006_family_access",
+      "breakpoints": true
     }
   ]
 }

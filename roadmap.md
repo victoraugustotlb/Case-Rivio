@@ -39,3 +39,8 @@
 - [x] Envio e novos códigos pausados quando o acesso não está em dia; leitura sempre liberada
 - [ ] Cobrança da assinatura individual (cartão e Pix), portal do cliente, cancelamento e webhook — aguardando o usuário ativar os pagamentos (a ativação foi recusada)
 - [ ] Aprovação do dependente pelo titular — Prompt 3
+
+## Minha família
+- [x] Menu, troca de perfil, faixa somente leitura, pedidos de conexão e de acesso, privacidade, responsável legal, código para menor; regras com testes
+- [ ] Teste completo com titular + dependente reais — precisa de duas contas de plano na mesma família
+- [ ] Encerrar pelo app um código gerado para um menor — hoje só expira sozinho

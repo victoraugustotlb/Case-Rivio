@@ -4,6 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { extractDocument } from "@/lib/documents.functions";
+import { saveMinorDocument } from "@/lib/family.functions";
+import { z } from "zod";
 import { DOC_KINDS } from "@/lib/vita-data";
 import { AlertCircle, ArrowLeft, Camera, Check, FileUp, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { WriteGate } from "@/components/vita/AccessStatus";
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/documentos/adicionar")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => z.object({ para: z.string().uuid().optional() }).catch({}).parse(s),
   component: Adicionar,
 });
 
@@ -38,6 +41,8 @@ function Adicionar() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const extract = useServerFn(extractDocument);
+  const saveMinor = useServerFn(saveMinorDocument);
+  const { para } = Route.useSearch();
   const qc = useQueryClient();
   const nav = useNavigate();
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -76,6 +81,14 @@ function Adicionar() {
     e.preventDefault();
     if (!draft || !file) return;
     setSaving(true); setError("");
+    if (para) {
+      const r = await saveMinor({ data: { memberId: para, path: file.path, fileType: file.type, fileHash: file.hash, origin: file.origin, title: draft.title, kind: draft.kind as never, docDate: draft.doc_date || null, source: draft.source || null, summary: draft.summary || null, fields: draft.fields.filter((f) => f.label || f.value) } });
+      setSaving(false);
+      if (!r.ok) { setError(r.error); return; }
+      await qc.invalidateQueries({ queryKey: ["family", "member", para] });
+      setStep("salvo");
+      return;
+    }
     const { error: err } = await supabase.from("documents").insert({
       title: draft.title || "Documento sem título", kind: draft.kind, doc_date: draft.doc_date || null, source: draft.source || null,
       summary: draft.summary || null, fields: draft.fields.filter((f) => f.label || f.value), origin: file.origin,
@@ -100,6 +113,7 @@ function Adicionar() {
       <WriteGate action="O envio de documentos">
       <div className="mx-auto max-w-5xl">
         <Link to="/documentos" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary"><ArrowLeft className="h-4 w-4" aria-hidden /> Meus documentos</Link>
+        {para && <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm">Você está adicionando um documento ao histórico do seu dependente menor de idade, como responsável legal.</p>}
         <h1 className="font-display text-3xl font-bold tracking-tight">Adicionar documento</h1>
         <ol className="mt-5 grid grid-cols-4 gap-2" aria-label="Etapas">
           {steps.map((s, i) => (
@@ -182,7 +196,7 @@ function Adicionar() {
               <p className="mt-1 text-muted-foreground">{draft?.title || "O documento"} já faz parte do seu histórico.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <button type="button" onClick={() => { setFile(null); setDraft(null); setStep("escolher"); }} className="min-h-11 rounded-lg border px-4 font-medium">Adicionar outro</button>
-                <button type="button" onClick={() => nav({ to: "/documentos" })} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">Ver documentos</button>
+                <button type="button" onClick={() => (para ? nav({ to: "/familia/$memberId", params: { memberId: para } }) : nav({ to: "/documentos" }))} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">Ver documentos</button>
               </div>
             </div>
           )}
