@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accessState, formatShareCode, normalizeCode, validateShare } from "./share";
+import { accessState, formatShareCode, normalizeCode, profileVisible, validateShare } from "./share";
 
 describe("compartilhamento", () => {
   it("não gera código sem nenhuma informação escolhida", () => {

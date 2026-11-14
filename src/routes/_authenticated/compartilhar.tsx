@@ -42,6 +42,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 function Compartilhar() {
   const [categories, setCategories] = useState<ShareCategory[]>([]);
   const [signals, setSignals] = useState<ShareSignal[]>([]);
+  const [includeProfile, setIncludeProfile] = useState(false);
   const [periodMonths, setPeriod] = useState(12);
   const [validityHours, setValidity] = useState(24);
   const [code, setCode] = useState<string | null>(null);
