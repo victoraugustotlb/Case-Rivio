@@ -28,11 +28,24 @@ export function useSignedInRedirect(): "verificando" | "livre" {
       const stored = localStorage.getItem(INTENT_KEY);
       localStorage.removeItem(INTENT_KEY);
       const intent = stored && INTENTS.includes(stored) ? (stored as EntryIntent) : null;
-      try {
-        const r = await resolveHome({ data: { intent } });
-        qc.setQueryData(accountQuery.queryKey, r.account);
-        nav({ to: r.destino, replace: true });
-      } catch { done.current = false; setState("livre"); }
+      // Tira o token do endereço (o retorno do Google deixa #access_token na barra).
+      if (typeof window !== "undefined" && /access_token|refresh_token/.test(window.location.hash)) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+      // Uma nova tentativa antes de desistir; se falhar de novo, segue para /inicio, onde o guarda de papel decide
+      // (médico vai para /clinico). Nunca volta em silêncio para a tela de entrada com a sessão aberta.
+      for (let tentativa = 0; tentativa < 2; tentativa++) {
+        try {
+          const r = await resolveHome({ data: { intent: tentativa === 0 ? intent : null } });
+          qc.setQueryData(accountQuery.queryKey, r.account);
+          nav({ to: r.destino, replace: true });
+          return;
+        } catch (err) {
+          console.error("[anamedis] resolveHome falhou", err);
+          if (tentativa === 0) await new Promise((ok) => setTimeout(ok, 700));
+        }
+      }
+      nav({ to: "/inicio", replace: true });
     };
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
       if (e === "SIGNED_IN" || e === "INITIAL_SESSION") setTimeout(() => void go(s), 0);

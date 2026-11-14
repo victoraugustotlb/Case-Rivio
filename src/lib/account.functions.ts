@@ -122,10 +122,17 @@ export const resolveHome = createServerFn({ method: "POST" })
     const sb = context.supabase;
     let account = await loadAccount(sb, context.userId);
     if (data.intent) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
-      const provider = (u.user?.app_metadata?.["provider"] as string | undefined) ?? null;
-      if (applyEntryIntent({ provider, createdAt: u.user?.created_at ?? null })) {
+      // A intenção é só um bônus de conta nova: se esta consulta falhar, o login segue normalmente.
+      let provider: string | null = null;
+      let createdAt: string | null = null;
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+        provider = (u.user?.app_metadata?.["provider"] as string | undefined) ?? null;
+        createdAt = u.user?.created_at ?? null;
+      } catch (err) { console.error("[anamedis] intenção de entrada ignorada", err); }
+      if (applyEntryIntent({ provider, createdAt })) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const current = account.type;
         const pro = (t: string) => t === "doctor" || t === "laboratory";
         const wantsPro = data.intent === "doctor" || data.intent === "laboratory";
