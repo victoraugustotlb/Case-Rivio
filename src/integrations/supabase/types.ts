@@ -191,6 +191,60 @@ export type Database = {
         }
         Relationships: []
       }
+      insurance_plans: {
+        Row: {
+          active: boolean
+          id: string
+          is_demo: boolean
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          id?: string
+          is_demo?: boolean
+          name: string
+        }
+        Update: {
+          active?: boolean
+          id?: string
+          is_demo?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
+      lab_profiles: {
+        Row: {
+          city: string
+          cnpj: string
+          created_at: string
+          legal_name: string
+          tech_lead_name: string
+          tech_lead_registry: string
+          uf: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          cnpj: string
+          created_at?: string
+          legal_name: string
+          tech_lead_name: string
+          tech_lead_registry: string
+          uf: string
+          user_id?: string
+        }
+        Update: {
+          city?: string
+          cnpj?: string
+          created_at?: string
+          legal_name?: string
+          tech_lead_name?: string
+          tech_lead_registry?: string
+          uf?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       patient_profiles: {
         Row: {
           activity: string
@@ -242,6 +296,86 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      plan_attempts: {
+        Row: {
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      plan_memberships: {
+        Row: {
+          card_number: string
+          created_at: string
+          holder_card_number: string | null
+          id: string
+          plan_id: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          card_number: string
+          created_at?: string
+          holder_card_number?: string | null
+          id?: string
+          plan_id: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          card_number?: string
+          created_at?: string
+          holder_card_number?: string | null
+          id?: string
+          plan_id?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_memberships_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          account_type: string
+          billing_exempt: boolean
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: string
+          billing_exempt?: boolean
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: string
+          billing_exempt?: boolean
+          created_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -302,12 +436,45 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          current_period_end: string | null
+          environment: string
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          current_period_end?: string | null
+          environment?: string
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          current_period_end?: string | null
+          environment?: string
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_write_records: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
