@@ -62,6 +62,60 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_profiles: {
+        Row: {
+          activity: string
+          alcohol: string
+          allergies: string
+          birth_date: string | null
+          conditions: string
+          family_history: string
+          full_name: string
+          height_cm: number | null
+          medications: Json
+          questionnaire_completed: boolean
+          smoking: string
+          surgeries: string
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          activity?: string
+          alcohol?: string
+          allergies?: string
+          birth_date?: string | null
+          conditions?: string
+          family_history?: string
+          full_name?: string
+          height_cm?: number | null
+          medications?: Json
+          questionnaire_completed?: boolean
+          smoking?: string
+          surgeries?: string
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          activity?: string
+          alcohol?: string
+          allergies?: string
+          birth_date?: string | null
+          conditions?: string
+          family_history?: string
+          full_name?: string
+          height_cm?: number | null
+          medications?: Json
+          questionnaire_completed?: boolean
+          smoking?: string
+          surgeries?: string
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       share_codes: {
         Row: {
           categories: string[]

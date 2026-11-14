@@ -6,6 +6,7 @@
 - [x] Preparar pacote com instalação, limites e especificação.
 - [ ] Confirmar execução no Figma real — depende de instalação e execução pelo usuário; não há sessão Figma disponível.
 # VITA — Web app
+- [ ] Perfil de saúde privado e editável, questionário inicial opcional e validação do salvamento.
 - [x] Design system, navegação responsiva e Início (dashboard).
 - [x] Reorientar para histórico + código ao médico: Início, Documentos (escanear/conferir), Saúde, Compartilhar, Perfil, VITA Clínico.
 - [ ] Salvar dados de verdade (contas e armazenamento) — aguardando decisão do usuário.
