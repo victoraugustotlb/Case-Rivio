@@ -29,7 +29,7 @@ export function formatShareCode(random?: () => number): string {
   const bytes = new Uint8Array(8);
   if (!random) crypto.getRandomValues(bytes);
   // ALPHABET tem 32 símbolos: byte % 32 é uniforme, sem viés.
-  for (let i = 0; i < 8; i++) s += ALPHABET[random ? Math.floor(random() * ALPHABET.length) : bytes[i] % ALPHABET.length];
+  for (let i = 0; i < 8; i++) s += ALPHABET[random ? Math.floor(random() * ALPHABET.length) : (bytes[i] ?? 0) % ALPHABET.length];
   return `${s.slice(0, 4)}-${s.slice(4)}`;
 }
 
