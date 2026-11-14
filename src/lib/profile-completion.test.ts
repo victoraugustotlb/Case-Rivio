@@ -80,3 +80,15 @@ describe("cartão em /inicio", () => {
   it("duas dispensas escondem por 30 dias", () => expect(completionCardHidden(["2026-11-01T00:00:00Z", "2026-11-13T00:00:00Z"], now)).toBe(true));
   it("volta depois de 30 dias", () => expect(completionCardHidden(["2026-09-01T00:00:00Z", "2026-10-01T00:00:00Z"], now)).toBe(false));
 });
+
+describe("modo simples", () => {
+  it("liga cada campo à sua pergunta e deixa os outros para o formulário", async () => {
+    const { guidedStepFor, NUDGE_QUESTION, COMPLETION_ORDER } = await import("./profile-completion");
+    expect(guidedStepFor("alergias")).toBe("alergias");
+    expect(guidedStepFor("idade")).toBe("nascimento");
+    expect(guidedStepFor("nascimento")).toBe("nascimento");
+    expect(guidedStepFor("sexo")).toBeNull();
+    expect(guidedStepFor("cirurgias")).toBeNull();
+    for (const item of COMPLETION_ORDER) expect(NUDGE_QUESTION[item].endsWith("?")).toBe(true);
+  });
+});

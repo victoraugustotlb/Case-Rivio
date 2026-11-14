@@ -11,6 +11,7 @@ import { requireRole } from "@/lib/require-role";
 import { destinationFor } from "@/lib/routing";
 import { AccessStatus } from "@/components/vita/AccessStatus";
 import { NotificationsCard, PendingUploads } from "@/components/vita/PatientInbox";
+import { ProfileNudge } from "@/components/vita/ProfileNudge";
 import { WearableHomeCard } from "@/components/vita/WearableHomeCard";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
@@ -64,10 +65,7 @@ function Inicio() {
         <PendingUploads />
         <NotificationsCard />
 
-        {!profile?.questionnaire_completed && <section className="flex flex-wrap items-center justify-between gap-4 border-y py-5">
-          <div><h2 className="font-display text-xl font-semibold">Complete seu perfil</h2><p className="mt-1 text-sm text-muted-foreground">Questionário inicial · Medidas, medicamentos e histórico</p></div>
-          <Button asChild className="min-h-11"><Link to="/perfil">Preencher perfil<ChevronRight aria-hidden /></Link></Button>
-        </section>}
+        <ProfileNudge profile={profile} />
 
         <section className="grid gap-4 lg:grid-cols-3">
           <article className="bg-hero rounded-2xl p-6 text-primary-foreground shadow-soft lg:col-span-2">

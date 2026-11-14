@@ -150,3 +150,29 @@ export function completionCardHidden(dismissals: string[], now: Date = new Date(
   if (recent.length < 2) return false;
   return now.getTime() - (recent[0] ?? 0) < 30 * 86_400_000;
 }
+
+/** Perguntas do modo simples (/perfil/guiado) que correspondem a cada campo; nome, sexo e cirurgias ficam no formulário completo. */
+export const GUIDED_STEPS = ["alergias", "medicamentos", "tipo_sanguineo", "condicoes", "contato_emergencia", "altura", "peso", "nascimento"] as const;
+export type GuidedStepId = (typeof GUIDED_STEPS)[number];
+const FIELD_TO_STEP: Partial<Record<EssentialField | CompletionItem, GuidedStepId>> = {
+  alergias: "alergias", medicamentos: "medicamentos", tipo_sanguineo: "tipo_sanguineo", condicoes: "condicoes",
+  contato_emergencia: "contato_emergencia", altura: "altura", peso: "peso", idade: "nascimento", nascimento: "nascimento",
+};
+export function guidedStepFor(item: EssentialField | CompletionItem): GuidedStepId | null {
+  return FIELD_TO_STEP[item] ?? null;
+}
+
+/** Pergunta em linguagem comum para o cartão do início. */
+export const NUDGE_QUESTION: Record<CompletionItem, string> = {
+  alergias: "Você tem alergia a algum remédio ou alimento?",
+  medicamentos: "Você toma algum remédio todos os dias?",
+  tipo_sanguineo: "Você sabe qual é o seu tipo de sangue?",
+  condicoes: "Você tem alguma doença que acompanha com médico?",
+  contato_emergencia: "Quem devemos avisar numa emergência?",
+  altura: "Qual é a sua altura?",
+  peso: "Qual é o seu peso?",
+  nascimento: "Qual é a sua data de nascimento?",
+  nome: "Qual é o seu nome completo?",
+  sexo: "Qual é o seu sexo?",
+  cirurgias: "Você já fez alguma cirurgia?",
+};

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { AccessStatus } from "@/components/vita/AccessStatus";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { HealthProfileEditor } from "@/components/vita/HealthProfileEditor";
+import { ProfileOverview } from "@/components/vita/ProfileOverview";
+import { ProfileSettings } from "@/components/vita/ProfileSettings";
 import { healthProfileQuery } from "@/lib/profile-query";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
@@ -34,6 +36,9 @@ function Perfil() {
           <h2 id="conta" className="font-display text-lg font-semibold">Conta</h2>
           <AccessStatus detailed />
         </section>
+        <ProfileOverview profile={data} />
+        <ProfileSettings />
+        <h2 id="editar" className="mb-3 mt-10 font-display text-xl font-bold">Editar tudo</h2>
         <HealthProfileEditor initial={data} accountName={typeof user.user_metadata["full_name"] === "string" ? user.user_metadata["full_name"] : ""} />
       </div>
     </AppShell>
