@@ -70,6 +70,9 @@ function Inicio() {
             <Link to="/compartilhar" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-foreground px-4 font-semibold text-primary">
               <Share2 className="h-4 w-4" aria-hidden /> Gerar código para o médico
             </Link>
+            <Link to="/autorizar" className="ml-2 mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg border border-primary-foreground/40 px-4 font-semibold">
+              Recebi um código do médico
+            </Link>
           </article>
           <article className="rounded-2xl border bg-card p-6 shadow-soft">
             <h2 className="font-semibold">Seu histórico</h2>
