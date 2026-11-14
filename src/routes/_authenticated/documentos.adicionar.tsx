@@ -113,6 +113,7 @@ function Adicionar() {
       <WriteGate action="O envio de documentos">
       <div className="mx-auto max-w-5xl">
         <Link to="/documentos" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary"><ArrowLeft className="h-4 w-4" aria-hidden /> Meus documentos</Link>
+        {para && <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm">Você está adicionando um documento ao histórico do seu dependente menor de idade, como responsável legal.</p>}
         <h1 className="font-display text-3xl font-bold tracking-tight">Adicionar documento</h1>
         <ol className="mt-5 grid grid-cols-4 gap-2" aria-label="Etapas">
           {steps.map((s, i) => (
@@ -195,7 +196,7 @@ function Adicionar() {
               <p className="mt-1 text-muted-foreground">{draft?.title || "O documento"} já faz parte do seu histórico.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <button type="button" onClick={() => { setFile(null); setDraft(null); setStep("escolher"); }} className="min-h-11 rounded-lg border px-4 font-medium">Adicionar outro</button>
-                <button type="button" onClick={() => nav({ to: "/documentos" })} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">Ver documentos</button>
+                <button type="button" onClick={() => (para ? nav({ to: "/familia/$memberId", params: { memberId: para } }) : nav({ to: "/documentos" }))} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground">Ver documentos</button>
               </div>
             </div>
           )}
