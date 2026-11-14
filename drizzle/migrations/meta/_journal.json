@@ -29,6 +29,13 @@
       "when": 1794624088607,
       "tag": "0003_doctor_accounts_and_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794666079087,
+      "tag": "0004_clinical_view_access_logs",
+      "breakpoints": true
     }
   ]
 }

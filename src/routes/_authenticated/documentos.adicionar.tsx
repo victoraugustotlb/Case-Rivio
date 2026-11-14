@@ -28,12 +28,12 @@ const stepIndex: Record<Step, number> = { escolher: 0, analisando: 1, conferir: 
 const ACCEPT = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const MAX = 20 * 1024 * 1024;
 
-type Draft = { title: string; kind: string; doc_date: string; source: string; summary: string; fields: { label: string; value: string }[] };
+type Draft = { title: string; kind: string; doc_date: string; source: string; summary: string; fields: { label: string; value: string; ai_value?: string; excerpt?: string; confidence?: string }[] };
 
 function Adicionar() {
   const [step, setStep] = useState<Step>("escolher");
   const [error, setError] = useState("");
-  const [file, setFile] = useState<{ path: string; type: string; preview: string; origin: string } | null>(null);
+  const [file, setFile] = useState<{ path: string; type: string; preview: string; origin: string; hash: string } | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const extract = useServerFn(extractDocument);
@@ -55,13 +55,14 @@ function Adicionar() {
       const path = `${u.user.id}/${crypto.randomUUID()}.${ext}`;
       const up = await supabase.storage.from("medical-documents").upload(path, f, { contentType: f.type });
       if (up.error) throw new Error("Não foi possível enviar o arquivo.");
-      setFile({ path, type: f.type, preview: URL.createObjectURL(f), origin });
+      const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", await f.arrayBuffer()));
+      setFile({ path, type: f.type, preview: URL.createObjectURL(f), origin, hash: Array.from(digest, (b) => b.toString(16).padStart(2, "0")).join("") });
       uploaded = true;
       const r = await extract({ data: { path } });
       if (!r.legivel) {
         setError("Não conseguimos ler um documento médico nesse arquivo. Você pode preencher os campos à mão.");
       }
-      setDraft({ title: r.titulo, kind: DOC_KINDS.includes(r.tipo as never) ? r.tipo : "Exame", doc_date: r.data, source: r.emissor, summary: r.resumo, fields: r.campos.map((c) => ({ label: c.rotulo, value: c.valor })) });
+      setDraft({ title: r.titulo, kind: DOC_KINDS.includes(r.tipo as never) ? r.tipo : "Exame", doc_date: r.data, source: r.emissor, summary: r.resumo, fields: r.campos.map((c) => ({ label: c.rotulo, value: c.valor, ai_value: c.valor, excerpt: c.trecho, confidence: c.confianca })) });
       setStep("conferir");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha na leitura. Tente novamente.");
@@ -77,7 +78,7 @@ function Adicionar() {
     const { error: err } = await supabase.from("documents").insert({
       title: draft.title || "Documento sem título", kind: draft.kind, doc_date: draft.doc_date || null, source: draft.source || null,
       summary: draft.summary || null, fields: draft.fields.filter((f) => f.label || f.value), origin: file.origin,
-      file_path: file.path, file_type: file.type, confirmed: true,
+      file_path: file.path, file_type: file.type, file_hash: file.hash, confirmed: true,
     });
     setSaving(false);
     if (err) { setError("Não foi possível salvar. Tente novamente."); return; }
