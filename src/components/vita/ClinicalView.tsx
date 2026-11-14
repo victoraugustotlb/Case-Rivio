@@ -272,15 +272,15 @@ function DocumentDetail({ doc, code, openDoc, onEnded, onBack }: { doc: Doc; cod
           </div>
           <div className="overflow-x-auto rounded-md border bg-card">
             <table className="w-full text-xs">
-              <thead className="bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground"><tr><th className="px-3 py-1.5 font-semibold">Parâmetro</th><th className="font-semibold">Resultado</th><th className="font-semibold">Situação</th><th className="font-semibold">Confiança</th><th className="pr-3 font-semibold">Origem</th></tr></thead>
+              <thead className="bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground"><tr><th className="px-3 py-1.5 font-semibold">Parâmetro</th><th className="font-semibold">Resultado</th><th className="px-2 font-semibold">Situação</th><th className="px-2 font-semibold">Confiança</th><th className="pr-3 font-semibold">Origem</th></tr></thead>
               <tbody>
                 {doc.fields.length === 0 && <tr><td colSpan={5} className="px-3 py-3 text-muted-foreground">Sem dados estruturados.</td></tr>}
                 {doc.fields.map((f, i) => (
                   <tr key={i} className="border-t align-top">
                     <td className="px-3 py-1.5 font-medium">{f.label}<p className="mt-0.5 font-normal text-[11px] text-muted-foreground">Trecho do original: <q className="font-mono">{f.excerpt?.trim() || "não registrado"}</q></p></td>
                     <td className="py-1.5 font-mono tabular-nums">{f.value}</td>
-                    <td className="py-1.5"><RefTag r={parseReference(f.value)} /></td>
-                    <td className="py-1.5 capitalize">{f.confidence === "media" ? "média" : f.confidence ?? "—"}</td>
+                    <td className="px-2 py-1.5"><RefTag r={parseReference(f.value)} /></td>
+                    <td className="px-2 py-1.5 capitalize">{f.confidence === "media" ? "média" : f.confidence ?? "—"}</td>
                     <td className="py-1.5 pr-3"><OriginTag origin={fieldOrigin(f)} /></td>
                   </tr>
                 ))}

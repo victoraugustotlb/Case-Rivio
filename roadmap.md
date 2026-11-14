@@ -30,3 +30,4 @@
 - [x] Contas profissionais (CRM informado), histórico de pacientes e código de 6 dígitos pedido pelo médico.
 - [ ] Validar CRM junto ao conselho — depende de uma fonte oficial de consulta.
 - [ ] Integração real com wearables.
+- [x] Visão clínica técnica no acesso por código (faixa, origem, resumo, referência, linha do tempo, documento técnico, encerramento, registro de acessos)
