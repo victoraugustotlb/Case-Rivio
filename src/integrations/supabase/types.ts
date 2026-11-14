@@ -123,6 +123,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          include_profile: boolean
           period_months: number
           revoked: boolean
           signals: string[]
@@ -134,6 +135,7 @@ export type Database = {
           created_at?: string
           expires_at: string
           id?: string
+          include_profile?: boolean
           period_months: number
           revoked?: boolean
           signals?: string[]
@@ -145,6 +147,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          include_profile?: boolean
           period_months?: number
           revoked?: boolean
           signals?: string[]

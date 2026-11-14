@@ -15,6 +15,13 @@
       "when": 1794620868548,
       "tag": "0001_patient_health_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794622164103,
+      "tag": "0002_share_health_profile_consent",
+      "breakpoints": true
     }
   ]
 }
