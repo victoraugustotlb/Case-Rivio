@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Bell, CalendarDays, CreditCard, Eye, FileUp, FolderHeart, LogOut, Home, Menu, ScanLine, Share2, ShieldCheck, User, Users, X } from "lucide-react";
+import { ArrowLeft, Bell, CalendarDays, CreditCard, Eye, FileUp, FolderHeart, LogOut, Home, Menu, ScanLine, Share2, ShieldCheck, User, Users, Watch, X } from "lucide-react";
 import { appointmentsQuery } from "@/lib/scheduling-query";
 import { isTomorrow } from "@/lib/scheduling";
 import { accountQuery } from "@/lib/account-query";
@@ -19,6 +19,7 @@ const nav = [
 const moreNav = [
   { label: "Minha família", to: "/familia", icon: Users },
   { label: "Perfil", to: "/perfil", icon: User },
+  { label: "Dispositivos", to: "/dispositivos", icon: Watch },
   { label: "Acessos", to: "/acessos", icon: Eye },
   { label: "Conta e privacidade", to: "/plano", icon: ShieldCheck },
   { label: "Assinatura e pagamento", to: "/assinatura", icon: CreditCard },

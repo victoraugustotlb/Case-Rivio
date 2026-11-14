@@ -11,6 +11,7 @@ import { requireRole } from "@/lib/require-role";
 import { destinationFor } from "@/lib/routing";
 import { AccessStatus } from "@/components/vita/AccessStatus";
 import { NotificationsCard, PendingUploads } from "@/components/vita/PatientInbox";
+import { WearableHomeCard } from "@/components/vita/WearableHomeCard";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -94,6 +95,8 @@ function Inicio() {
             )}
           </article>
         </section>
+
+        <WearableHomeCard />
 
         <section aria-labelledby="add">
           <h2 id="add" className="mb-3 font-display text-xl font-semibold">Adicionar ao histórico</h2>

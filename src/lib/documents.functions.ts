@@ -155,10 +155,29 @@ export async function buildOpened(rawCode: string, viewer?: { viewerId: string; 
     }
   }
   await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer?.action ?? "resumo", viewer_id: viewer?.viewerId ?? null });
-  return { status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, profileIncomplete, docs };
+  const deviceSignals = await deviceSignalSummaries(supabaseAdmin, share);
+  if (deviceSignals.length) await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer ? "profissional_sinais" : "sinais", viewer_id: viewer?.viewerId ?? null });
+  return { deviceSignals, status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, profileIncomplete, docs };
 }
 
 /** Acesso do médico: valida o código e devolve só o que o paciente autorizou. */
 export const openShare = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ code: z.string().min(8).max(12) }).parse(d))
   .handler(async ({ data }) => withLookupLimit(() => buildOpened(data.code)));
+
+/** Só os sinais autorizados, dentro do período, como resumo (nunca a série bruta). */
+async function deviceSignalSummaries(admin: any, share: { user_id: string; signals: string[] | null; period_months: number }) {
+  const { metricsForSignals, summarize, METRICS } = await import("@/lib/wearables");
+  const metrics = metricsForSignals(share.signals ?? []);
+  if (!metrics.length) return [];
+  const now = new Date();
+  const ms = share.period_months * 30.44 * 86_400_000;
+  const since = new Date(now.getTime() - ms).toISOString();
+  const out: { metric: string; label: string; unit: string; summary: NonNullable<ReturnType<typeof summarize>> }[] = [];
+  for (const m of metrics) {
+    const { data } = await admin.from("wearable_readings").select("metric,value,measured_at,source_device").eq("user_id", share.user_id).eq("metric", m).gte("measured_at", since).order("measured_at", { ascending: false }).limit(5000);
+    const sum = summarize((data ?? []).map((r: any) => ({ ...r, value: Number(r.value) })), { now, ms });
+    if (sum) out.push({ metric: m, label: METRICS[m].label, unit: METRICS[m].unit, summary: sum });
+  }
+  return out;
+}

@@ -31,12 +31,18 @@ import { Route as ClinicoPedirRouteImport } from './routes/clinico/pedir'
 import { Route as AuthenticatedConsultasIndexRouteImport } from './routes/_authenticated/consultas.index'
 import { Route as AuthenticatedConsultasProviderIdRouteImport } from './routes/_authenticated/consultas.$providerId'
 import { Route as AuthenticatedConsultasAgendamentosRouteImport } from './routes/_authenticated/consultas.agendamentos'
+import { Route as AuthenticatedDispositivosIndexRouteImport } from './routes/_authenticated/dispositivos.index'
+import { Route as AuthenticatedDispositivosApiRouteImport } from './routes/_authenticated/dispositivos.api'
+import { Route as AuthenticatedDispositivosPainelRouteImport } from './routes/_authenticated/dispositivos.painel'
 import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
 import { Route as AuthenticatedFamiliaIndexRouteImport } from './routes/_authenticated/familia.index'
 import { Route as AuthenticatedFamiliaMemberIdRouteImport } from './routes/_authenticated/familia.$memberId'
 import { Route as ClinicoPacienteIdRouteImport } from './routes/clinico/paciente.$id'
+import { Route as ApiPublicWearablesIngestRouteImport } from './routes/api/public/wearables/ingest'
+import { Route as ApiPublicWearablesRetentionRouteImport } from './routes/api/public/wearables/retention'
+import { Route as ApiPublicWearablesWebhookJunctionRouteImport } from './routes/api/public/wearables/webhook/junction'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -151,6 +157,24 @@ const AuthenticatedConsultasAgendamentosRoute =
     path: '/consultas/agendamentos',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDispositivosIndexRoute =
+  AuthenticatedDispositivosIndexRouteImport.update({
+    id: '/dispositivos/',
+    path: '/dispositivos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDispositivosApiRoute =
+  AuthenticatedDispositivosApiRouteImport.update({
+    id: '/dispositivos/api',
+    path: '/dispositivos/api',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDispositivosPainelRoute =
+  AuthenticatedDispositivosPainelRouteImport.update({
+    id: '/dispositivos/painel',
+    path: '/dispositivos/painel',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDocumentosIndexRoute =
   AuthenticatedDocumentosIndexRouteImport.update({
     id: '/documentos/',
@@ -186,6 +210,24 @@ const ClinicoPacienteIdRoute = ClinicoPacienteIdRouteImport.update({
   path: '/paciente/$id',
   getParentRoute: () => ClinicoRoute,
 } as any)
+const ApiPublicWearablesIngestRoute =
+  ApiPublicWearablesIngestRouteImport.update({
+    id: '/api/public/wearables/ingest',
+    path: '/api/public/wearables/ingest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWearablesRetentionRoute =
+  ApiPublicWearablesRetentionRouteImport.update({
+    id: '/api/public/wearables/retention',
+    path: '/api/public/wearables/retention',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWearablesWebhookJunctionRoute =
+  ApiPublicWearablesWebhookJunctionRouteImport.update({
+    id: '/api/public/wearables/webhook/junction',
+    path: '/api/public/wearables/webhook/junction',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -208,13 +250,19 @@ export interface FileRoutesByFullPath {
   '/clinico/': typeof ClinicoIndexRoute
   '/consultas/$providerId': typeof AuthenticatedConsultasProviderIdRoute
   '/consultas/agendamentos': typeof AuthenticatedConsultasAgendamentosRoute
+  '/dispositivos/api': typeof AuthenticatedDispositivosApiRoute
+  '/dispositivos/painel': typeof AuthenticatedDispositivosPainelRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
   '/clinico/paciente/$id': typeof ClinicoPacienteIdRoute
   '/consultas/': typeof AuthenticatedConsultasIndexRoute
+  '/dispositivos/': typeof AuthenticatedDispositivosIndexRoute
   '/documentos/': typeof AuthenticatedDocumentosIndexRoute
   '/familia/': typeof AuthenticatedFamiliaIndexRoute
+  '/api/public/wearables/ingest': typeof ApiPublicWearablesIngestRoute
+  '/api/public/wearables/retention': typeof ApiPublicWearablesRetentionRoute
+  '/api/public/wearables/webhook/junction': typeof ApiPublicWearablesWebhookJunctionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,13 +284,19 @@ export interface FileRoutesByTo {
   '/clinico': typeof ClinicoIndexRoute
   '/consultas/$providerId': typeof AuthenticatedConsultasProviderIdRoute
   '/consultas/agendamentos': typeof AuthenticatedConsultasAgendamentosRoute
+  '/dispositivos/api': typeof AuthenticatedDispositivosApiRoute
+  '/dispositivos/painel': typeof AuthenticatedDispositivosPainelRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
   '/clinico/paciente/$id': typeof ClinicoPacienteIdRoute
   '/consultas': typeof AuthenticatedConsultasIndexRoute
+  '/dispositivos': typeof AuthenticatedDispositivosIndexRoute
   '/documentos': typeof AuthenticatedDocumentosIndexRoute
   '/familia': typeof AuthenticatedFamiliaIndexRoute
+  '/api/public/wearables/ingest': typeof ApiPublicWearablesIngestRoute
+  '/api/public/wearables/retention': typeof ApiPublicWearablesRetentionRoute
+  '/api/public/wearables/webhook/junction': typeof ApiPublicWearablesWebhookJunctionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,13 +321,19 @@ export interface FileRoutesById {
   '/clinico/': typeof ClinicoIndexRoute
   '/_authenticated/consultas/$providerId': typeof AuthenticatedConsultasProviderIdRoute
   '/_authenticated/consultas/agendamentos': typeof AuthenticatedConsultasAgendamentosRoute
+  '/_authenticated/dispositivos/api': typeof AuthenticatedDispositivosApiRoute
+  '/_authenticated/dispositivos/painel': typeof AuthenticatedDispositivosPainelRoute
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/_authenticated/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
   '/clinico/paciente/$id': typeof ClinicoPacienteIdRoute
   '/_authenticated/consultas/': typeof AuthenticatedConsultasIndexRoute
+  '/_authenticated/dispositivos/': typeof AuthenticatedDispositivosIndexRoute
   '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
   '/_authenticated/familia/': typeof AuthenticatedFamiliaIndexRoute
+  '/api/public/wearables/ingest': typeof ApiPublicWearablesIngestRoute
+  '/api/public/wearables/retention': typeof ApiPublicWearablesRetentionRoute
+  '/api/public/wearables/webhook/junction': typeof ApiPublicWearablesWebhookJunctionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -298,13 +358,19 @@ export interface FileRouteTypes {
     | '/clinico/'
     | '/consultas/$providerId'
     | '/consultas/agendamentos'
+    | '/dispositivos/api'
+    | '/dispositivos/painel'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/familia/$memberId'
     | '/clinico/paciente/$id'
     | '/consultas/'
+    | '/dispositivos/'
     | '/documentos/'
     | '/familia/'
+    | '/api/public/wearables/ingest'
+    | '/api/public/wearables/retention'
+    | '/api/public/wearables/webhook/junction'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -326,13 +392,19 @@ export interface FileRouteTypes {
     | '/clinico'
     | '/consultas/$providerId'
     | '/consultas/agendamentos'
+    | '/dispositivos/api'
+    | '/dispositivos/painel'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/familia/$memberId'
     | '/clinico/paciente/$id'
     | '/consultas'
+    | '/dispositivos'
     | '/documentos'
     | '/familia'
+    | '/api/public/wearables/ingest'
+    | '/api/public/wearables/retention'
+    | '/api/public/wearables/webhook/junction'
   id:
     | '__root__'
     | '/'
@@ -356,13 +428,19 @@ export interface FileRouteTypes {
     | '/clinico/'
     | '/_authenticated/consultas/$providerId'
     | '/_authenticated/consultas/agendamentos'
+    | '/_authenticated/dispositivos/api'
+    | '/_authenticated/dispositivos/painel'
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/adicionar'
     | '/_authenticated/familia/$memberId'
     | '/clinico/paciente/$id'
     | '/_authenticated/consultas/'
+    | '/_authenticated/dispositivos/'
     | '/_authenticated/documentos/'
     | '/_authenticated/familia/'
+    | '/api/public/wearables/ingest'
+    | '/api/public/wearables/retention'
+    | '/api/public/wearables/webhook/junction'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -371,6 +449,9 @@ export interface RootRouteChildren {
   ClinicoRoute: typeof ClinicoRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   MedicoRoute: typeof MedicoRoute
+  ApiPublicWearablesIngestRoute: typeof ApiPublicWearablesIngestRoute
+  ApiPublicWearablesRetentionRoute: typeof ApiPublicWearablesRetentionRoute
+  ApiPublicWearablesWebhookJunctionRoute: typeof ApiPublicWearablesWebhookJunctionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -529,6 +610,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConsultasAgendamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dispositivos/': {
+      id: '/_authenticated/dispositivos/'
+      path: '/dispositivos'
+      fullPath: '/dispositivos/'
+      preLoaderRoute: typeof AuthenticatedDispositivosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dispositivos/api': {
+      id: '/_authenticated/dispositivos/api'
+      path: '/dispositivos/api'
+      fullPath: '/dispositivos/api'
+      preLoaderRoute: typeof AuthenticatedDispositivosApiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dispositivos/painel': {
+      id: '/_authenticated/dispositivos/painel'
+      path: '/dispositivos/painel'
+      fullPath: '/dispositivos/painel'
+      preLoaderRoute: typeof AuthenticatedDispositivosPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documentos/': {
       id: '/_authenticated/documentos/'
       path: '/documentos'
@@ -571,6 +673,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClinicoPacienteIdRouteImport
       parentRoute: typeof ClinicoRoute
     }
+    '/api/public/wearables/ingest': {
+      id: '/api/public/wearables/ingest'
+      path: '/api/public/wearables/ingest'
+      fullPath: '/api/public/wearables/ingest'
+      preLoaderRoute: typeof ApiPublicWearablesIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/wearables/retention': {
+      id: '/api/public/wearables/retention'
+      path: '/api/public/wearables/retention'
+      fullPath: '/api/public/wearables/retention'
+      preLoaderRoute: typeof ApiPublicWearablesRetentionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/wearables/webhook/junction': {
+      id: '/api/public/wearables/webhook/junction'
+      path: '/api/public/wearables/webhook/junction'
+      fullPath: '/api/public/wearables/webhook/junction'
+      preLoaderRoute: typeof ApiPublicWearablesWebhookJunctionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -584,10 +707,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlanoRoute: typeof AuthenticatedPlanoRoute
   AuthenticatedConsultasProviderIdRoute: typeof AuthenticatedConsultasProviderIdRoute
   AuthenticatedConsultasAgendamentosRoute: typeof AuthenticatedConsultasAgendamentosRoute
+  AuthenticatedDispositivosApiRoute: typeof AuthenticatedDispositivosApiRoute
+  AuthenticatedDispositivosPainelRoute: typeof AuthenticatedDispositivosPainelRoute
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
   AuthenticatedFamiliaMemberIdRoute: typeof AuthenticatedFamiliaMemberIdRoute
   AuthenticatedConsultasIndexRoute: typeof AuthenticatedConsultasIndexRoute
+  AuthenticatedDispositivosIndexRoute: typeof AuthenticatedDispositivosIndexRoute
   AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
   AuthenticatedFamiliaIndexRoute: typeof AuthenticatedFamiliaIndexRoute
 }
@@ -603,10 +729,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConsultasProviderIdRoute: AuthenticatedConsultasProviderIdRoute,
   AuthenticatedConsultasAgendamentosRoute:
     AuthenticatedConsultasAgendamentosRoute,
+  AuthenticatedDispositivosApiRoute: AuthenticatedDispositivosApiRoute,
+  AuthenticatedDispositivosPainelRoute: AuthenticatedDispositivosPainelRoute,
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
   AuthenticatedFamiliaMemberIdRoute: AuthenticatedFamiliaMemberIdRoute,
   AuthenticatedConsultasIndexRoute: AuthenticatedConsultasIndexRoute,
+  AuthenticatedDispositivosIndexRoute: AuthenticatedDispositivosIndexRoute,
   AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
   AuthenticatedFamiliaIndexRoute: AuthenticatedFamiliaIndexRoute,
 }
@@ -645,6 +774,10 @@ const rootRouteChildren: RootRouteChildren = {
   ClinicoRoute: ClinicoRouteWithChildren,
   EntrarRoute: EntrarRoute,
   MedicoRoute: MedicoRoute,
+  ApiPublicWearablesIngestRoute: ApiPublicWearablesIngestRoute,
+  ApiPublicWearablesRetentionRoute: ApiPublicWearablesRetentionRoute,
+  ApiPublicWearablesWebhookJunctionRoute:
+    ApiPublicWearablesWebhookJunctionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

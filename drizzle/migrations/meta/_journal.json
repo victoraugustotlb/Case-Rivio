@@ -29,6 +29,13 @@
       "when": 1794674468552,
       "tag": "0003_share_codes_ungated_and_lookup_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794675651528,
+      "tag": "0004_wearables",
+      "breakpoints": true
     }
   ]
 }

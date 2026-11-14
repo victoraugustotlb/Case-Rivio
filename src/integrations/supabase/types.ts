@@ -794,6 +794,128 @@ export type Database = {
         }
         Relationships: []
       }
+      wearable_connections: {
+        Row: {
+          created_at: string
+          display_name: string
+          external_user_id: string | null
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          provider: string
+          source: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          external_user_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          provider: string
+          source: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          external_user_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          provider?: string
+          source?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wearable_ingest_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          last_used_at: string | null
+          revoked_at: string | null
+          token_hash: string
+          user_id: string
+          window_count: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash: string
+          user_id: string
+          window_count?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash?: string
+          user_id?: string
+          window_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      wearable_readings: {
+        Row: {
+          connection_id: string | null
+          external_id: string | null
+          id: string
+          measured_at: string
+          metric: string
+          received_at: string
+          source_device: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          connection_id?: string | null
+          external_id?: string | null
+          id?: string
+          measured_at: string
+          metric: string
+          received_at?: string
+          source_device?: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          connection_id?: string | null
+          external_id?: string | null
+          id?: string
+          measured_at?: string
+          metric?: string
+          received_at?: string
+          source_device?: string
+          unit?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wearable_readings_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "wearable_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -813,6 +935,15 @@ export type Database = {
       reschedule_appointment: {
         Args: { _id: string; _new_slot: string }
         Returns: string
+      }
+      wearable_token_hit: {
+        Args: { _hash: string; _limit: number }
+        Returns: {
+          allowed: boolean
+          owner: string
+          revoked: boolean
+          token_id: string
+        }[]
       }
     }
     Enums: {
