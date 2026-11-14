@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { docVisible, normalizeCode, accessState } from "@/lib/share";
+import { docVisible, normalizeCode, accessState, profileVisible } from "@/lib/share";
+import { profileSchema, type HealthProfile } from "@/lib/profile";
 
 const extractSchema = {
   type: "object",

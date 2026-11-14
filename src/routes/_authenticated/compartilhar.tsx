@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, Copy, Info, ShieldOff } from "lucide-react";
+import { Check, Copy, Info, ShieldCheck, ShieldOff, UserRound } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";

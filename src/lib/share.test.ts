@@ -3,7 +3,7 @@ import { accessState, formatShareCode, normalizeCode, validateShare } from "./sh
 
 describe("compartilhamento", () => {
   it("não gera código sem nenhuma informação escolhida", () => {
-    expect(validateShare({ categories: [], signals: [], periodMonths: 12, validityHours: 24 })).toHaveLength(1);
+    expect(validateShare({ categories: [], signals: [], includeProfile: false, periodMonths: 12, validityHours: 24 })).toHaveLength(1);
   });
   it("aceita só sinais de dispositivos, sem documentos", () => {
     expect(validateShare({ categories: [], signals: ["fc"], periodMonths: 12, validityHours: 24 })).toEqual([]);

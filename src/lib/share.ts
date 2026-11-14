@@ -4,6 +4,7 @@ export type ShareSignal = "fc" | "sono" | "spo2" | "passos" | "pressao" | "glico
 export type ShareRequest = {
   categories: ShareCategory[];
   signals: ShareSignal[];
+  includeProfile: boolean;
   periodMonths: number;
   validityHours: number;
 };
