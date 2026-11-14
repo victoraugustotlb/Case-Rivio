@@ -31,3 +31,11 @@
 - [ ] Validar CRM junto ao conselho — depende de uma fonte oficial de consulta.
 - [ ] Integração real com wearables.
 - [x] Visão clínica técnica no acesso por código (faixa, origem, resumo, referência, linha do tempo, documento técnico, encerramento, registro de acessos)
+
+# Entrada, plano e assinatura
+- [x] Entrar com três caminhos (plano, assinatura individual, profissional) e tipos de conta com redirecionamento
+- [x] Vínculo com plano (carteirinha, titular/dependente, limite de tentativas) e textos de privacidade
+- [x] Laboratório ou clínica (CNPJ informado) no painel profissional
+- [x] Envio e novos códigos pausados quando o acesso não está em dia; leitura sempre liberada
+- [ ] Cobrança da assinatura individual (cartão e Pix), portal do cliente, cancelamento e webhook — aguardando o usuário ativar os pagamentos (a ativação foi recusada)
+- [ ] Aprovação do dependente pelo titular — Prompt 3

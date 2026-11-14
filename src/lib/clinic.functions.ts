@@ -88,6 +88,8 @@ export const respondAccessRequest = createServerFn({ method: "POST" })
       await supabaseAdmin.from("access_requests").update({ status: "declined", patient_id: context.userId }).eq("id", r.id).eq("status", "pending");
       return { ok: true };
     }
+    const { data: allowed } = await context.supabase.rpc("can_write_records", { _uid: context.userId });
+    if (!allowed) throw new Error("Regularize seu acesso para autorizar novos códigos. Seus documentos continuam guardados.");
     const { data: share, error } = await supabaseAdmin.from("share_codes").insert({
       user_id: context.userId, code: formatShareCode(), categories: r.categories, signals: r.signals, include_profile: r.include_profile,
       period_months: r.period_months, expires_at: new Date(Date.now() + AUTHORIZED_HOURS * 3600_000).toISOString(),

@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { AccessStatus } from "@/components/vita/AccessStatus";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { HealthProfileEditor } from "@/components/vita/HealthProfileEditor";
 import { healthProfileQuery } from "@/lib/profile-query";
@@ -28,7 +29,11 @@ function Perfil() {
   return (
     <AppShell>
       <div className="mx-auto max-w-4xl">
-        <PageTitle title="Perfil" subtitle="Suas informações e seu histórico de saúde" />
+        <PageTitle title="Perfil" subtitle="Sua conta, suas informações e seu histórico de saúde" />
+        <section aria-labelledby="conta" className="mb-8 space-y-2">
+          <h2 id="conta" className="font-display text-lg font-semibold">Conta</h2>
+          <AccessStatus detailed />
+        </section>
         <HealthProfileEditor initial={data} accountName={typeof user.user_metadata["full_name"] === "string" ? user.user_metadata["full_name"] : ""} />
       </div>
     </AppShell>

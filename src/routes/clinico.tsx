@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { createAccessRequest, getAccessRequest } from "@/lib/clinic.functions";
 import { formatRequestCode } from "@/lib/clinic";
 import { DoctorFields } from "@/components/vita/DoctorFields";
+import { LabFields, emptyLab, type LabForm } from "@/components/vita/LabFields";
 import { PERIOD_OPTIONS, type ShareCategory, type ShareSignal } from "@/lib/share";
 
 export const Route = createFileRoute("/clinico")({
@@ -32,14 +33,25 @@ function useDoctor() {
     queryKey: ["doctor-me"],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return { user: null, doctor: null };
+      if (!u.user) return { user: null, doctor: null, lab: null, type: null };
+      const { data: prof } = await supabase.from("profiles").select("account_type").eq("user_id", u.user.id).maybeSingle();
+      if (prof?.account_type === "laboratory") {
+        let { data: lab } = await supabase.from("lab_profiles").select("*").eq("user_id", u.user.id).maybeSingle();
+        const l = (u.user.user_metadata as Record<string, unknown>)["lab"] as Record<string, string> | undefined;
+        if (!lab && l?.["cnpj"]) {
+          const { data } = await supabase.from("lab_profiles").insert({ legal_name: l["legal_name"] ?? "", cnpj: l["cnpj"], tech_lead_name: l["tech_lead_name"] ?? "", tech_lead_registry: l["tech_lead_registry"] ?? "", city: l["city"] ?? "", uf: l["uf"] ?? "SP" }).select("*").single();
+          lab = data;
+        }
+        return { user: u.user, doctor: null, lab, type: "laboratory" as const };
+      }
+      if (prof?.account_type === "patient_plan" || prof?.account_type === "patient_individual") return { user: u.user, doctor: null, lab: null, type: "patient" as const };
       let { data: doctor } = await supabase.from("doctor_profiles").select("*").eq("user_id", u.user.id).maybeSingle();
       const m = u.user.user_metadata as Record<string, string | undefined>;
       if (!doctor && m["account_type"] === "doctor" && m["crm"] && m["uf"]) {
         const { data } = await supabase.from("doctor_profiles").insert({ full_name: m["full_name"] ?? "", crm: m["crm"], uf: m["uf"], specialty: m["specialty"] ?? "" }).select("*").single();
         doctor = data;
       }
-      return { user: u.user, doctor };
+      return { user: u.user, doctor, lab: null, type: "doctor" as const };
     },
   });
 }
@@ -58,6 +70,8 @@ function Clinico() {
   const sair = async () => { qc.clear(); await supabase.auth.signOut(); nav({ to: "/entrar", replace: true }); };
 
   if (me.isLoading || !me.data?.user) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" aria-label="Carregando" /></div>;
+  if (me.data.type === "patient") return <Navigate to="/inicio" replace />;
+  if (me.data.type === "laboratory") return me.data.lab ? <LabPanel lab={me.data.lab} onExit={sair} /> : <NoLab onDone={() => me.refetch()} />;
   if (!me.data.doctor) return <NoDoctor onDone={() => me.refetch()} />;
   const list = (patients.data ?? []).filter((p) => `${p.patient_name} ${p.patient_ref}`.toLowerCase().includes(q.toLowerCase()));
   const d = me.data.doctor;
@@ -68,7 +82,7 @@ function Clinico() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-8">
           <div className="flex items-center gap-2 font-display text-xl font-bold text-primary"><Stethoscope className="h-6 w-6" aria-hidden />VITA Clínico</div>
           <div className="flex items-center gap-2">
-            <span className="hidden text-right text-sm sm:block"><span className="block font-semibold">{d.full_name}</span><span className="text-muted-foreground">CRM {d.crm}/{d.uf}</span></span>
+            <span className="hidden text-right text-sm sm:block"><span className="block font-semibold">{d.full_name}</span><span className="text-muted-foreground">CRM {d.crm}/{d.uf} · informado</span></span>
             <button onClick={sair} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted"><LogOut className="h-4 w-4" aria-hidden />Sair</button>
           </div>
         </div>
@@ -200,3 +214,47 @@ function NoDoctor({ onDone }: { onDone: () => void }) {
   );
 }
 
+
+function LabPanel({ lab, onExit }: { lab: { legal_name: string; cnpj: string; city: string; uf: string; tech_lead_name: string; tech_lead_registry: string }; onExit: () => void }) {
+  const cnpj = lab.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+  return (
+    <div className="min-h-screen bg-background font-sans text-foreground">
+      <header className="border-b bg-card">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-8">
+          <div className="flex items-center gap-2 font-display text-xl font-bold text-primary"><Stethoscope className="h-6 w-6" aria-hidden />VITA Clínico</div>
+          <div className="flex items-center gap-2">
+            <span className="hidden text-right text-sm sm:block"><span className="block font-semibold">{lab.legal_name}</span><span className="text-muted-foreground">CNPJ {cnpj} · informado</span></span>
+            <button onClick={onExit} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted"><LogOut className="h-4 w-4" aria-hidden />Sair</button>
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+        <Link to="/medico" className="flex min-h-28 items-center gap-4 rounded-2xl bg-hero p-6 text-primary-foreground shadow-soft md:max-w-xl">
+          <KeyRound className="h-8 w-8 shrink-0" aria-hidden /><span><span className="block font-display text-xl font-semibold">Tenho um código do paciente</span><span className="text-sm text-primary-foreground/80">Abra um histórico com o código que o paciente gerou</span></span>
+        </Link>
+        <p className="mt-6 text-sm text-muted-foreground">Responsável técnico: {lab.tech_lead_name} ({lab.tech_lead_registry}) · {lab.city}/{lab.uf}. Dados informados pelo laboratório, ainda sem verificação oficial.</p>
+      </main>
+    </div>
+  );
+}
+
+function NoLab({ onDone }: { onDone: () => void }) {
+  const [f, setF] = useState<LabForm>(emptyLab);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <main className="grid min-h-screen place-items-center bg-background px-4 font-sans">
+      <form className="w-full max-w-md" onSubmit={async (e) => {
+        e.preventDefault(); setBusy(true); setErr("");
+        const { error } = await supabase.from("lab_profiles").insert(f);
+        setBusy(false);
+        if (error) setErr("Confira os dados: CNPJ com 14 dígitos e todos os campos preenchidos."); else onDone();
+      }}>
+        <h1 className="font-display text-2xl font-bold">Cadastro do laboratório ou clínica</h1>
+        <LabFields f={f} setF={setF} />
+        {err && <p role="alert" className="mt-3 rounded-lg bg-danger-soft p-3 text-sm">{err}</p>}
+        <button disabled={busy} className="mt-5 min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-60">Salvar</button>
+      </form>
+    </main>
+  );
+}
