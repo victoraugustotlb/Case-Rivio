@@ -6,6 +6,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { devices } from "@/lib/vita-data";
 import { documentsQuery } from "@/lib/documents";
 import { supabase } from "@/integrations/supabase/client";
+import { healthProfileQuery } from "@/lib/profile-query";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -18,13 +20,14 @@ export const Route = createFileRoute("/_authenticated/inicio")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(documentsQuery),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(documentsQuery), context.queryClient.ensureQueryData(healthProfileQuery)]),
   component: Inicio,
 });
 
 function Inicio() {
   const [hidden, setHidden] = useState(true);
   const { data: docs } = useSuspenseQuery(documentsQuery);
+  const { data: profile } = useSuspenseQuery(healthProfileQuery);
   const [nome, setNome] = useState("");
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setNome(((data.user?.user_metadata?.["full_name"] as string) || "").split(" ")[0] ?? "")); }, []);
   const counts = { exames: docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").length, total: docs.length, pend: 0 };
@@ -42,6 +45,11 @@ function Inicio() {
             {hidden ? "Mostrar nomes" : "Ocultar nomes"}
           </button>
         </section>
+
+        {!profile?.questionnaire_completed && <section className="flex flex-wrap items-center justify-between gap-4 border-y py-5">
+          <div><h2 className="font-display text-xl font-semibold">Seu perfil de saúde</h2><p className="mt-1 text-sm text-muted-foreground">Questionário inicial · Medidas, medicamentos e histórico</p></div>
+          <Button asChild className="min-h-11"><Link to="/perfil">Preencher perfil<ChevronRight aria-hidden /></Link></Button>
+        </section>}
 
         <section className="grid gap-4 lg:grid-cols-3">
           <article className="bg-hero rounded-2xl p-6 text-primary-foreground shadow-soft lg:col-span-2">
