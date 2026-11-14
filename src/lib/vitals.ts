@@ -26,3 +26,17 @@ export const statusLabel: Record<VitalStatus, string> = {
   atencao: "Atenção",
   alerta: "Fora da faixa",
 };
+
+/** SpO₂ em %, informativo (não diagnóstico). */
+export function classifySpo2(pct: number): VitalStatus {
+  if (pct < 90) return "alerta";
+  if (pct < 95) return "atencao";
+  return "normal";
+}
+
+/** Frequência cardíaca em repouso medida por dispositivo, bpm. Informativo. */
+export function classifyRestingHeartRate(bpm: number): VitalStatus {
+  if (bpm < 40 || bpm > 100) return "alerta";
+  if (bpm < 50 || bpm > 90) return "atencao";
+  return "normal";
+}

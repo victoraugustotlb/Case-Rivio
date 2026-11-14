@@ -77,3 +77,14 @@ export function grantExpiry(d: GrantDuration, now: Date = new Date()): string | 
 export function canShareFor(d: ViewDecision): boolean {
   return d.allowed && (d.basis === "proprio" || d.basis === "responsavel_legal");
 }
+
+/**
+ * Quem pode editar o perfil de outra pessoa da família: o titular, para dependente menor de 18;
+ * um adulto só se o dono concedeu can_edit_profile num consentimento ativo (desligado por padrão).
+ */
+export function canEditMember(viewer: FamilyMember, owner: FamilyMember, grant: (FamilyGrant & { can_edit_profile?: boolean }) | null, now: Date = new Date()): boolean {
+  const d = canViewMember(viewer, owner, grant, now);
+  if (!d.allowed) return false;
+  if (d.basis === "proprio" || d.basis === "responsavel_legal") return true;
+  return !!grant?.can_edit_profile;
+}

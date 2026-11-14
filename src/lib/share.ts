@@ -5,9 +5,19 @@ export type ShareRequest = {
   categories: ShareCategory[];
   signals: ShareSignal[];
   includeProfile: boolean;
+  /** Ficha essencial (nome, idade, alergias…). Opcional para chamadas antigas. */
+  includeEssentials?: boolean;
   periodMonths: number;
   validityHours: number;
 };
+
+/** Ponto único para trocar o padrão: novos códigos já vêm com a ficha essencial marcada. */
+export const DEFAULT_SHARE_ESSENTIALS = true;
+
+/** A ficha só sai num código que a incluiu ao ser criado (códigos antigos têm include_essentials = false). */
+export function essentialsVisible(share: { include_essentials?: boolean | null; essentials_fields?: string[] | null }): string[] {
+  return share.include_essentials ? (share.essentials_fields ?? []) : [];
+}
 
 export const VALIDITY_OPTIONS = [1, 24, 72, 168] as const;
 export const PERIOD_OPTIONS = [3, 6, 12, 60] as const;
@@ -15,7 +25,7 @@ export const PERIOD_OPTIONS = [3, 6, 12, 60] as const;
 /** Retorna os problemas que impedem gerar o código; lista vazia = pode gerar. */
 export function validateShare(r: ShareRequest): string[] {
   const errors: string[] = [];
-  if (r.categories.length === 0 && r.signals.length === 0 && !r.includeProfile) errors.push("Escolha ao menos um tipo de informação.");
+  if (r.categories.length === 0 && r.signals.length === 0 && !r.includeProfile && !r.includeEssentials) errors.push("Escolha ao menos um tipo de informação.");
   if (!(VALIDITY_OPTIONS as readonly number[]).includes(r.validityHours)) errors.push("Validade inválida.");
   if (!(PERIOD_OPTIONS as readonly number[]).includes(r.periodMonths)) errors.push("Período inválido.");
   return errors;
@@ -55,10 +65,11 @@ const KIND_TO_CATEGORY: Record<string, ShareCategory> = {
 
 /** O médico só vê documentos da categoria autorizada e adicionados dentro do período. */
 export function docVisible(
-  doc: { kind: string; created_at: string },
+  doc: { kind: string; created_at: string; status?: string | null },
   share: { categories: string[]; period_months: number },
   now: Date = new Date(),
 ): boolean {
+  if ((doc.status ?? "accepted") !== "accepted") return false; // pendente/recusado nunca entra em códigos
   const cat = KIND_TO_CATEGORY[doc.kind];
   if (!cat || !share.categories.includes(cat)) return false;
   const limit = new Date(now);

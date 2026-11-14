@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { agoText } from "@/lib/wearables";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown, ArrowUp, ChevronLeft, Clock3, Eye, FileText, Hash, Loader2, LockKeyhole, LogOut, Minus,
@@ -77,9 +78,12 @@ function Sparkline({ points, refMax, unit }: { points: { t: number; v: number }[
   );
 }
 
-export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onClose: () => void; onEnded: () => void }) {
+export type DocOpener = (documentId: string) => Promise<{ status: string; url?: string | null }>;
+
+export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded }: { opened: Opened; onClose: () => void; onEnded: () => void; openDocument?: DocOpener; embedded?: boolean }) {
   const check = useServerFn(checkShare);
-  const openDoc = useServerFn(openSharedDocument);
+  const openShared = useServerFn(openSharedDocument);
+  const openDoc = useCallback<DocOpener>((id) => openDocument ? openDocument(id) : openShared({ data: { code: opened.code, documentId: id } }), [openDocument, openShared, opened.code]);
   const [view, setView] = useState<View>({ tab: "resumo" });
   const [now, setNow] = useState(() => Date.now());
   const endedRef = useRef(false);
@@ -87,7 +91,7 @@ export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onC
   const verify = useCallback(async () => {
     try {
       const r = await check({ data: { code: opened.code } });
-      if (r.status !== "valido" && !endedRef.current) { endedRef.current = true; onEnded(); }
+      if (r.status !== "valido" && r.status !== "bloqueado" && !endedRef.current) { endedRef.current = true; onEnded(); }
     } catch { /* rede instável: tenta de novo no próximo ciclo */ }
   }, [check, opened.code, onEnded]);
 
@@ -123,13 +127,13 @@ export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onC
   const Source = ({ d }: { d: Doc }) => <button type="button" onClick={() => go({ tab: "doc", id: d.id })} className="text-left text-primary underline-offset-2 hover:underline">{d.title} · {fmt(docTime(d))}</button>;
 
   return (
-    <div className="min-h-screen bg-background font-sans text-[13px] text-foreground">
+    <div className={`${embedded ? "" : "min-h-screen"} bg-background font-sans text-[13px] text-foreground`}>
       <header className="sticky top-0 z-10 border-b bg-card">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2">
-          <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />VITA Clínico</span>
+          <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />Anamedis Clínico</span>
           <span className="font-semibold">{profile ? `${profile.full_name.trim() || "Nome não informado"}${age !== null ? ` · ${age} anos` : ""}` : "Identificação não autorizada"}</span>
           <span className="font-mono text-xs text-muted-foreground" title="Identificador desta sessão de acesso">Sessão {opened.session}</span>
-          <span className="text-xs text-muted-foreground">Escopo: {[...CATEGORIES.filter((c) => allowed.has(c.id)).map((c) => c.label), ...(opened.includeProfile ? ["Perfil"] : [])].join(", ") || "—"} · Período: {opened.periodMonths === 60 ? "5 anos" : `${opened.periodMonths} meses`}</span>
+          <span className="text-xs text-muted-foreground">Escopo: {[...CATEGORIES.filter((c) => allowed.has(c.id)).map((c) => c.label), ...(opened.essentials ? ["Ficha essencial"] : []), ...(opened.includeProfile ? ["Perfil"] : [])].join(", ") || "—"} · Período: {opened.periodMonths === 60 ? "5 anos" : `${opened.periodMonths} meses`}</span>
           <span className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"><Eye className="h-3 w-3" aria-hidden />Somente leitura</span>
           <span role="timer" aria-label="Tempo restante do acesso" className={`ml-auto inline-flex items-center gap-1 rounded px-2 py-0.5 font-mono text-xs tabular-nums ${sec < 300 ? "bg-warning-soft font-semibold text-warning" : "bg-muted"}`}><Clock3 className="h-3.5 w-3.5" aria-hidden />{countdown}</span>
           <button type="button" onClick={onClose} className="inline-flex min-h-8 items-center gap-1 rounded border px-2 text-xs hover:bg-muted"><LogOut className="h-3.5 w-3.5" aria-hidden />Sair</button>
@@ -143,6 +147,8 @@ export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onC
       </header>
 
       <main className="mx-auto max-w-[1400px] p-4">
+        {view.tab === "resumo" && opened.profileIncomplete && profile && <p role="status" className="mb-3 rounded border bg-warning-soft px-3 py-2 text-xs">Perfil incompleto: algumas respostas antigas do questionário não puderam ser lidas e aparecem em branco.</p>}
+        {view.tab === "resumo" && opened.essentials && <EssentialsBand items={opened.essentials} />}
         {view.tab === "resumo" && (
           <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
             <Section title="Alergias informadas">{profile ? (profile.allergies.trim() ? <><p className="whitespace-pre-line font-medium">{profile.allergies}</p><div className="mt-1"><OriginTag origin="paciente" /> <span className="text-[11px] text-muted-foreground">· Questionário do paciente</span></div></> : <Empty text="Nenhuma alergia informada pelo paciente." />) : <Locked />}</Section>
@@ -167,13 +173,14 @@ export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onC
             <Section title="Exames recentes" count={allowed.has("exames") ? docs.filter((d) => d.kind === "Exame").length : undefined}>
               {!allowed.has("exames") ? <Locked /> : (() => { const ex = sorted.filter((d) => d.kind === "Exame").slice(0, 8); return ex.length ? <ul className="divide-y">{ex.map((d) => <li key={d.id} className="flex items-center justify-between gap-2 py-1"><Source d={d} /><span className="text-[11px] text-muted-foreground">{d.source || "Emissor não informado"}</span></li>)}</ul> : <Empty text="Nenhum exame no período autorizado." />; })()}
             </Section>
+            {(opened.signals?.length ?? 0) > 0 && <div className="lg:col-span-2 xl:col-span-3"><DeviceSignals items={opened.deviceSignals ?? []} /></div>}
             <Section title="Internações e cirurgias">{profile ? (profile.surgeries.trim() ? <><p className="whitespace-pre-line">{profile.surgeries}</p><div className="mt-1"><OriginTag origin="paciente" /></div></> : <Empty text="Nenhuma informada." />) : <Locked />}</Section>
             <Section title="Vacinas">{!allowed.has("vacinas") ? <Locked /> : (() => { const v = sorted.filter((d) => d.kind === "Vacina"); return v.length ? <ul className="divide-y">{v.map((d) => <li key={d.id} className="py-1"><Source d={d} /></li>)}</ul> : <Empty text="Nenhum registro de vacina no período." />; })()}</Section>
           </div>
         )}
 
         {view.tab === "linha" && <Timeline docs={sorted} allowed={allowed} onOpen={(id) => go({ tab: "doc", id })} />}
-        {view.tab === "doc" && (() => { const d = docs.find((x) => x.id === view.id); return d ? <DocumentDetail key={d.id} doc={d} code={opened.code} openDoc={openDoc} onEnded={onEnded} onBack={() => go({ tab: "linha" })} /> : null; })()}
+        {view.tab === "doc" && (() => { const d = docs.find((x) => x.id === view.id); return d ? <DocumentDetail key={d.id} doc={d} openDoc={openDoc} onEnded={onEnded} onBack={() => go({ tab: "linha" })} /> : null; })()}
       </main>
     </div>
   );
@@ -223,19 +230,19 @@ function Timeline({ docs, allowed, onOpen }: { docs: Doc[]; allowed: Set<string>
   );
 }
 
-function DocumentDetail({ doc, code, openDoc, onEnded, onBack }: { doc: Doc; code: string; openDoc: ReturnType<typeof useServerFn<typeof openSharedDocument>>; onEnded: () => void; onBack: () => void }) {
+function DocumentDetail({ doc, openDoc, onEnded, onBack }: { doc: Doc; openDoc: DocOpener; onEnded: () => void; onBack: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [zoom, setZoom] = useState(1);
   useEffect(() => {
     let alive = true;
-    openDoc({ data: { code, documentId: doc.id } }).then((r) => {
+    openDoc(doc.id).then((r) => {
       if (!alive) return;
       if (r.status === "expirado" || r.status === "revogado") onEnded();
-      else if (r.status === "valido") setUrl(r.url);
+      else if (r.status === "valido") setUrl(r.url ?? null);
     }).finally(() => alive && setLoading(false));
     return () => { alive = false; };
-  }, [code, doc.id, openDoc, onEnded]);
+  }, [doc.id, openDoc, onEnded]);
   const isPdf = doc.file_type === "application/pdf";
   return (
     <div className="space-y-2">
@@ -294,6 +301,21 @@ function DocumentDetail({ doc, code, openDoc, onEnded, onBack }: { doc: Doc; cod
   );
 }
 
+function DeviceSignals({ items }: { items: { metric: string; label: string; unit: string; summary: { last: number; min: number; avg: number; max: number; count: number; lastAt: string; device: string } }[] }) {
+  const now = new Date();
+  return (
+    <Section title="Sinais de dispositivo" count={items.length}>
+      {items.length === 0 ? <Empty text="Nenhuma leitura de dispositivo no período autorizado." /> : (
+        <table className="w-full">
+          <thead><tr className="text-left text-[11px] text-muted-foreground"><th className="py-1 font-medium">Sinal</th><th className="font-medium">Último</th><th className="font-medium">Mín · Média · Máx</th><th className="font-medium">Leituras</th><th className="font-medium">Origem</th></tr></thead>
+          <tbody>{items.map((it) => <tr key={it.metric} className="border-t align-top"><td className="py-1 font-medium">{it.label}</td><td className="font-mono tabular-nums">{it.summary.last} {it.unit}</td><td className="font-mono tabular-nums">{it.summary.min} · {it.summary.avg} · {it.summary.max}</td><td className="tabular-nums">{it.summary.count}</td><td><span className="rounded border px-1.5 py-0.5 text-[11px]">Dispositivo: {it.summary.device || "não informado"}, sincronizado {agoText(it.summary.lastAt, now)}</span></td></tr>)}</tbody>
+        </table>
+      )}
+      <p className="mt-2 text-[11px] text-muted-foreground">Não é medição clínica. Dados enviados por dispositivos do paciente.</p>
+    </Section>
+  );
+}
+
 export function AccessEnded({ onBack }: { onBack: () => void }) {
   return (
     <main className="grid min-h-screen place-items-center bg-background p-6 text-center font-sans">
@@ -304,5 +326,28 @@ export function AccessEnded({ onBack }: { onBack: () => void }) {
         <button type="button" onClick={onBack} className="mt-5 min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground">Abrir outro código</button>
       </div>
     </main>
+  );
+}
+
+const SOURCE_TEXT: Record<string, string> = { paciente: "Informado pelo paciente", documento: "Do documento", dispositivo: "Do dispositivo", cuidador: "Preenchido por cuidador" };
+const dm = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "America/Sao_Paulo" }) : "");
+
+/** Faixa "Ficha essencial": só o que o paciente informou, sem completar nada. */
+function EssentialsBand({ items }: { items: NonNullable<Opened["essentials"]> }) {
+  return (
+    <section aria-labelledby="ficha-essencial" className="mb-3 rounded border bg-card">
+      <h2 id="ficha-essencial" className="border-b bg-muted px-3 py-1.5 text-xs font-semibold uppercase tracking-wide">Ficha essencial</h2>
+      <dl className="grid gap-x-4 gap-y-2 p-3 sm:grid-cols-2 xl:grid-cols-4">
+        {items.map((e) => (
+          <div key={e.field} className="min-w-0">
+            <dt className="text-[11px] text-muted-foreground">{e.label}</dt>
+            <dd className="font-medium">
+              {e.state === "preenchido" ? e.value : e.state === "nenhum_confirmado" ? `Nenhuma conhecida${e.confirmedAt ? ` (confirmado em ${dm(e.confirmedAt)})` : ""}` : <span className="font-normal italic text-muted-foreground">Não informado pelo paciente</span>}
+            </dd>
+            {e.source && <p className="text-[11px] text-muted-foreground">{e.source.origem === "cuidador" && e.source.por_nome ? `Preenchido por ${e.source.por_nome}` : SOURCE_TEXT[e.source.origem]} · atualizado em {dm(e.source.atualizado_em)}</p>}
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

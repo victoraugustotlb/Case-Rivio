@@ -4,4 +4,5 @@ import { getHealthProfile } from "./profile.functions";
 export const healthProfileQuery = queryOptions({
   queryKey: ["health-profile"],
   queryFn: () => getHealthProfile(),
+  staleTime: 60_000,
 });

@@ -44,3 +44,17 @@
 - [x] Menu, troca de perfil, faixa somente leitura, pedidos de conexão e de acesso, privacidade, responsável legal, código para menor; regras com testes
 - [ ] Teste completo com titular + dependente reais — precisa de duas contas de plano na mesma família
 - [ ] Encerrar pelo app um código gerado para um menor — hoje só expira sozinho
+
+## Agendamento de consultas
+- [x] Navegação com Consultas e menu Mais; busca com filtros, lista/mapa, detalhe, resumo, agendar, cancelar/remarcar, lembrete na véspera; regras com testes; testado com sessão real
+- [ ] Rede credenciada real das operadoras — depende de acesso às APIs das operadoras
+- [ ] Novos horários de demonstração após 30 dias — hoje cobrem só os próximos 30 dias
+
+## Área do profissional (/clinico)
+- [x] Menu lateral, Painel, Pacientes com acesso, Histórico, Pedir acesso (escopo, ID VT, permissão de envio, solicitações enviadas), Adicionar documento, Agenda, Minha conta
+- [x] Paciente: interruptor de envio em Autorizar, documentos aguardando aceitação (Início/Documentos), avisos e página Acessos; regras com testes
+- [x] Teste completo com conta de médico + paciente (contas de teste temporárias)
+
+## Códigos e velocidade
+- [x] Parte A: códigos do paciente e do médico (geração no servidor, mensagens, limites, nomes)
+- [x] Parte B: login com 1 chamada + 1 redirecionamento, sem chamadas ao Auth na navegação, guarda de papel único

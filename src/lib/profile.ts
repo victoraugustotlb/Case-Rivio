@@ -30,13 +30,45 @@ export const profileSchema = z.object({
   alcohol: z.enum(["", "Não consumo", "Ocasionalmente", "Regularmente"]),
   activity: z.enum(["", "Não pratico", "1–2 dias por semana", "3–4 dias por semana", "5 ou mais dias por semana"]),
   questionnaire_completed: z.boolean(),
+  // Ficha essencial (campos novos com padrão, para respostas antigas continuarem válidas).
+  blood_type: z.enum(["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]).default(""),
+  sex: z.enum(["", "feminino", "masculino", "outro", "prefiro_nao_informar"]).default(""),
+  emergency_contacts: z.array(z.object({ nome: z.string().trim().min(1, "Informe o nome do contato.").max(120), parentesco: z.string().trim().max(60), telefone: z.string().trim().min(8, "Informe um telefone com DDD.").max(30) })).max(3, "Até 3 contatos.").default([]),
+  organ_donor: z.enum(["", "sim", "nao", "nao_sei"]).default(""),
+  confirmed_none: z.array(z.enum(["alergias", "medicamentos", "condicoes", "cirurgias"])).max(4).default([]),
+  field_sources: z.record(z.string(), z.object({
+    origem: z.enum(["paciente", "documento", "dispositivo", "cuidador"]),
+    documento_id: z.string().optional(), por_nome: z.string().optional(), atualizado_em: z.string(),
+    anterior: z.any().optional(),
+  })).default({}),
 });
 export type HealthProfile = z.infer<typeof profileSchema>;
-export function firstAccessDestination(profile: HealthProfile | null): "/perfil" | "/inicio" {
-  return profile === null ? "/perfil" : "/inicio";
-}
 export type Medication = z.infer<typeof medicationSchema>;
 export const emptyProfile: HealthProfile = {
   full_name: "", birth_date: null, height_cm: null, weight_kg: null, medications: [],
   allergies: "", conditions: "", surgeries: "", family_history: "", smoking: "", alcohol: "", activity: "", questionnaire_completed: false,
+  blood_type: "", sex: "", emergency_contacts: [], organ_donor: "", confirmed_none: [], field_sources: {},
 };
+/**
+ * Leitura tolerante para o médico: um valor antigo ou fora do formato não derruba o acesso.
+ * Mantém só os campos válidos (os demais voltam vazios) e informa quais foram descartados.
+ */
+export function parseProfileLenient(row: unknown): { profile: HealthProfile; incomplete: boolean; invalid: string[] } {
+  const full = profileSchema.safeParse(row);
+  if (full.success) return { profile: full.data, incomplete: false, invalid: [] };
+  const src = (row && typeof row === "object" ? row : {}) as Record<string, unknown>;
+  const shape = profileSchema.shape;
+  const out: Record<string, unknown> = { ...emptyProfile };
+  const invalid: string[] = [];
+  for (const key of Object.keys(shape) as (keyof typeof shape)[]) {
+    if (!(key in src)) continue;
+    if (key === "medications" && Array.isArray(src[key])) {
+      const meds = (src[key] as unknown[]).map((m) => medicationSchema.safeParse(m)).filter((r) => r.success).map((r) => r.data);
+      if (meds.length !== (src[key] as unknown[]).length) invalid.push(key);
+      out[key] = meds.slice(0, 50); continue;
+    }
+    const r = shape[key].safeParse(src[key]);
+    if (r.success) out[key] = r.data; else invalid.push(key);
+  }
+  return { profile: out as HealthProfile, incomplete: true, invalid };
+}

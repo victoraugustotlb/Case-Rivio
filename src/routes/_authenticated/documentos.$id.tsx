@@ -9,10 +9,10 @@ export const Route = createFileRoute("/_authenticated/documentos/$id")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(documentQuery(params.id)),
   head: () => ({
     meta: [
-      { title: "Documento — VITA" },
+      { title: "Documento — Anamedis" },
       { name: "description", content: "Original e informações confirmadas do documento." },
-      { property: "og:title", content: "Documento — VITA" },
-      { property: "og:description", content: "Detalhe do documento no VITA." },
+      { property: "og:title", content: "Documento — Anamedis" },
+      { property: "og:description", content: "Detalhe do documento no Anamedis." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -43,6 +43,12 @@ function Detalhe() {
           <div className="min-w-0">
             <h1 className="font-display text-3xl font-bold tracking-tight">{d.title}</h1>
             <p className="mt-1 text-muted-foreground">{[d.kind, d.source, d.doc_date].filter(Boolean).join(" · ")}</p>
+            {d.uploaded_by_name && <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
+              <span className="rounded-full bg-primary-soft px-2 py-0.5 text-primary">Enviado por {d.uploaded_by_name}</span>
+              <span className="rounded-full bg-muted px-2 py-0.5">Origem: {d.origin}</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-success"><ShieldCheck className="h-3 w-3" aria-hidden />Original preservado</span>
+            </div>}
+            {d.note && <p className="mt-2 text-sm">Observação do profissional: {d.note}</p>}
           </div>
           <button type="button" onClick={excluir} className="inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm font-medium hover:bg-danger-soft"><Trash2 className="h-4 w-4" aria-hidden /> Excluir</button>
         </div>
@@ -56,7 +62,7 @@ function Detalhe() {
           <section className="rounded-2xl border bg-card p-6">
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-semibold">Informações extraídas</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[11px] font-semibold text-success"><ShieldCheck className="h-3 w-3" aria-hidden /> Conferido por você</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[11px] font-semibold text-success"><ShieldCheck className="h-3 w-3" aria-hidden /> {d.uploaded_by_name ? "Conferido pelo profissional" : "Conferido por você"}</span>
             </div>
             {d.summary && <p className="mt-3 text-sm">{d.summary}</p>}
             <dl className="mt-4 divide-y">

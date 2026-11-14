@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Logo } from "@/components/vita/Logo";
 import { useState } from "react";
 import { ArrowLeft, Building2, ChevronRight, CreditCard, Loader2, ShieldCheck, Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +12,9 @@ import { formatPrice } from "@/lib/pricing";
 export const Route = createFileRoute("/entrar")({
   head: () => ({
     meta: [
-      { title: "Entrar — VITA" },
-      { name: "description", content: "Entre no VITA pelo plano de saúde, com a assinatura individual ou como profissional de saúde." },
-      { property: "og:title", content: "Entrar — VITA" },
+      { title: "Entrar — Anamedis" },
+      { name: "description", content: "Entre no Anamedis pelo plano de saúde, com a assinatura individual ou como profissional de saúde." },
+      { property: "og:title", content: "Entrar — Anamedis" },
       { property: "og:description", content: "Seu histórico de saúde em um só lugar, com o seu controle." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -44,9 +45,7 @@ function Entrar() {
   return (
     <div className="grid min-h-screen bg-background font-sans text-foreground lg:grid-cols-2">
       <aside className="hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
-        <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-sidebar-accent-foreground">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-sidebar-primary text-sm text-sidebar-primary-foreground">V</span> VITA
-        </Link>
+        <Link to="/" aria-label="Anamedis — início"><Logo variant="escuro" /></Link>
         <div>
           <h2 className="font-display text-4xl font-bold leading-tight text-sidebar-accent-foreground">Todo o histórico de saúde em um só lugar.</h2>
           <p className="mt-4 max-w-md text-sidebar-foreground/80">Pelo plano ou pela assinatura individual, as garantias são as mesmas: só você decide quem vê o seu histórico.</p>
@@ -55,9 +54,10 @@ function Entrar() {
       </aside>
       <main className="grid place-items-center px-4 py-10">
         <div className="w-full max-w-md">
+          <div className="mb-6 inline-flex rounded-2xl border bg-card px-4 py-3 shadow-soft"><Logo variant="completo" height={44} /></div>
           {!path ? (
             <>
-              <h1 className="font-display text-3xl font-bold tracking-tight">Como você vai usar o VITA?</h1>
+              <h1 className="font-display text-3xl font-bold tracking-tight">Como você vai usar o Anamedis?</h1>
               <p className="mt-1 text-muted-foreground">Escolha um caminho para entrar ou criar sua conta.</p>
               <ul className="mt-6 space-y-3">
                 {PATHS.map(({ id, title, text, icon: Icon }) => (
@@ -112,7 +112,6 @@ function PatientForm({ path }: { path: "plano" | "individual" }) {
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault(); setMsg(null); setBusy(true);
     try {
-      localStorage.setItem(INTENT_KEY, intent);
       if (modo === "criar") {
         const { error } = await supabase.auth.signUp({ email, password: senha, options: { emailRedirectTo: window.location.origin, data: { full_name: nome, account_type: intent } } });
         if (error) throw error;
@@ -171,7 +170,6 @@ function ProfessionalForm() {
         if (error) throw error;
         setMsg({ tipo: "ok", texto: "Conta criada. Enviamos um e-mail de confirmação — clique no link para entrar." });
       } else {
-        localStorage.setItem(INTENT_KEY, kind);
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
       }
@@ -196,7 +194,7 @@ function ProfessionalForm() {
         <label className="block"><span className="text-sm font-medium">Senha</span><input required minLength={6} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete={modo === "criar" ? "new-password" : "current-password"} className={input} /></label>
         <Message msg={msg} />
         <button type="submit" disabled={busy} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-60">
-          {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}{modo === "criar" ? "Criar conta profissional" : "Entrar no VITA Clínico"}
+          {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}{modo === "criar" ? "Criar conta profissional" : "Entrar no Anamedis Clínico"}
         </button>
       </form>
       <Link to="/medico" className="mt-4 block text-center text-sm text-muted-foreground underline">Abrir só com o código do paciente, sem conta</Link>

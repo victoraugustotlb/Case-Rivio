@@ -50,47 +50,142 @@ export type Database = {
           code: string
           created_at: string
           doctor_id: string
+          essentials_fields: string[]
           expected_patient_id: string | null
           expires_at: string
           id: string
+          include_essentials: boolean
           include_profile: boolean
           patient_id: string | null
           period_months: number
+          request_upload: boolean
           share_code_id: string | null
           signals: string[]
           status: string
+          upload_granted: boolean
         }
         Insert: {
           categories?: string[]
           code: string
           created_at?: string
           doctor_id?: string
+          essentials_fields?: string[]
           expected_patient_id?: string | null
           expires_at: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           patient_id?: string | null
           period_months: number
+          request_upload?: boolean
           share_code_id?: string | null
           signals?: string[]
           status?: string
+          upload_granted?: boolean
         }
         Update: {
           categories?: string[]
           code?: string
           created_at?: string
           doctor_id?: string
+          essentials_fields?: string[]
           expected_patient_id?: string | null
           expires_at?: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           patient_id?: string | null
           period_months?: number
+          request_upload?: boolean
           share_code_id?: string | null
           signals?: string[]
           status?: string
+          upload_granted?: boolean
         }
         Relationships: []
+      }
+      appointments: {
+        Row: {
+          coverage: string
+          created_at: string
+          id: string
+          mode: string
+          patient_id: string
+          provider_id: string
+          share_code_id: string | null
+          slot_id: string
+          status: string
+        }
+        Insert: {
+          coverage?: string
+          created_at?: string
+          id?: string
+          mode: string
+          patient_id?: string
+          provider_id: string
+          share_code_id?: string | null
+          slot_id: string
+          status?: string
+        }
+        Update: {
+          coverage?: string
+          created_at?: string
+          id?: string
+          mode?: string
+          patient_id?: string
+          provider_id?: string
+          share_code_id?: string | null
+          slot_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "availability_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_slots: {
+        Row: {
+          booked: boolean
+          duration_min: number
+          id: string
+          provider_id: string
+          starts_at: string
+        }
+        Insert: {
+          booked?: boolean
+          duration_min?: number
+          id?: string
+          provider_id: string
+          starts_at: string
+        }
+        Update: {
+          booked?: boolean
+          duration_min?: number
+          id?: string
+          provider_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       doctor_patients: {
         Row: {
@@ -154,10 +249,15 @@ export type Database = {
           file_type: string | null
           id: string
           kind: string
+          note: string | null
           origin: string
           source: string | null
+          status: string
           summary: string | null
           title: string
+          uploaded_by: string | null
+          uploaded_by_name: string | null
+          uploaded_by_role: string | null
           user_id: string
         }
         Insert: {
@@ -170,10 +270,15 @@ export type Database = {
           file_type?: string | null
           id?: string
           kind?: string
+          note?: string | null
           origin?: string
           source?: string | null
+          status?: string
           summary?: string | null
           title: string
+          uploaded_by?: string | null
+          uploaded_by_name?: string | null
+          uploaded_by_role?: string | null
           user_id?: string
         }
         Update: {
@@ -186,10 +291,15 @@ export type Database = {
           file_type?: string | null
           id?: string
           kind?: string
+          note?: string | null
           origin?: string
           source?: string | null
+          status?: string
           summary?: string | null
           title?: string
+          uploaded_by?: string | null
+          uploaded_by_name?: string | null
+          uploaded_by_role?: string | null
           user_id?: string
         }
         Relationships: []
@@ -197,6 +307,7 @@ export type Database = {
       family_access_grants: {
         Row: {
           basis: string
+          can_edit_profile: boolean
           categories: string[]
           created_at: string
           expires_at: string | null
@@ -209,6 +320,7 @@ export type Database = {
         }
         Insert: {
           basis?: string
+          can_edit_profile?: boolean
           categories?: string[]
           created_at?: string
           expires_at?: string | null
@@ -221,6 +333,7 @@ export type Database = {
         }
         Update: {
           basis?: string
+          can_edit_profile?: boolean
           categories?: string[]
           created_at?: string
           expires_at?: string | null
@@ -328,18 +441,60 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          ref: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          ref?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          ref?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       patient_profiles: {
         Row: {
           activity: string
           alcohol: string
           allergies: string
           birth_date: string | null
+          blood_type: string
           conditions: string
+          confirmed_none: string[]
+          emergency_contacts: Json
           family_history: string
+          field_sources: Json
           full_name: string
           height_cm: number | null
           medications: Json
+          organ_donor: string
           questionnaire_completed: boolean
+          sex: string
           smoking: string
           surgeries: string
           updated_at: string
@@ -351,12 +506,18 @@ export type Database = {
           alcohol?: string
           allergies?: string
           birth_date?: string | null
+          blood_type?: string
           conditions?: string
+          confirmed_none?: string[]
+          emergency_contacts?: Json
           family_history?: string
+          field_sources?: Json
           full_name?: string
           height_cm?: number | null
           medications?: Json
+          organ_donor?: string
           questionnaire_completed?: boolean
+          sex?: string
           smoking?: string
           surgeries?: string
           updated_at?: string
@@ -368,17 +529,50 @@ export type Database = {
           alcohol?: string
           allergies?: string
           birth_date?: string | null
+          blood_type?: string
           conditions?: string
+          confirmed_none?: string[]
+          emergency_contacts?: Json
           family_history?: string
+          field_sources?: Json
           full_name?: string
           height_cm?: number | null
           medications?: Json
+          organ_donor?: string
           questionnaire_completed?: boolean
+          sex?: string
           smoking?: string
           surgeries?: string
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      patient_settings: {
+        Row: {
+          default_share_essentials: boolean
+          essentials_fields: string[]
+          guided_mode: boolean
+          large_text: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          default_share_essentials?: boolean
+          essentials_fields?: string[]
+          guided_mode?: boolean
+          large_text?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          default_share_essentials?: boolean
+          essentials_fields?: string[]
+          guided_mode?: boolean
+          large_text?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -441,6 +635,42 @@ export type Database = {
           },
         ]
       }
+      profile_suggestions: {
+        Row: {
+          confidence: number
+          created_at: string
+          excerpt: string
+          field: string
+          id: string
+          source_document_id: string | null
+          status: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          excerpt?: string
+          field: string
+          id?: string
+          source_document_id?: string | null
+          status?: string
+          user_id: string
+          value: Json
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          excerpt?: string
+          field?: string
+          id?: string
+          source_document_id?: string | null
+          status?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: string
@@ -459,6 +689,90 @@ export type Database = {
           billing_exempt?: boolean
           created_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      provider_plans: {
+        Row: {
+          plan_id: string
+          provider_id: string
+        }
+        Insert: {
+          plan_id: string
+          provider_id: string
+        }
+        Update: {
+          plan_id?: string
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_plans_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      providers: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          id: string
+          in_person: boolean
+          is_demo: boolean
+          kind: string
+          lat: number
+          lng: number
+          name: string
+          price_private: number | null
+          specialties: string[]
+          telehealth: boolean
+          uf: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string
+          city: string
+          created_at?: string
+          id?: string
+          in_person?: boolean
+          is_demo?: boolean
+          kind: string
+          lat: number
+          lng: number
+          name: string
+          price_private?: number | null
+          specialties?: string[]
+          telehealth?: boolean
+          uf: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          id?: string
+          in_person?: boolean
+          is_demo?: boolean
+          kind?: string
+          lat?: number
+          lng?: number
+          name?: string
+          price_private?: number | null
+          specialties?: string[]
+          telehealth?: boolean
+          uf?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -485,8 +799,10 @@ export type Database = {
           categories: string[]
           code: string
           created_at: string
+          essentials_fields: string[]
           expires_at: string
           id: string
+          include_essentials: boolean
           include_profile: boolean
           period_months: number
           revoked: boolean
@@ -497,8 +813,10 @@ export type Database = {
           categories?: string[]
           code: string
           created_at?: string
+          essentials_fields?: string[]
           expires_at: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           period_months: number
           revoked?: boolean
@@ -509,13 +827,33 @@ export type Database = {
           categories?: string[]
           code?: string
           created_at?: string
+          essentials_fields?: string[]
           expires_at?: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           period_months?: number
           revoked?: boolean
           signals?: string[]
           user_id?: string
+        }
+        Relationships: []
+      }
+      share_lookup_attempts: {
+        Row: {
+          created_at: string
+          id: number
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          ip_hash?: string
         }
         Relationships: []
       }
@@ -552,12 +890,157 @@ export type Database = {
         }
         Relationships: []
       }
+      wearable_connections: {
+        Row: {
+          created_at: string
+          display_name: string
+          external_user_id: string | null
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          provider: string
+          source: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          external_user_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          provider: string
+          source: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          external_user_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          provider?: string
+          source?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wearable_ingest_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          last_used_at: string | null
+          revoked_at: string | null
+          token_hash: string
+          user_id: string
+          window_count: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash: string
+          user_id: string
+          window_count?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash?: string
+          user_id?: string
+          window_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      wearable_readings: {
+        Row: {
+          connection_id: string | null
+          external_id: string | null
+          id: string
+          measured_at: string
+          metric: string
+          received_at: string
+          source_device: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          connection_id?: string | null
+          external_id?: string | null
+          id?: string
+          measured_at: string
+          metric: string
+          received_at?: string
+          source_device?: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          connection_id?: string | null
+          external_id?: string | null
+          id?: string
+          measured_at?: string
+          metric?: string
+          received_at?: string
+          source_device?: string
+          unit?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wearable_readings_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "wearable_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      attach_appointment_share: {
+        Args: { _id: string; _share: string }
+        Returns: undefined
+      }
+      book_slot: {
+        Args: { _coverage: string; _mode: string; _slot: string }
+        Returns: string
+      }
       can_write_records: { Args: { _uid: string }; Returns: boolean }
+      cancel_appointment: { Args: { _id: string }; Returns: undefined }
+      is_patient_account: { Args: { _uid: string }; Returns: boolean }
+      reschedule_appointment: {
+        Args: { _id: string; _new_slot: string }
+        Returns: string
+      }
+      wearable_token_hit: {
+        Args: { _hash: string; _limit: number }
+        Returns: {
+          allowed: boolean
+          owner: string
+          revoked: boolean
+          token_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

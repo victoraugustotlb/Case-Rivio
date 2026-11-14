@@ -14,9 +14,9 @@ import { AppShell } from "@/components/vita/AppShell";
 export const Route = createFileRoute("/_authenticated/documentos/adicionar")({
   head: () => ({
     meta: [
-      { title: "Adicionar documento — VITA" },
+      { title: "Adicionar documento — Anamedis" },
       { name: "description", content: "Escaneie ou envie exames, laudos, receitas e consultas antigas para o seu histórico." },
-      { property: "og:title", content: "Adicionar documento — VITA" },
+      { property: "og:title", content: "Adicionar documento — Anamedis" },
       { property: "og:description", content: "Adicione documentos médicos ao seu histórico." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

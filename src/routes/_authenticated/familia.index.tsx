@@ -10,13 +10,15 @@ import { listPlans } from "@/lib/account.functions";
 import { requestFamilyLink, requestMemberAccess, respondFamilyRequest, respondMemberAccess, revokeMemberAccess } from "@/lib/family.functions";
 import { GRANT_DURATIONS, type GrantDuration } from "@/lib/family";
 import { DOC_KINDS, type DocKind } from "@/lib/vita-data";
+import { requireRole } from "@/lib/require-role";
 
 export const Route = createFileRoute("/_authenticated/familia/")({
+  beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
-      { title: "Minha família — VITA" },
+      { title: "Minha família — Anamedis" },
       { name: "description", content: "Conecte titular e dependentes do plano e escolha quem pode ver seu histórico." },
-      { property: "og:title", content: "Minha família — VITA" },
+      { property: "og:title", content: "Minha família — Anamedis" },
       { property: "og:description", content: "Família do plano de saúde com acesso somente por consentimento." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -41,7 +43,7 @@ function Familia() {
           <div className="rounded-2xl border bg-card p-6">
             <Users className="h-8 w-8 text-primary" aria-hidden />
             <h2 className="mt-3 text-lg font-semibold">A família é criada pelo plano de saúde</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Na assinatura individual cada pessoa tem a própria conta. Quando titular e dependentes usam o VITA pelo plano oferecido pela operadora, eles podem se conectar aqui — sempre com aprovação do titular e consentimento de cada adulto.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Na assinatura individual cada pessoa tem a própria conta. Quando titular e dependentes usam o Anamedis pelo plano oferecido pela operadora, eles podem se conectar aqui — sempre com aprovação do titular e consentimento de cada adulto.</p>
             <Link to="/plano" className="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 font-medium">Usar meu plano de saúde</Link>
           </div>
         </div>
@@ -161,11 +163,12 @@ function AccessRequest({ id, name, onDone }: { id: string; name: string; onDone:
   const [scope, setScope] = useState<"tudo" | "categorias">("tudo");
   const [cats, setCats] = useState<DocKind[]>([]);
   const [duration, setDuration] = useState<GrantDuration>("30d");
+  const [canEdit, setCanEdit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const send = async (approve: boolean) => {
     setBusy(true); setErr("");
-    const r = await respond({ data: { id, approve, scope, categories: cats, duration } });
+    const r = await respond({ data: { id, approve, scope, categories: cats, duration, canEditProfile: approve && canEdit } });
     if (!r.ok) setErr(r.error); else await onDone();
     setBusy(false);
   };
@@ -181,7 +184,11 @@ function AccessRequest({ id, name, onDone }: { id: string; name: string; onDone:
       {scope === "categorias" && <div className="mt-2 flex flex-wrap gap-2">{DOC_KINDS.map((k) => <button key={k} type="button" aria-pressed={cats.includes(k)} className={chip(cats.includes(k))} onClick={() => setCats((l) => (l.includes(k) ? l.filter((x) => x !== k) : [...l, k]))}>{k}</button>)}</div>}
       <p className="mt-3 text-sm font-medium">Por quanto tempo</p>
       <div className="mt-1 flex flex-wrap gap-2">{(Object.keys(GRANT_DURATIONS) as GrantDuration[]).map((d) => <button key={d} type="button" className={chip(duration === d)} onClick={() => setDuration(d)}>{GRANT_DURATIONS[d]}</button>)}</div>
-      <p className="mt-2 text-xs text-muted-foreground">Acesso somente leitura. Você pode revogar a qualquer momento em Conta e privacidade.</p>
+      <label className="mt-3 flex cursor-pointer items-start justify-between gap-4 rounded-xl border bg-card p-3">
+        <span className="text-sm"><span className="block font-semibold">Pode me ajudar a preencher meu perfil</span>{name} poderá editar seu perfil de saúde. Cada alteração aparece como "Preenchido por {name}" e você pode desfazer.</span>
+        <input type="checkbox" role="switch" checked={canEdit} onChange={(e) => setCanEdit(e.target.checked)} className="mt-1 h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-muted transition before:block before:h-5 before:w-5 before:translate-x-0.5 before:rounded-full before:bg-card before:shadow before:transition checked:bg-primary checked:before:translate-x-5" />
+      </label>
+      <p className="mt-2 text-xs text-muted-foreground">{canEdit ? "Leitura e ajuda no perfil." : "Acesso somente leitura."} Você pode revogar a qualquer momento em Minha família.</p>
       {err && <p role="alert" className="mt-2 text-sm">{err}</p>}
       <div className="mt-3 flex gap-2">
         <button type="button" disabled={busy} onClick={() => send(true)} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50">Autorizar</button>

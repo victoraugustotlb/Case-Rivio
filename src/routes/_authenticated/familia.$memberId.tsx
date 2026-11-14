@@ -6,13 +6,15 @@ import { FileText, FileUp, Loader2, Lock, Share2 } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { memberRecordsQuery } from "@/lib/family-query";
 import { openMemberDocument } from "@/lib/family.functions";
+import { requireRole } from "@/lib/require-role";
 
 export const Route = createFileRoute("/_authenticated/familia/$memberId")({
+  beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
-      { title: "Perfil de familiar — VITA" },
+      { title: "Perfil de familiar — Anamedis" },
       { name: "description", content: "Histórico de um familiar, aberto com autorização e somente para leitura." },
-      { property: "og:title", content: "Perfil de familiar — VITA" },
+      { property: "og:title", content: "Perfil de familiar — Anamedis" },
       { property: "og:description", content: "Acesso familiar somente leitura, registrado para o dono do histórico." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -63,6 +65,7 @@ function Membro() {
             </div>
           ) : undefined} />
         {err && <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm">{err}</p>}
+        {r.canEditProfile && <Link to="/familia/$memberId/perfil" params={{ memberId }} className="inline-flex min-h-12 items-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground">Ajudar a preencher o perfil</Link>}
         {r.scope === "tudo" && (
           <section className="rounded-2xl border bg-card p-5">
             <h2 className="font-semibold">Perfil de saúde</h2>

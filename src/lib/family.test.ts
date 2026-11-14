@@ -70,3 +70,13 @@ describe("aprovação de pedido", () => {
     expect(decideFamilyRequest({ ...req, status: "aprovado" }, "t", false).ok).toBe(false);
   });
 });
+
+import { canEditMember } from "./family";
+describe("canEditMember", () => {
+  it("titular edita dependente menor", () => expect(canEditMember(titular, menor, null, now)).toBe(true));
+  it("adulto com consentimento só de leitura não pode editar", () => expect(canEditMember(titular, adulto, grant(), now)).toBe(false));
+  it("adulto que concedeu edição pode ser editado", () => expect(canEditMember(titular, adulto, { ...grant(), can_edit_profile: true }, now)).toBe(true));
+  it("edição revogada junto com o consentimento", () => expect(canEditMember(titular, adulto, { ...grant({ status: "revogado", revoked_at: now.toISOString() }), can_edit_profile: true }, now)).toBe(false));
+  it("dependente não edita o titular sem consentimento", () => expect(canEditMember(menor, titular, null, now)).toBe(false));
+  it("aos 18 anos o titular perde a edição automática", () => expect(canEditMember(titular, { ...menor, birthDate: "2008-11-14" }, null, now)).toBe(false));
+});

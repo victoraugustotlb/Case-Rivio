@@ -1,19 +1,30 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Logo } from "@/components/vita/Logo";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Eye, FileUp, FolderHeart, LogOut, Home, Menu, ScanLine, Share2, User, Users, X } from "lucide-react";
+import { ArrowLeft, Bell, CalendarDays, CreditCard, Eye, FileUp, FolderHeart, LogOut, Home, Menu, ScanLine, Share2, ShieldCheck, User, Users, Watch, X } from "lucide-react";
+import { appointmentsQuery } from "@/lib/scheduling-query";
+import { isTomorrow } from "@/lib/scheduling";
 import { accountQuery } from "@/lib/account-query";
 import { familyQuery } from "@/lib/family-query";
+import { patientSettingsQuery } from "@/lib/patient-settings-query";
 
 const nav = [
   { label: "Início", to: "/inicio", icon: Home },
   { label: "Documentos", to: "/documentos", icon: FolderHeart },
+  { label: "Consultas", to: "/consultas", icon: CalendarDays },
   { label: "Compartilhar", to: "/compartilhar", icon: Share2 },
-  { label: "Perfil", to: "/perfil", icon: User },
 ] as const;
-const familyItem = { label: "Minha família", to: "/familia", icon: Users } as const;
+const moreNav = [
+  { label: "Minha família", to: "/familia", icon: Users },
+  { label: "Perfil", to: "/perfil", icon: User },
+  { label: "Dispositivos", to: "/dispositivos", icon: Watch },
+  { label: "Acessos", to: "/acessos", icon: Eye },
+  { label: "Conta e privacidade", to: "/plano", icon: ShieldCheck },
+  { label: "Assinatura e pagamento", to: "/assinatura", icon: CreditCard },
+] as const;
 
 function isActive(path: string, to: string) {
   return path.startsWith(to);
@@ -25,9 +36,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setName((data.user?.user_metadata?.["full_name"] as string) || data.user?.email || ""));
+    supabase.auth.getSession().then(({ data }) => { const u = data.session?.user; setName((u?.user_metadata?.["full_name"] as string) || u?.email || ""); });
   }, []);
   const account = useQuery(accountQuery);
+  // "Texto grande": aumenta a fonte base e os alvos de toque no app todo.
+  const settings = useQuery({ ...patientSettingsQuery, enabled: account.data?.type !== "doctor" && account.data?.type !== "laboratory" });
+  const largeText = !!settings.data?.large_text;
+  useEffect(() => { document.documentElement.classList.toggle("large-text", largeText); }, [largeText]);
   const isPlan = account.data?.type === "patient_plan";
   const family = useQuery({ ...familyQuery, enabled: isPlan });
   const pending = (family.data?.incomingRequests.length ?? 0) + (family.data?.accessRequests.length ?? 0);
@@ -35,7 +50,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const viewing = viewingId ? family.data?.members.find((m) => m.id === viewingId) : null;
   const visible = (family.data?.members ?? []).filter((m) => m.access === "ver");
   const [more, setMore] = useState(false);
-  const sidebarNav = [...nav.slice(0, 3), familyItem, nav[3]];
+  const sidebarNav = [...nav, ...moreNav];
+  const appts = useQuery(appointmentsQuery);
+  const tomorrow = (appts.data ?? []).filter((a) => a.status === "agendado" && isTomorrow(a.startsAt));
   const sair = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -45,10 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-sidebar p-5 text-sidebar-foreground lg:flex">
-        <Link to="/inicio" className="flex items-center gap-2 px-2 font-display text-2xl font-bold tracking-tight text-sidebar-accent-foreground">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-sidebar-primary text-sm text-sidebar-primary-foreground">V</span>
-          VITA
-        </Link>
+        <Link to="/inicio" className="px-2" aria-label="Anamedis — início"><Logo variant="escuro" /></Link>
         <div className="mt-8 rounded-xl bg-sidebar-accent p-3">
           <p className="text-xs text-sidebar-foreground/70">Perfil ativo</p>
           <ul className="mt-1 space-y-1" aria-label="Trocar de perfil">
@@ -80,8 +94,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <button type="button" onClick={sair} className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-lg text-sm hover:bg-sidebar-accent"><LogOut className="h-4 w-4" aria-hidden /> Sair</button>
       </aside>
 
-      <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b bg-background/90 px-4 py-3 backdrop-blur lg:ml-64 lg:px-8">
-        <span className="truncate font-display text-xl font-bold text-primary lg:hidden">VITA</span>
+      <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b bg-card px-4 py-3 backdrop-blur lg:ml-64 lg:px-8">
+        <span className="lg:hidden"><Logo variant="completo" height={28} /></span>
         <span className="hidden text-sm text-muted-foreground lg:block">Seu histórico de saúde em um só lugar</span>
         <div className="flex items-center gap-2">
           <button type="button" onClick={sair} aria-label="Sair" className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted lg:hidden"><LogOut className="h-5 w-5" aria-hidden /></button>
@@ -98,13 +112,22 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
+      {tomorrow.length > 0 && !path.startsWith("/consultas/agendamentos") && (
+        <div role="status" className="flex flex-wrap items-center justify-between gap-2 border-b bg-primary-soft px-4 py-2 text-sm lg:ml-64 lg:px-8">
+          <span className="flex items-center gap-2"><Bell className="h-4 w-4 text-primary" aria-hidden />Lembrete: amanhã você tem consulta com <strong>{tomorrow[0]!.provider.name}</strong> às {new Date(tomorrow[0]!.startsAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}.</span>
+          <Link to="/consultas/agendamentos" className="font-medium text-primary underline">Ver agendamento</Link>
+        </div>
+      )}
+
       <main className="px-4 pb-28 pt-6 lg:ml-64 lg:px-8 lg:pb-10">{children}</main>
 
       {more && (
         <div className="fixed inset-0 z-30 bg-foreground/40 lg:hidden" onClick={() => setMore(false)}>
           <div role="dialog" aria-label="Mais opções" className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-card p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]" onClick={(e) => e.stopPropagation()}>
             <div className="mb-2 flex items-center justify-between"><p className="font-semibold">Mais</p><button type="button" aria-label="Fechar" onClick={() => setMore(false)} className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted"><X className="h-5 w-5" aria-hidden /></button></div>
-            <Link to="/familia" onClick={() => setMore(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 hover:bg-muted"><Users className="h-5 w-5" aria-hidden />Minha família{pending > 0 && <span className="ml-auto rounded-full bg-warning px-2 text-xs font-bold text-card">{pending}</span>}</Link>
+            {moreNav.map(({ label, to, icon: Icon }) => (
+              <Link key={to} to={to} onClick={() => setMore(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 hover:bg-muted"><Icon className="h-5 w-5" aria-hidden />{label}{to === "/familia" && pending > 0 && <span className="ml-auto rounded-full bg-warning px-2 text-xs font-bold text-card">{pending}</span>}</Link>
+            ))}
             {visible.map((m) => (
               <Link key={m.id} to="/familia/$memberId" params={{ memberId: m.id }} onClick={() => setMore(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 pl-11 text-sm hover:bg-muted">Ver perfil de {m.name}</Link>
             ))}
@@ -124,7 +147,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           );
         })}
-        <button type="button" onClick={() => setMore(true)} aria-haspopup="dialog" className={`relative flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-medium ${path.startsWith("/familia") ? "text-primary" : "text-muted-foreground"}`}>
+        <button type="button" onClick={() => setMore(true)} aria-haspopup="dialog" className={`relative flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-medium ${moreNav.some((m) => path.startsWith(m.to)) ? "text-primary" : "text-muted-foreground"}`}>
           <Menu className="h-5 w-5" aria-hidden />
           <span>Mais</span>
           {pending > 0 && <span className="absolute right-[30%] top-2 h-2.5 w-2.5 rounded-full bg-warning" aria-label="Há avisos" />}

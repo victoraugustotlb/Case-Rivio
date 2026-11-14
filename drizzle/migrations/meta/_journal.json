@@ -5,50 +5,43 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1794603302432,
-      "tag": "0000_documents_and_shares",
+      "when": 1794668878691,
+      "tag": "0000_appointments_scheduling",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1794620868548,
-      "tag": "0001_patient_health_profiles",
+      "when": 1794670701434,
+      "tag": "0001_tighten_directory_policies",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1794622164103,
-      "tag": "0002_share_health_profile_consent",
+      "when": 1794673619074,
+      "tag": "0002_professional_area",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1794624088607,
-      "tag": "0003_doctor_accounts_and_requests",
+      "when": 1794674468552,
+      "tag": "0003_share_codes_ungated_and_lookup_limit",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1794666079087,
-      "tag": "0004_clinical_view_access_logs",
+      "when": 1794675651528,
+      "tag": "0004_wearables",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1794666822337,
-      "tag": "0005_accounts_plans_subscriptions",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1794667780533,
-      "tag": "0006_family_access",
+      "when": 1794676499456,
+      "tag": "0005_essential_health_record",
       "breakpoints": true
     }
   ]
