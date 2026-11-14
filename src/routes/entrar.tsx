@@ -77,7 +77,6 @@ function Entrar() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) { setMsg({ tipo: "erro", texto: "Não foi possível entrar com o Google." }); return; }
     if (r.redirected) return;
-    nav({ to: "/inicio" });
   };
 
   const input = "mt-1 min-h-11 w-full rounded-lg border bg-card px-3";
