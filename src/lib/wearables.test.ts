@@ -65,3 +65,18 @@ describe("auxiliares", () => {
   it("agoText", () => expect(agoText("2026-11-14T09:00:00Z", now)).toBe("há 3 h"));
   it("CSV com cabeçalho e escape", () => expect(readingsCsv([{ metric: "heart_rate", value: 72, unit: "bpm", measured_at: "x", source_device: "A, B" }])).toBe('metrica,valor,unidade,medido_em,dispositivo\nheart_rate,72,bpm,x,"A, B"'));
 });
+
+describe("medição manual", () => {
+  it("pressão gera duas leituras com unidade certa", async () => {
+    const { manualReadings } = await import("./wearables");
+    expect(manualReadings("pressao", [120, 80], "2026-11-14T12:00:00Z")).toEqual([
+      { metric: "bp_systolic", value: 120, unit: "mmHg", measured_at: "2026-11-14T12:00:00Z" },
+      { metric: "bp_diastolic", value: 80, unit: "mmHg", measured_at: "2026-11-14T12:00:00Z" },
+    ]);
+  });
+  it("recusa quantidade errada de valores", async () => {
+    const { manualReadings } = await import("./wearables");
+    expect(manualReadings("pressao", [120], "2026-11-14T12:00:00Z")).toBeNull();
+    expect(manualReadings("glicose", [90, 1], "2026-11-14T12:00:00Z")).toBeNull();
+  });
+});

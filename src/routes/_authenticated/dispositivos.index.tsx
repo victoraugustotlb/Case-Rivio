@@ -3,12 +3,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { AlertTriangle, BarChart3, CheckCircle2, Clock, Download, ExternalLink, KeyRound, Loader2, Smartphone, Trash2, Unplug, Watch } from "lucide-react";
+import { AlertTriangle, BarChart3, Bluetooth, CheckCircle2, Clock, Download, ExternalLink, Loader2, Pencil, Smartphone, Trash2, Unplug, Watch } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { LiveHeartRate } from "@/components/vita/LiveHeartRate";
+import { ManualReading } from "@/components/vita/ManualReading";
+import { ConnectIphone } from "@/components/vita/ConnectIphone";
 import { WearablePanel } from "@/components/vita/WearablePanel";
 import { connectionsQuery, useReadingsRealtime, type ConnectionRow } from "@/lib/wearables-query";
 import { demoReadings } from "@/lib/wearables-demo";
@@ -19,9 +21,9 @@ export const Route = createFileRoute("/_authenticated/dispositivos/")({
   validateSearch: (s: Record<string, unknown>) => z.object({ demo: z.coerce.number().optional() }).catch({}).parse(s),
   head: () => ({
     meta: [
-      { title: "Dispositivos — Anamedis" },
-      { name: "description", content: "Conecte relógio, anel, cinta cardíaca ou outro aplicativo ao seu histórico de saúde." },
-      { property: "og:title", content: "Dispositivos — Anamedis" },
+      { title: "Meus aparelhos — Anamedis" },
+      { name: "description", content: "Anote medições, conecte o relógio ou use uma cinta de batimentos para guardar seus dados de saúde." },
+      { property: "og:title", content: "Meus aparelhos — Anamedis" },
       { property: "og:description", content: "Conexões de dispositivos com consentimento e controle total." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -67,6 +69,9 @@ function Dispositivos() {
   const [result, setResult] = useState<{ source: AggSource; code?: string; url?: string; error?: string } | null>(null);
   const [confirm, setConfirm] = useState<{ kind: "revoke" | "delete" | "deleteAll"; c?: ConnectionRow } | null>(null);
   const [msg, setMsg] = useState("");
+  const [way, setWay] = useState<"anotar" | "relogio" | "bluetooth">("anotar");
+  const [watch, setWatch] = useState<"apple" | "outros">("apple");
+  useEffect(() => { if (typeof window !== "undefined" && window.location.hash === "#bluetooth") setWay("bluetooth"); }, []);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => { const i = setInterval(() => setNow(new Date()), 30_000); return () => clearInterval(i); }, []);
   const enabled = !!status.data?.junction;
@@ -106,7 +111,7 @@ function Dispositivos() {
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl space-y-8">
-        <PageTitle title="Dispositivos" subtitle="Relógio, anel, cinta cardíaca ou outros aplicativos." action={<Button asChild variant="outline" className="min-h-11"><Link to="/dispositivos/painel"><BarChart3 aria-hidden />Ver painel</Link></Button>} />
+        <PageTitle title="Meus aparelhos" subtitle="Escolha como quer guardar suas medições." action={<Button asChild variant="outline" className="min-h-11"><Link to="/dispositivos/painel"><BarChart3 aria-hidden />Ver painel</Link></Button>} />
 
         {demo === 1 && (
           <section className="space-y-3">
@@ -133,30 +138,78 @@ function Dispositivos() {
           )}
         </section>
 
-        <section aria-labelledby="conectar">
-          <h2 id="conectar" className="mb-3 font-display text-xl font-bold">Conectar</h2>
-          <div className="mb-4 rounded-2xl border bg-card p-5">
-            <div className="flex items-center gap-2"><Watch className="h-5 w-5 text-brand-teal-strong" aria-hidden /><h3 className="font-semibold">Apple Watch / Apple Saúde</h3>{!enabled && <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">Em breve</span>}</div>
-            <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm">
-              <li>O Apple Watch envia seus dados para o app Saúde do iPhone automaticamente.</li>
-              <li>Instale no iPhone o app de pareamento do nosso parceiro e permita que ele leia o app Saúde.</li>
-              <li>Toque em "Conectar" aqui e digite no app o código que aparecer nesta tela.</li>
-            </ol>
-            <p className="mt-2 text-xs text-muted-foreground">As leituras chegam em até cerca de 1 hora, não na hora exata.</p>
-            {enabled && <Button className="mt-3 min-h-11" onClick={() => setConsent("apple_health")}>Conectar</Button>}
+        <section aria-labelledby="enviar">
+          <h2 id="enviar" className="mb-3 font-display text-xl font-bold">Como você quer guardar suas medições?</h2>
+          <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label="Escolha um jeito">
+            {([
+              { id: "anotar", icon: Pencil, titulo: "Anotar uma medição", texto: "Qualquer pessoa pode. Leva 20 segundos." },
+              { id: "relogio", icon: Watch, titulo: "Conectar meu relógio", texto: "Apple Watch e outros relógios." },
+              { id: "bluetooth", icon: Bluetooth, titulo: "Cinta ou relógio com Bluetooth", texto: "Veja os batimentos ao vivo." },
+            ] as const).map((w) => {
+              const Icon = w.icon; const on = way === w.id;
+              return (
+                <button key={w.id} type="button" aria-pressed={on} onClick={() => setWay(w.id)}
+                  className={`flex min-h-24 flex-col items-start gap-1 rounded-2xl border p-4 text-left ${on ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-accent"}`}>
+                  <span className="flex items-center gap-2 font-semibold"><Icon className="h-5 w-5" aria-hidden />{w.titulo}</span>
+                  <span className={`text-sm ${on ? "opacity-90" : "text-muted-foreground"}`}>{w.texto}</span>
+                </button>
+              );
+            })}
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {AGG.filter((a) => a.id !== "apple_health").map((a) => (
-              <div key={a.id} className="flex flex-col justify-between gap-3 rounded-2xl border bg-card p-4">
-                <div><p className="flex items-center gap-2 font-semibold">{a.id === "health_connect" ? <Smartphone className="h-4 w-4 text-brand-teal-strong" aria-hidden /> : <Watch className="h-4 w-4 text-brand-teal-strong" aria-hidden />}{SOURCES[a.id]}</p><p className="text-sm text-muted-foreground">{a.hint}</p></div>
-                {enabled ? <Button variant="outline" className="min-h-11" onClick={() => setConsent(a.id)}>Conectar</Button> : <span className="inline-flex min-h-11 items-center justify-center rounded-lg bg-muted text-sm font-semibold text-muted-foreground">Em breve</span>}
+
+          <div className="mt-4">
+            {way === "anotar" && <ManualReading />}
+
+            {way === "relogio" && (
+              <div className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Qual é o seu relógio?">
+                  {([{ id: "apple", t: "Apple Watch (iPhone)" }, { id: "outros", t: "Outro relógio (Android, Samsung, Xiaomi, Garmin…)" }] as const).map((o) => (
+                    <button key={o.id} type="button" aria-pressed={watch === o.id} onClick={() => setWatch(o.id)}
+                      className={`min-h-14 rounded-xl border px-4 text-left text-sm font-semibold ${watch === o.id ? "border-primary bg-accent" : "bg-card hover:bg-accent"}`}>{o.t}</button>
+                  ))}
+                </div>
+                {watch === "apple" && <ConnectIphone />}
+                {watch === "outros" && (
+                  <div className="space-y-3 rounded-2xl border bg-card p-5 text-sm">
+                    {enabled ? (
+                      <>
+                        <p>Escolha a marca e siga a autorização na tela seguinte.</p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {AGG.map((a) => (
+                            <button key={a.id} type="button" onClick={() => setConsent(a.id)} className="flex min-h-14 items-center gap-2 rounded-xl border px-4 text-left font-semibold hover:bg-accent">
+                              {a.id === "health_connect" ? <Smartphone className="h-4 w-4 text-brand-teal-strong" aria-hidden /> : <Watch className="h-4 w-4 text-brand-teal-strong" aria-hidden />}
+                              <span>{SOURCES[a.id]}<span className="block text-xs font-normal text-muted-foreground">{a.hint}</span></span>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-semibold">Para esses relógios, use um destes dois caminhos, que funcionam hoje:</p>
+                        <ul className="list-disc space-y-1 pl-5">
+                          <li><button type="button" className="font-semibold text-brand-teal-strong underline" onClick={() => setWay("anotar")}>Anotar a medição</button> que aparece no relógio ou no aplicativo dele.</li>
+                          <li><button type="button" className="font-semibold text-brand-teal-strong underline" onClick={() => setWay("bluetooth")}>Ver os batimentos ao vivo</button>, se o seu relógio permite “transmitir batimentos” por Bluetooth (procure essa opção nos ajustes do relógio).</li>
+                        </ul>
+                        <p className="text-muted-foreground">A conexão automática com esses relógios depende de um serviço parceiro que ainda não foi ativado nesta versão do Anamedis.</p>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
-            ))}
-            <Link to="/dispositivos/api" className="flex flex-col justify-between gap-3 rounded-2xl border bg-card p-4 hover:bg-accent">
-              <div><p className="flex items-center gap-2 font-semibold"><KeyRound className="h-4 w-4 text-brand-teal-strong" aria-hidden />Outro aplicativo</p><p className="text-sm text-muted-foreground">Envie leituras por API com um token seu.</p></div>
-              <span className="text-sm font-semibold text-brand-teal-strong">Gerenciar tokens →</span>
-            </Link>
+            )}
+
+            {way === "bluetooth" && (
+              <div className="space-y-3">
+                <ol className="list-decimal space-y-1 rounded-2xl border bg-card p-5 pl-9 text-sm">
+                  <li>Ligue a cinta, ou ative “transmitir batimentos” no relógio.</li>
+                  <li>Toque em <strong>Procurar aparelho</strong> abaixo.</li>
+                  <li>Escolha o seu aparelho na lista que aparecer.</li>
+                </ol>
+                <section id="bluetooth" aria-label="Batimentos ao vivo"><LiveHeartRate /></section>
+              </div>
+            )}
           </div>
+
           {result && (
             <div role="status" className="mt-4 rounded-2xl border bg-accent p-5">
               {result.error ? <p className="text-sm">{result.error}</p> : result.code ? (
@@ -164,11 +217,7 @@ function Dispositivos() {
               ) : <p className="text-sm">A autorização abriu em outra aba. Se não abriu, <a href={result.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-brand-teal-strong underline">abra aqui<ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>.</p>}
             </div>
           )}
-        </section>
-
-        <section id="bluetooth" aria-labelledby="ble">
-          <h2 id="ble" className="mb-3 font-display text-xl font-bold">Cinta cardíaca por Bluetooth</h2>
-          <LiveHeartRate />
+          <p className="mt-4 text-sm"><Link to="/dispositivos/api" className="font-medium text-brand-teal-strong underline">Avançado: senhas de conexão para outros aplicativos</Link></p>
         </section>
 
         <section aria-labelledby="priv" className="rounded-2xl border bg-card p-5">

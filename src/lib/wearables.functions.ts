@@ -100,3 +100,25 @@ export const recordBleReading = createServerFn({ method: "POST" })
     if (conn.status === "revoked") await supabaseAdmin.from("wearable_connections").update({ status: "connected" }).eq("id", conn.id);
     return ingestReadings(supabaseAdmin, { userId: context.userId, connectionId: conn.id, device: data.device, readings: [{ metric: "heart_rate", value: data.bpm, unit: "bpm", measured_at: data.measured_at }] });
   });
+
+/** Medição anotada à mão (pressão, glicose, batimentos…), gravada pelo mesmo caminho de validação das leituras de aparelho. */
+export const recordManualReading = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    kind: z.enum(["pressao", "glicose", "batimentos", "oxigenio", "peso", "temperatura"]),
+    values: z.array(z.number()).min(1).max(2),
+    measured_at: z.string().datetime({ offset: true }),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { manualReadings } = await import("@/lib/wearables");
+    const readings = manualReadings(data.kind, data.values, data.measured_at);
+    if (!readings) return { ok: false as const, error: "valores_incompletos" as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { ingestReadings, ensureConnection } = await import("@/lib/wearables.server");
+    const device = "Medição manual";
+    const conn = await ensureConnection(supabaseAdmin, context.userId, "ingest_api", "outro", device);
+    if (conn.status === "revoked") await supabaseAdmin.from("wearable_connections").update({ status: "connected" }).eq("id", conn.id);
+    const r = await ingestReadings(supabaseAdmin, { userId: context.userId, connectionId: conn.id, device, readings });
+    if (r.rejected.length) return { ok: false as const, error: "fora_da_faixa" as const };
+    return { ok: true as const, accepted: r.accepted };
+  });

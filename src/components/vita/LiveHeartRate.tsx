@@ -60,7 +60,7 @@ export function LiveHeartRate() {
   const last = points[points.length - 1];
   const live = !!last && freshness(new Date(last.t), new Date(now), "ble_hr").kind === "ao_vivo";
 
-  if (supported === false) return <p className="rounded-xl border bg-muted p-4 text-sm">Este navegador não permite pareamento por Bluetooth. No iPhone, use o app de pareamento do Apple Watch.</p>;
+  if (supported === false) return <p className="rounded-xl border bg-muted p-4 text-sm">Este navegador não permite ligar por Bluetooth (isso não funciona no Safari do iPhone). Use o Chrome no computador ou no Android, ou anote a medição.</p>;
   return (
     <div className="rounded-2xl border bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -77,7 +77,7 @@ export function LiveHeartRate() {
             <button type="button" onClick={reconnect} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground"><RefreshCw className="h-4 w-4" aria-hidden />Reconectar</button></div>
         ) : state !== "live" && (
           <button type="button" onClick={connect} disabled={state === "connecting" || supported === null} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60">
-            {state === "connecting" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Bluetooth className="h-4 w-4" aria-hidden />}Parear cinta cardíaca
+            {state === "connecting" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Bluetooth className="h-4 w-4" aria-hidden />}Procurar aparelho
           </button>
         )}
       </div>

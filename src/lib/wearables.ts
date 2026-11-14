@@ -147,3 +147,19 @@ export function agoText(at: Date | string, now: Date): string {
   const d = Math.floor(min / 1440);
   return `há ${d} ${d === 1 ? "dia" : "dias"}`;
 }
+
+/** Medições que a pessoa anota à mão: nomes simples, campos e a tradução para leituras. */
+export type ManualKind = "pressao" | "glicose" | "batimentos" | "oxigenio" | "peso" | "temperatura";
+export const MANUAL_KINDS: Record<ManualKind, { titulo: string; dica: string; campos: { rotulo: string; metric: Metric; passo: number }[] }> = {
+  pressao: { titulo: "Pressão", dica: "Os dois números do aparelho, por exemplo 12 por 8 é 120 e 80.", campos: [{ rotulo: "O número de cima (máxima)", metric: "bp_systolic", passo: 1 }, { rotulo: "O número de baixo (mínima)", metric: "bp_diastolic", passo: 1 }] },
+  glicose: { titulo: "Açúcar no sangue", dica: "O número que aparece no aparelho de glicose.", campos: [{ rotulo: "Glicose", metric: "glucose", passo: 1 }] },
+  batimentos: { titulo: "Batimentos do coração", dica: "Batimentos por minuto, do relógio ou do aparelho.", campos: [{ rotulo: "Batimentos por minuto", metric: "heart_rate", passo: 1 }] },
+  oxigenio: { titulo: "Oxigênio no sangue", dica: "A porcentagem do oxímetro, por exemplo 97.", campos: [{ rotulo: "Oxigênio (%)", metric: "spo2", passo: 1 }] },
+  peso: { titulo: "Peso", dica: "O peso da balança em quilos.", campos: [{ rotulo: "Peso (kg)", metric: "weight", passo: 0.1 }] },
+  temperatura: { titulo: "Temperatura", dica: "A temperatura do termômetro em graus.", campos: [{ rotulo: "Temperatura (°C)", metric: "temperature", passo: 0.1 }] },
+};
+export function manualReadings(kind: ManualKind, values: number[], measuredAt: string): ReadingInput[] | null {
+  const def = MANUAL_KINDS[kind];
+  if (!def || values.length !== def.campos.length) return null;
+  return def.campos.map((c, i) => ({ metric: c.metric, value: values[i]!, unit: METRICS[c.metric].unit, measured_at: measuredAt }));
+}
