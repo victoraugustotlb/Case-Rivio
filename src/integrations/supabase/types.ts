@@ -20,24 +20,27 @@ export type Database = {
           created_at: string
           document_id: string | null
           id: number
-          share_code_id: string
+          share_code_id: string | null
           user_id: string
+          viewer_id: string | null
         }
         Insert: {
           action: string
           created_at?: string
           document_id?: string | null
           id?: number
-          share_code_id: string
+          share_code_id?: string | null
           user_id: string
+          viewer_id?: string | null
         }
         Update: {
           action?: string
           created_at?: string
           document_id?: string | null
           id?: number
-          share_code_id?: string
+          share_code_id?: string | null
           user_id?: string
+          viewer_id?: string | null
         }
         Relationships: []
       }
@@ -190,6 +193,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      family_access_grants: {
+        Row: {
+          basis: string
+          categories: string[]
+          created_at: string
+          expires_at: string | null
+          id: string
+          owner_id: string
+          revoked_at: string | null
+          scope: string
+          status: string
+          viewer_id: string
+        }
+        Insert: {
+          basis?: string
+          categories?: string[]
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          owner_id: string
+          revoked_at?: string | null
+          scope?: string
+          status?: string
+          viewer_id: string
+        }
+        Update: {
+          basis?: string
+          categories?: string[]
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          owner_id?: string
+          revoked_at?: string | null
+          scope?: string
+          status?: string
+          viewer_id?: string
+        }
+        Relationships: []
+      }
+      family_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          holder_card_number: string
+          holder_id: string | null
+          id: string
+          plan_id: string
+          requester_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          holder_card_number: string
+          holder_id?: string | null
+          id?: string
+          plan_id: string
+          requester_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          holder_card_number?: string
+          holder_id?: string | null
+          id?: string
+          plan_id?: string
+          requester_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_requests_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       insurance_plans: {
         Row: {
