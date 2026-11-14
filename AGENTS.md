@@ -39,3 +39,5 @@ use the editor.
 - Documents and share codes live in Lovable Cloud with owner-only RLS; files go in the private `medical-documents` bucket under `<userId>/`. The doctor view reads them only through the `openShare` server function after code validation, so doctors need no account.
 - Document reading runs in `extractDocument` (server) via the AI gateway with a strict JSON schema; the patient always confirms before saving.
 - Only wearable data may be demo data (`src/lib/vita-data.ts`); medical records never ship sample rows.
+- Health profiles use owner-only `patient_profiles` RLS and authenticated server functions with shared validation; birth date determines age, and questionnaire completion is optional. This keeps sensitive self-reported data private without blocking document uploads.
+- Existing share codes do not expose health profiles; profile sharing requires a separate explicit consent option so adding personal data never broadens existing access.
