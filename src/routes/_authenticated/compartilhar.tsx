@@ -61,6 +61,7 @@ function Compartilhar() {
             <p className="mt-2 font-display text-5xl font-bold tracking-widest text-primary">{code}</p>
             <p className="mt-4 text-sm text-muted-foreground">O médico acessa em <strong>{typeof window !== "undefined" ? window.location.host : ""}/medico</strong> no computador dele.</p>
             <ul className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
+              {includeProfile && <li className="rounded-full bg-primary-soft px-2 py-1 text-primary">Perfil de saúde</li>}
               {[...cats.filter((c) => categories.includes(c.id)), ...sigs.filter((s) => signals.includes(s.id))].map((x) => <li key={x.id} className="rounded-full bg-muted px-2 py-1">{x.label}</li>)}
               <li className="rounded-full bg-muted px-2 py-1">Últimos {periodLabel(periodMonths)}</li>
             </ul>
@@ -96,16 +97,16 @@ function Compartilhar() {
           <div className="mt-3 flex flex-wrap gap-2">{cats.map((c) => <Chip key={c.id} on={categories.includes(c.id)} onClick={() => setCategories((l) => toggle(l, c.id))}>{c.label}</Chip>)}</div>
         </section>
         <section className="rounded-2xl border bg-card p-5">
-          <h2 className="font-semibold">2. Dados de dispositivos</h2>
+          <h2 className="font-semibold">3. Dados de dispositivos</h2>
           <div className="mt-3 flex flex-wrap gap-2">{sigs.map((s) => <Chip key={s.id} on={signals.includes(s.id)} onClick={() => setSignals((l) => toggle(l, s.id))}>{s.label}</Chip>)}</div>
         </section>
         <div className="grid gap-6 sm:grid-cols-2">
           <section className="rounded-2xl border bg-card p-5">
-            <h2 className="font-semibold">3. Dados de quando</h2>
+            <h2 className="font-semibold">4. Dados de quando</h2>
             <div className="mt-3 grid grid-cols-2 gap-2">{PERIOD_OPTIONS.map((m) => <Chip key={m} on={periodMonths === m} onClick={() => setPeriod(m)}>{periodLabel(m)}</Chip>)}</div>
           </section>
           <section className="rounded-2xl border bg-card p-5">
-            <h2 className="font-semibold">4. Acesso válido por</h2>
+            <h2 className="font-semibold">5. Acesso válido por</h2>
             <div className="mt-3 grid grid-cols-2 gap-2">{VALIDITY_OPTIONS.map((h) => <Chip key={h} on={validityHours === h} onClick={() => setValidity(h)}>{validityLabel(h)}</Chip>)}</div>
           </section>
         </div>
@@ -116,7 +117,7 @@ function Compartilhar() {
           setBusy(true); setFail("");
           for (let i = 0; i < 3; i++) {
             const c = formatShareCode();
-            const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, period_months: periodMonths, expires_at: new Date(Date.now() + validityHours * 3600_000).toISOString() });
+            const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, include_profile: includeProfile, period_months: periodMonths, expires_at: new Date(Date.now() + validityHours * 3600_000).toISOString() });
             if (!error) { setCode(c); setBusy(false); return; }
             if (error.code !== "23505") break;
           }

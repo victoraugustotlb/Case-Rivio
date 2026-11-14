@@ -29,6 +29,10 @@ describe("compartilhamento", () => {
     expect(accessState(t, false, t)).toBe("expirado");
     expect(accessState(t, false, new Date("2026-11-13T09:59:59Z"))).toBe("valido");
   });
+  it("perfil exige consentimento explícito", () => {
+    expect(profileVisible({ include_profile: false })).toBe(false);
+    expect(profileVisible({ include_profile: true })).toBe(true);
+  });
 });
 
 import { docVisible as dv } from "./share";
