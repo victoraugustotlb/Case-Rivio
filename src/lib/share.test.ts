@@ -8,8 +8,11 @@ describe("compartilhamento", () => {
   it("aceita só sinais de dispositivos, sem documentos", () => {
     expect(validateShare({ categories: [], signals: ["fc"], includeProfile: false, periodMonths: 12, validityHours: 24 })).toEqual([]);
   });
+  it("aceita compartilhar somente o perfil, sem documentos ou dispositivos", () => {
+    expect(validateShare({ categories: [], signals: [], includeProfile: true, periodMonths: 12, validityHours: 24 })).toEqual([]);
+  });
   it("recusa validade fora das opções", () => {
-    expect(validateShare({ categories: ["exames"], signals: [], periodMonths: 12, validityHours: 999 })).toContain("Validade inválida.");
+    expect(validateShare({ categories: ["exames"], signals: [], includeProfile: false, periodMonths: 12, validityHours: 999 })).toContain("Validade inválida.");
   });
   it("código tem formato XXXX-XXXX sem 0, O, 1 ou I", () => {
     const c = formatShareCode();

@@ -81,7 +81,18 @@ function Compartilhar() {
       <div className="mx-auto max-w-3xl space-y-6">
         <PageTitle title="Compartilhar com médico" subtitle="Você escolhe o que ele vê. Nada vem marcado." />
         <section className="rounded-2xl border bg-card p-5">
-          <h2 className="font-semibold">1. Documentos</h2>
+          <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><UserRound className="h-5 w-5" aria-hidden /></span>
+            <div className="min-w-0"><h2 className="font-semibold">1. Perfil de saúde</h2><p className="mt-1 text-sm text-muted-foreground">Inclui dados pessoais, medicamentos, alergias, histórico e hábitos do questionário.</p></div>
+          </div>
+          <button type="button" role="switch" aria-checked={includeProfile} onClick={() => setIncludeProfile((value) => !value)} className={`mt-4 flex min-h-12 w-full items-center justify-between gap-4 rounded-lg border px-4 text-left text-sm font-medium ${includeProfile ? "border-primary bg-primary-soft text-primary" : "bg-card hover:bg-muted"}`}>
+            <span>{includeProfile ? "Perfil autorizado neste código" : "Não compartilhar o perfil"}</span>
+            <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${includeProfile ? "bg-primary" : "bg-muted-foreground/30"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-card transition-transform ${includeProfile ? "translate-x-1 left-1/2" : "left-1"}`} /></span>
+          </button>
+          <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />Códigos já criados não mudam: este consentimento vale apenas para o novo código.</p>
+        </section>
+        <section className="rounded-2xl border bg-card p-5">
+          <h2 className="font-semibold">2. Documentos</h2>
           <div className="mt-3 flex flex-wrap gap-2">{cats.map((c) => <Chip key={c.id} on={categories.includes(c.id)} onClick={() => setCategories((l) => toggle(l, c.id))}>{c.label}</Chip>)}</div>
         </section>
         <section className="rounded-2xl border bg-card p-5">
