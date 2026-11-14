@@ -45,6 +45,8 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 }
 
 function Compartilhar() {
+  const { para } = Route.useSearch();
+  const createMinor = useServerFn(createMinorShareCode);
   const [categories, setCategories] = useState<ShareCategory[]>([]);
   const [signals, setSignals] = useState<ShareSignal[]>([]);
   const [includeProfile, setIncludeProfile] = useState(false);
@@ -87,6 +89,7 @@ function Compartilhar() {
     <AppShell>
       <div className="mx-auto max-w-3xl space-y-6">
         <PageTitle title="Compartilhar com médico" subtitle="Você escolhe o que ele vê. Nada vem marcado." />
+        {para && <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm">Este código abre o histórico do seu dependente menor de idade, gerado por você como responsável legal.</p>}
         <section className="rounded-2xl border bg-card p-5">
           <div className="flex items-start gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><UserRound className="h-5 w-5" aria-hidden /></span>
