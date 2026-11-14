@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { docVisible, normalizeCode, accessState } from "@/lib/share";
+import { docVisible, normalizeCode, accessState, profileVisible } from "@/lib/share";
+import { profileSchema, type HealthProfile } from "@/lib/profile";
 
 const extractSchema = {
   type: "object",
@@ -80,5 +81,15 @@ export const openShare = createServerFn({ method: "POST" })
       if (d.file_path) url = (await supabaseAdmin.storage.from("medical-documents").createSignedUrl(d.file_path, 900)).data?.signedUrl ?? null;
       return { ...d, fields: (d.fields ?? []) as { label: string; value: string }[], file_path: undefined, url };
     }));
-    return { status: "valido" as const, code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, docs };
+    let profile: HealthProfile | null = null;
+    if (profileVisible(share)) {
+      const { data: profileRow, error: profileError } = await supabaseAdmin
+        .from("patient_profiles")
+        .select("full_name,birth_date,height_cm,weight_kg,medications,allergies,conditions,surgeries,family_history,smoking,alcohol,activity,questionnaire_completed")
+        .eq("user_id", share.user_id)
+        .maybeSingle();
+      if (profileError) throw new Error("Não foi possível carregar o perfil autorizado.");
+      profile = profileRow ? profileSchema.parse(profileRow) : null;
+    }
+    return { status: "valido" as const, code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, docs };
   });

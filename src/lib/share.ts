@@ -4,6 +4,7 @@ export type ShareSignal = "fc" | "sono" | "spo2" | "passos" | "pressao" | "glico
 export type ShareRequest = {
   categories: ShareCategory[];
   signals: ShareSignal[];
+  includeProfile: boolean;
   periodMonths: number;
   validityHours: number;
 };
@@ -14,7 +15,7 @@ export const PERIOD_OPTIONS = [3, 6, 12, 60] as const;
 /** Retorna os problemas que impedem gerar o código; lista vazia = pode gerar. */
 export function validateShare(r: ShareRequest): string[] {
   const errors: string[] = [];
-  if (r.categories.length === 0 && r.signals.length === 0) errors.push("Escolha ao menos um tipo de informação.");
+  if (r.categories.length === 0 && r.signals.length === 0 && !r.includeProfile) errors.push("Escolha ao menos um tipo de informação.");
   if (!(VALIDITY_OPTIONS as readonly number[]).includes(r.validityHours)) errors.push("Validade inválida.");
   if (!(PERIOD_OPTIONS as readonly number[]).includes(r.periodMonths)) errors.push("Período inválido.");
   return errors;
@@ -38,6 +39,11 @@ export type AccessState = "valido" | "expirado" | "revogado";
 export function accessState(expiresAt: Date, revoked: boolean, now: Date = new Date()): AccessState {
   if (revoked) return "revogado";
   return now.getTime() >= expiresAt.getTime() ? "expirado" : "valido";
+}
+
+/** O questionário só é consultado quando este consentimento explícito existe. */
+export function profileVisible(share: { include_profile: boolean }): boolean {
+  return share.include_profile;
 }
 
 const KIND_TO_CATEGORY: Record<string, ShareCategory> = {

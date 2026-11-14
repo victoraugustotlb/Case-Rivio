@@ -123,7 +123,7 @@ export function HealthProfileEditor({ initial, accountName }: { initial: HealthP
           <div className="grid gap-5 sm:grid-cols-2">{choice("smoking", "Você fuma?", ["Nunca", "Já parei", "Atualmente"])}{choice("alcohol", "Consumo de álcool", ["Não consumo", "Ocasionalmente", "Regularmente"])}{choice("activity", "Atividade física", ["Não pratico", "1–2 dias por semana", "3–4 dias por semana", "5 ou mais dias por semana"])}</div>
         </section>}
 
-        <p className="flex items-start gap-2 text-sm text-muted-foreground"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />Estas informações são privadas. Os códigos atuais compartilham apenas os documentos e dados de dispositivos selecionados, não este perfil.</p>
+        <p className="flex items-start gap-2 text-sm text-muted-foreground"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />Estas informações são privadas e só aparecem no VITA Clínico quando você marca “Perfil de saúde” ao gerar um código.</p>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {saved && <p role="status" className="flex items-center gap-2 text-sm font-medium text-success"><Check className="h-4 w-4" />Perfil salvo com sucesso.</p>}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">

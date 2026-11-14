@@ -14,6 +14,13 @@
 - [x] Reorientar para histórico + código ao médico: Início, Documentos (escanear/conferir), Saúde, Compartilhar, Perfil, VITA Clínico.
 - [x] Salvar dados de verdade (contas e armazenamento).
 
+# VITA Clínico — acesso e perfil compartilhado
+- [x] Renovar a entrada por código e a navegação da visão profissional.
+- [x] Adicionar consentimento separado para compartilhar o questionário de saúde, sem ampliar códigos antigos.
+- [x] Exibir perfil, medicamentos, histórico e hábitos autorizados no VITA Clínico.
+- [x] Testar regras, código inválido e apresentação pública no computador e celular.
+- [ ] Confirmar geração de código e leitura do perfil com sessão autenticada — depende de o usuário identificar qual conta usar; há várias contas e nenhuma corresponde ao acesso automático.
+
 # VITA Web — documentos reais
 - [x] Contas de paciente (e-mail/senha e Google), telas protegidas.
 - [x] Envio de arquivo/foto, leitura por IA, conferência e salvamento no histórico.

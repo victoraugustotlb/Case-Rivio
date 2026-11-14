@@ -1,0 +1,2 @@
+ALTER TABLE public.share_codes ADD COLUMN include_profile boolean NOT NULL DEFAULT false;
+COMMENT ON COLUMN public.share_codes.include_profile IS 'Consentimento explícito do paciente para exibir o questionário de saúde no acesso por código.';
