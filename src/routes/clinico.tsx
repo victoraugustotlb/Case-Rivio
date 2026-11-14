@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -70,7 +70,7 @@ function Clinico() {
   const sair = async () => { qc.clear(); await supabase.auth.signOut(); nav({ to: "/entrar", replace: true }); };
 
   if (me.isLoading || !me.data?.user) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" aria-label="Carregando" /></div>;
-  if (me.data.type === "patient") { nav({ to: "/inicio", replace: true }); return null; }
+  if (me.data.type === "patient") return <Navigate to="/inicio" replace />;
   if (me.data.type === "laboratory") return me.data.lab ? <LabPanel lab={me.data.lab} onExit={sair} /> : <NoLab onDone={() => me.refetch()} />;
   if (!me.data.doctor) return <NoDoctor onDone={() => me.refetch()} />;
   const list = (patients.data ?? []).filter((p) => `${p.patient_name} ${p.patient_ref}`.toLowerCase().includes(q.toLowerCase()));
