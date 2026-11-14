@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Activity, ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, Share2, Upload, Watch } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
@@ -8,6 +8,7 @@ import { documentsQuery } from "@/lib/documents";
 import { supabase } from "@/integrations/supabase/client";
 import { healthProfileQuery } from "@/lib/profile-query";
 import { Button } from "@/components/ui/button";
+import { firstAccessDestination } from "@/lib/profile";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -20,7 +21,13 @@ export const Route = createFileRoute("/_authenticated/inicio")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(documentsQuery), context.queryClient.ensureQueryData(healthProfileQuery)]),
+  loader: async ({ context }) => {
+    const profile = await context.queryClient.fetchQuery(healthProfileQuery);
+    if (firstAccessDestination(profile) === "/perfil") throw redirect({ to: "/perfil", replace: true });
+    await context.queryClient.ensureQueryData(documentsQuery);
+  },
+  errorComponent: () => <AppShell><p role="alert">Não foi possível carregar seu histórico. Atualize a página para tentar novamente.</p></AppShell>,
+  notFoundComponent: () => <AppShell><p>Página não encontrada.</p></AppShell>,
   component: Inicio,
 });
 

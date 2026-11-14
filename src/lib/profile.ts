@@ -32,6 +32,9 @@ export const profileSchema = z.object({
   questionnaire_completed: z.boolean(),
 });
 export type HealthProfile = z.infer<typeof profileSchema>;
+export function firstAccessDestination(profile: HealthProfile | null): "/perfil" | "/inicio" {
+  return profile === null ? "/perfil" : "/inicio";
+}
 export type Medication = z.infer<typeof medicationSchema>;
 export const emptyProfile: HealthProfile = {
   full_name: "", birth_date: null, height_cm: null, weight_kg: null, medications: [],

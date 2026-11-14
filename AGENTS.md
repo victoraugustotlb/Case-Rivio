@@ -41,3 +41,4 @@ use the editor.
 - Only wearable data may be demo data (`src/lib/vita-data.ts`); medical records never ship sample rows.
 - Health profiles use owner-only `patient_profiles` RLS and authenticated server functions with shared validation; birth date determines age, and questionnaire completion is optional. This keeps sensitive self-reported data private without blocking document uploads.
 - Existing share codes do not expose health profiles; profile sharing requires a separate explicit consent option so adding personal data never broadens existing access.
+- The authenticated home loader sends accounts without a health profile to the optional questionnaire; deferral persists only the existing profile or empty answers and returns home. This covers password, email-confirmation and OAuth entry without forcing medical disclosure.

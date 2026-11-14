@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ArrowRight, Check, ClipboardList, HeartPulse, Loader2, Pill, Plus, Ruler, Save, ShieldCheck, Trash2, UserRound } from "lucide-react";
@@ -27,6 +28,17 @@ export function HealthProfileEditor({ initial, accountName }: { initial: HealthP
   const [saved, setSaved] = useState(false);
   const save = useServerFn(saveHealthProfile);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const defer = async () => {
+    setBusy(true); setError("");
+    try {
+      await save({ data: initial ?? { ...emptyProfile, full_name: accountName } });
+      await queryClient.invalidateQueries({ queryKey: healthProfileQuery.queryKey });
+      await navigate({ to: "/inicio", replace: true });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Não foi possível continuar. Tente novamente.");
+    } finally { setBusy(false); }
+  };
   const update = <K extends keyof HealthProfile>(key: K, value: HealthProfile[K]) => {
     setProfile((previous) => ({ ...previous, [key]: value }));
     setSaved(false);
@@ -41,6 +53,7 @@ export function HealthProfileEditor({ initial, accountName }: { initial: HealthP
       setProfile(parsed.data);
       await queryClient.invalidateQueries({ queryKey: healthProfileQuery.queryKey });
       setSaved(true); setWizard(false);
+      if (complete) await navigate({ to: "/inicio", replace: true });
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível salvar. Tente novamente."); }
     finally { setBusy(false); }
   };
@@ -114,7 +127,7 @@ export function HealthProfileEditor({ initial, accountName }: { initial: HealthP
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {saved && <p role="status" className="flex items-center gap-2 text-sm font-medium text-success"><Check className="h-4 w-4" />Perfil salvo com sucesso.</p>}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">
-          {wizard ? <div className="flex flex-wrap gap-2">{step > 0 && <Button type="button" variant="outline" className="min-h-11" disabled={busy} onClick={() => { setStep(step - 1); setError(""); }}><ArrowLeft />Voltar</Button>}<Button type="button" variant="ghost" className="min-h-11" disabled={busy} onClick={() => { setWizard(false); setError(""); }}>Preencher depois</Button></div> : <span />}
+          {wizard ? <div className="flex flex-wrap gap-2">{step > 0 && <Button type="button" variant="outline" className="min-h-11" disabled={busy} onClick={() => { setStep(step - 1); setError(""); }}><ArrowLeft />Voltar</Button>}<Button type="button" variant="ghost" className="min-h-11" disabled={busy} onClick={() => void defer()}>Preencher depois</Button></div> : <span />}
           <Button type="submit" className="min-h-11" disabled={busy}>{busy ? <Loader2 className="animate-spin" /> : wizard && step < 3 ? <ArrowRight /> : <Save />}{busy ? "Salvando…" : wizard ? step < 3 ? "Continuar" : "Concluir e salvar" : "Salvar alterações"}</Button>
         </div>
       </form>
