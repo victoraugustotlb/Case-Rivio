@@ -51,7 +51,7 @@ function RefTag({ r }: { r: RefReading }) {
   return <span className="text-muted-foreground">Não classificado</span>;
 }
 
-function Section({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
+function Section({ title, count, children }: { title: string; count?: number | undefined; children: React.ReactNode }) {
   return (
     <section className="rounded-md border bg-card">
       <h2 className="flex items-center justify-between border-b bg-muted/50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{title}{count !== undefined && <span className="tabular-nums">{count}</span>}</h2>
