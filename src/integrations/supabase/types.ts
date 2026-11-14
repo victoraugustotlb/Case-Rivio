@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_logs: {
+        Row: {
+          action: string
+          created_at: string
+          document_id: string | null
+          id: number
+          share_code_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          document_id?: string | null
+          id?: number
+          share_code_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          document_id?: string | null
+          id?: number
+          share_code_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       access_requests: {
         Row: {
           categories: string[]
@@ -119,6 +146,7 @@ export type Database = {
           created_at: string
           doc_date: string | null
           fields: Json
+          file_hash: string | null
           file_path: string | null
           file_type: string | null
           id: string
@@ -134,6 +162,7 @@ export type Database = {
           created_at?: string
           doc_date?: string | null
           fields?: Json
+          file_hash?: string | null
           file_path?: string | null
           file_type?: string | null
           id?: string
@@ -149,6 +178,7 @@ export type Database = {
           created_at?: string
           doc_date?: string | null
           fields?: Json
+          file_hash?: string | null
           file_path?: string | null
           file_type?: string | null
           id?: string
