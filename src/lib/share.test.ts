@@ -6,7 +6,7 @@ describe("compartilhamento", () => {
     expect(validateShare({ categories: [], signals: [], includeProfile: false, periodMonths: 12, validityHours: 24 })).toHaveLength(1);
   });
   it("aceita só sinais de dispositivos, sem documentos", () => {
-    expect(validateShare({ categories: [], signals: ["fc"], periodMonths: 12, validityHours: 24 })).toEqual([]);
+    expect(validateShare({ categories: [], signals: ["fc"], includeProfile: false, periodMonths: 12, validityHours: 24 })).toEqual([]);
   });
   it("recusa validade fora das opções", () => {
     expect(validateShare({ categories: ["exames"], signals: [], periodMonths: 12, validityHours: 999 })).toContain("Validade inválida.");

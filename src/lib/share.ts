@@ -41,6 +41,11 @@ export function accessState(expiresAt: Date, revoked: boolean, now: Date = new D
   return now.getTime() >= expiresAt.getTime() ? "expirado" : "valido";
 }
 
+/** O questionário só é consultado quando este consentimento explícito existe. */
+export function profileVisible(share: { include_profile: boolean }): boolean {
+  return share.include_profile;
+}
+
 const KIND_TO_CATEGORY: Record<string, ShareCategory> = {
   Exame: "exames", Laudo: "laudos", Consulta: "consultas", Receita: "receitas", Vacina: "vacinas",
 };

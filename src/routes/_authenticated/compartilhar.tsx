@@ -49,7 +49,7 @@ function Compartilhar() {
   const [revoked, setRevoked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState("");
-  const errors = validateShare({ categories, signals, periodMonths, validityHours });
+  const errors = validateShare({ categories, signals, includeProfile, periodMonths, validityHours });
 
   if (code) {
     return (
