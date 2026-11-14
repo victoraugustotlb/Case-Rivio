@@ -6,6 +6,7 @@
 - [x] Preparar pacote com instalação, limites e especificação.
 - [ ] Confirmar execução no Figma real — depende de instalação e execução pelo usuário; não há sessão Figma disponível.
 # VITA — Web app
+- [ ] Abrir questionário no primeiro acesso, permitir adiar e publicar atualização.
 - [x] Perfil de saúde privado e editável e questionário inicial opcional; validações testadas.
 - [ ] Confirmar questionário e salvamento pela tela com sessão autenticada — depende de login do usuário na prévia; sessão automática indisponível.
 - [x] Design system, navegação responsiva e Início (dashboard).

@@ -44,7 +44,7 @@ function Entrar() {
     setMsg(null); setBusy(true);
     try {
       if (modo === "criar") {
-        const { error } = await supabase.auth.signUp({ email, password: senha, options: { emailRedirectTo: `${window.location.origin}/inicio`, data: { full_name: nome } } });
+        const { error } = await supabase.auth.signUp({ email, password: senha, options: { emailRedirectTo: window.location.origin, data: { full_name: nome } } });
         if (error) throw error;
         setMsg({ tipo: "ok", texto: "Conta criada. Enviamos um e-mail de confirmação — clique no link para entrar." });
       } else {

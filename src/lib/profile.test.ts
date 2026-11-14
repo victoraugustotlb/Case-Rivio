@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { ageFromBirthDate, emptyProfile, profileSchema } from "./profile";
+import { ageFromBirthDate, emptyProfile, firstAccessDestination, profileSchema } from "./profile";
 
 describe("perfil de saúde", () => {
+  it("abre o questionário no primeiro acesso de uma conta sem perfil", () => {
+    expect(firstAccessDestination(null)).toBe("/perfil");
+  });
+  it("permite acessar o início depois de adiar o questionário", () => {
+    expect(firstAccessDestination(emptyProfile)).toBe("/inicio");
+  });
+  it("não repete o questionário de um perfil concluído", () => {
+    expect(firstAccessDestination({ ...emptyProfile, questionnaire_completed: true })).toBe("/inicio");
+  });
   it("calcula a idade pela data de nascimento, antes do aniversário", () => {
     expect(ageFromBirthDate("1990-11-15", new Date(2026, 10, 14))).toBe(35);
   });
