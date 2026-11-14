@@ -14,10 +14,12 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as ClinicoRouteImport } from './routes/clinico'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MedicoRouteImport } from './routes/medico'
+import { Route as AuthenticatedAssinaturaRouteImport } from './routes/_authenticated/assinatura'
 import { Route as AuthenticatedAutorizarRouteImport } from './routes/_authenticated/autorizar'
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedPlanoRouteImport } from './routes/_authenticated/plano'
 import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
@@ -46,6 +48,11 @@ const MedicoRoute = MedicoRouteImport.update({
   path: '/medico',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAssinaturaRoute = AuthenticatedAssinaturaRouteImport.update({
+  id: '/assinatura',
+  path: '/assinatura',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAutorizarRoute = AuthenticatedAutorizarRouteImport.update({
   id: '/autorizar',
   path: '/autorizar',
@@ -65,6 +72,11 @@ const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlanoRoute = AuthenticatedPlanoRouteImport.update({
+  id: '/plano',
+  path: '/plano',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDocumentosIndexRoute =
@@ -91,10 +103,12 @@ export interface FileRoutesByFullPath {
   '/clinico': typeof ClinicoRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
+  '/assinatura': typeof AuthenticatedAssinaturaRoute
   '/autorizar': typeof AuthenticatedAutorizarRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/plano': typeof AuthenticatedPlanoRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/documentos/': typeof AuthenticatedDocumentosIndexRoute
@@ -104,10 +118,12 @@ export interface FileRoutesByTo {
   '/clinico': typeof ClinicoRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
+  '/assinatura': typeof AuthenticatedAssinaturaRoute
   '/autorizar': typeof AuthenticatedAutorizarRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/plano': typeof AuthenticatedPlanoRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/documentos': typeof AuthenticatedDocumentosIndexRoute
@@ -119,10 +135,12 @@ export interface FileRoutesById {
   '/clinico': typeof ClinicoRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
+  '/_authenticated/assinatura': typeof AuthenticatedAssinaturaRoute
   '/_authenticated/autorizar': typeof AuthenticatedAutorizarRoute
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/plano': typeof AuthenticatedPlanoRoute
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
@@ -134,10 +152,12 @@ export interface FileRouteTypes {
     | '/clinico'
     | '/entrar'
     | '/medico'
+    | '/assinatura'
     | '/autorizar'
     | '/compartilhar'
     | '/inicio'
     | '/perfil'
+    | '/plano'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/documentos/'
@@ -147,10 +167,12 @@ export interface FileRouteTypes {
     | '/clinico'
     | '/entrar'
     | '/medico'
+    | '/assinatura'
     | '/autorizar'
     | '/compartilhar'
     | '/inicio'
     | '/perfil'
+    | '/plano'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/documentos'
@@ -161,10 +183,12 @@ export interface FileRouteTypes {
     | '/clinico'
     | '/entrar'
     | '/medico'
+    | '/_authenticated/assinatura'
     | '/_authenticated/autorizar'
     | '/_authenticated/compartilhar'
     | '/_authenticated/inicio'
     | '/_authenticated/perfil'
+    | '/_authenticated/plano'
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/adicionar'
     | '/_authenticated/documentos/'
@@ -215,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MedicoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/assinatura': {
+      id: '/_authenticated/assinatura'
+      path: '/assinatura'
+      fullPath: '/assinatura'
+      preLoaderRoute: typeof AuthenticatedAssinaturaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/autorizar': {
       id: '/_authenticated/autorizar'
       path: '/autorizar'
@@ -243,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/plano': {
+      id: '/_authenticated/plano'
+      path: '/plano'
+      fullPath: '/plano'
+      preLoaderRoute: typeof AuthenticatedPlanoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documentos/': {
       id: '/_authenticated/documentos/'
       path: '/documentos'
@@ -268,20 +306,24 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAssinaturaRoute: typeof AuthenticatedAssinaturaRoute
   AuthenticatedAutorizarRoute: typeof AuthenticatedAutorizarRoute
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedPlanoRoute: typeof AuthenticatedPlanoRoute
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
   AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAssinaturaRoute: AuthenticatedAssinaturaRoute,
   AuthenticatedAutorizarRoute: AuthenticatedAutorizarRoute,
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedPlanoRoute: AuthenticatedPlanoRoute,
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
   AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
