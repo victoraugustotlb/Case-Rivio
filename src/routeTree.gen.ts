@@ -23,6 +23,7 @@ import { Route as AuthenticatedPlanoRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
+import { Route as AuthenticatedFamiliaIndexRouteImport } from './routes/_authenticated/familia.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -97,6 +98,12 @@ const AuthenticatedDocumentosAdicionarRoute =
     path: '/documentos/adicionar',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedFamiliaIndexRoute =
+  AuthenticatedFamiliaIndexRouteImport.update({
+    id: '/familia/',
+    path: '/familia/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/documentos/': typeof AuthenticatedDocumentosIndexRoute
+  '/familia/': typeof AuthenticatedFamiliaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -127,6 +135,7 @@ export interface FileRoutesByTo {
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/documentos': typeof AuthenticatedDocumentosIndexRoute
+  '/familia': typeof AuthenticatedFamiliaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -144,6 +153,7 @@ export interface FileRoutesById {
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
+  '/_authenticated/familia/': typeof AuthenticatedFamiliaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/documentos/'
+    | '/familia/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/documentos'
+    | '/familia'
   id:
     | '__root__'
     | '/'
@@ -192,6 +204,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/adicionar'
     | '/_authenticated/documentos/'
+    | '/_authenticated/familia/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -302,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentosAdicionarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/familia/': {
+      id: '/_authenticated/familia/'
+      path: '/familia'
+      fullPath: '/familia/'
+      preLoaderRoute: typeof AuthenticatedFamiliaIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -315,6 +335,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
   AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
+  AuthenticatedFamiliaIndexRoute: typeof AuthenticatedFamiliaIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -327,6 +348,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
   AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
+  AuthenticatedFamiliaIndexRoute: AuthenticatedFamiliaIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
