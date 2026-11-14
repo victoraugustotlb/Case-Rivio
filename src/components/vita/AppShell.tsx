@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link key={to} to={to} aria-current={active ? "page" : undefined}
                 className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${active ? "bg-sidebar-primary text-sidebar-primary-foreground" : "hover:bg-sidebar-accent"}`}>
                 <Icon className="h-5 w-5 shrink-0" aria-hidden /> {label}
-                {to === "/familia" && pending > 0 && <span className="ml-auto rounded-full bg-warning px-2 text-xs font-bold text-warning-foreground" aria-label={`${pending} aviso(s)`}>{pending}</span>}
+                {to === "/familia" && pending > 0 && <span className="ml-auto rounded-full bg-warning px-2 text-xs font-bold text-card" aria-label={`${pending} aviso(s)`}>{pending}</span>}
               </Link>
             );
           })}
@@ -104,7 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-30 bg-foreground/40 lg:hidden" onClick={() => setMore(false)}>
           <div role="dialog" aria-label="Mais opções" className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-card p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]" onClick={(e) => e.stopPropagation()}>
             <div className="mb-2 flex items-center justify-between"><p className="font-semibold">Mais</p><button type="button" aria-label="Fechar" onClick={() => setMore(false)} className="grid h-11 w-11 place-items-center rounded-full hover:bg-muted"><X className="h-5 w-5" aria-hidden /></button></div>
-            <Link to="/familia" onClick={() => setMore(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 hover:bg-muted"><Users className="h-5 w-5" aria-hidden />Minha família{pending > 0 && <span className="ml-auto rounded-full bg-warning px-2 text-xs font-bold text-warning-foreground">{pending}</span>}</Link>
+            <Link to="/familia" onClick={() => setMore(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 hover:bg-muted"><Users className="h-5 w-5" aria-hidden />Minha família{pending > 0 && <span className="ml-auto rounded-full bg-warning px-2 text-xs font-bold text-card">{pending}</span>}</Link>
             {visible.map((m) => (
               <Link key={m.id} to="/familia/$memberId" params={{ memberId: m.id }} onClick={() => setMore(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 pl-11 text-sm hover:bg-muted">Ver perfil de {m.name}</Link>
             ))}
