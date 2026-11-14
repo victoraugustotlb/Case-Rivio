@@ -22,6 +22,13 @@
       "when": 1794622164103,
       "tag": "0002_share_health_profile_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794624088607,
+      "tag": "0003_doctor_accounts_and_requests",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          categories: string[]
+          code: string
+          created_at: string
+          doctor_id: string
+          expected_patient_id: string | null
+          expires_at: string
+          id: string
+          include_profile: boolean
+          patient_id: string | null
+          period_months: number
+          share_code_id: string | null
+          signals: string[]
+          status: string
+        }
+        Insert: {
+          categories?: string[]
+          code: string
+          created_at?: string
+          doctor_id?: string
+          expected_patient_id?: string | null
+          expires_at: string
+          id?: string
+          include_profile?: boolean
+          patient_id?: string | null
+          period_months: number
+          share_code_id?: string | null
+          signals?: string[]
+          status?: string
+        }
+        Update: {
+          categories?: string[]
+          code?: string
+          created_at?: string
+          doctor_id?: string
+          expected_patient_id?: string | null
+          expires_at?: string
+          id?: string
+          include_profile?: boolean
+          patient_id?: string | null
+          period_months?: number
+          share_code_id?: string | null
+          signals?: string[]
+          status?: string
+        }
+        Relationships: []
+      }
+      doctor_patients: {
+        Row: {
+          doctor_id: string
+          last_seen_at: string
+          patient_id: string
+          patient_name: string
+          patient_ref: string
+        }
+        Insert: {
+          doctor_id: string
+          last_seen_at?: string
+          patient_id: string
+          patient_name?: string
+          patient_ref: string
+        }
+        Update: {
+          doctor_id?: string
+          last_seen_at?: string
+          patient_id?: string
+          patient_name?: string
+          patient_ref?: string
+        }
+        Relationships: []
+      }
+      doctor_profiles: {
+        Row: {
+          created_at: string
+          crm: string
+          full_name: string
+          specialty: string
+          uf: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crm: string
+          full_name: string
+          specialty?: string
+          uf: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          crm?: string
+          full_name?: string
+          specialty?: string
+          uf?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           confirmed: boolean
@@ -113,6 +212,24 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      request_attempts: {
+        Row: {
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          user_id?: string
         }
         Relationships: []
       }

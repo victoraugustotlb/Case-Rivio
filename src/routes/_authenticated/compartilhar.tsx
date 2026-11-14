@@ -71,6 +71,7 @@ function Compartilhar() {
             {!revoked && <button type="button" onClick={async () => { const { error } = await supabase.from("share_codes").update({ revoked: true }).eq("code", code); if (!error) setRevoked(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-destructive px-4 font-semibold text-destructive-foreground"><ShieldOff className="h-4 w-4" aria-hidden /> Encerrar acesso</button>}
             <button type="button" onClick={() => { setCode(null); setRevoked(false); }} className="min-h-11 rounded-lg px-4 font-medium text-primary">Novo compartilhamento</button>
             <Link to="/medico" className="min-h-11 content-center rounded-lg px-4 text-sm text-muted-foreground underline">Ver como o médico vê</Link>
+            <Link to="/autorizar" className="min-h-11 content-center rounded-lg px-4 text-sm font-medium text-primary underline">Autorizar código do médico</Link>
           </div>
         </div>
       </AppShell>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Stethoscope, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { DoctorFields, type DoctorForm } from "@/components/vita/DoctorFields";
 
 export const Route = createFileRoute("/entrar")({
   head: () => ({
@@ -32,6 +33,7 @@ function Entrar() {
   const [busy, setBusy] = useState(false);
   const nav = useNavigate();
   const medico = perfil === "medico";
+  const [doc, setDoc] = useState<DoctorForm>({ full_name: "", crm: "", uf: "SP", specialty: "" });
   useEffect(() => {
     const go = () => nav({ to: "/inicio", replace: true });
     supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
@@ -51,6 +53,25 @@ function Entrar() {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
         nav({ to: "/inicio" });
+      }
+    } catch (err) {
+      const m = err instanceof Error ? err.message : "";
+      setMsg({ tipo: "erro", texto: /Invalid login/i.test(m) ? "E-mail ou senha incorretos." : /confirm/i.test(m) ? "Confirme seu e-mail antes de entrar." : /registered/i.test(m) ? "Este e-mail já tem conta. Entre com sua senha." : m || "Não foi possível continuar." });
+    } finally { setBusy(false); }
+  };
+
+  const enviarMedico = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg(null); setBusy(true);
+    try {
+      if (modo === "criar") {
+        const { error } = await supabase.auth.signUp({ email, password: senha, options: { emailRedirectTo: window.location.origin, data: { ...doc, account_type: "doctor" } } });
+        if (error) throw error;
+        setMsg({ tipo: "ok", texto: "Conta criada. Enviamos um e-mail de confirmação — clique no link para entrar." });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        if (error) throw error;
+        nav({ to: "/clinico" });
       }
     } catch (err) {
       const m = err instanceof Error ? err.message : "";
@@ -92,12 +113,22 @@ function Entrar() {
           </div>
 
           {medico ? (
-            <div className="mt-6 rounded-2xl border bg-card p-5">
-              <p className="font-semibold">Acesso por código do paciente</p>
-              <p className="mt-1 text-sm text-muted-foreground">Peça ao paciente o código de 8 caracteres gerado no app dele. Você verá apenas o que ele autorizou, pelo tempo escolhido.</p>
-              <Link to="/medico" className="mt-4 flex min-h-12 items-center justify-center rounded-lg bg-primary font-semibold text-primary-foreground">Abrir VITA Clínico</Link>
-              <p className="mt-3 text-xs text-muted-foreground">Contas profissionais com validação de CRM ainda não estão disponíveis.</p>
-            </div>
+            <>
+              <form className="mt-6 space-y-4" onSubmit={enviarMedico}>
+                {modo === "criar" && <DoctorFields f={doc} setF={setDoc} />}
+                <label className="block"><span className="text-sm font-medium">E-mail profissional</span><input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className={input} /></label>
+                <label className="block"><span className="text-sm font-medium">Senha</span><input required minLength={6} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete={modo === "criar" ? "new-password" : "current-password"} className={input} /></label>
+                {msg && <p role={msg.tipo === "erro" ? "alert" : "status"} className={`rounded-lg p-3 text-sm ${msg.tipo === "erro" ? "bg-danger-soft" : "bg-success-soft"}`}>{msg.texto}</p>}
+                <button type="submit" disabled={busy} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-60">
+                  {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}{modo === "criar" ? "Criar conta profissional" : "Entrar no VITA Clínico"}
+                </button>
+              </form>
+              <p className="mt-4 text-center text-sm">
+                {modo === "entrar" ? <>Ainda não tem conta? <button type="button" onClick={() => { setModo("criar"); setMsg(null); }} className="font-medium text-primary underline">Criar conta profissional</button></>
+                  : <>Já tem conta? <button type="button" onClick={() => { setModo("entrar"); setMsg(null); }} className="font-medium text-primary underline">Entrar</button></>}
+              </p>
+              <Link to="/medico" className="mt-3 block text-center text-sm text-muted-foreground underline">Abrir só com o código do paciente, sem conta</Link>
+            </>
           ) : (
             <>
               <button type="button" onClick={google} className="mt-6 flex min-h-11 w-full items-center justify-center gap-[10px] rounded-lg border border-[#747775] bg-[#FFFFFF] px-3 text-sm font-medium text-[#1F1F1F]">

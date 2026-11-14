@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ClinicoRouteImport } from './routes/clinico'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MedicoRouteImport } from './routes/medico'
+import { Route as AuthenticatedAutorizarRouteImport } from './routes/_authenticated/autorizar'
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -30,6 +32,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicoRoute = ClinicoRouteImport.update({
+  id: '/clinico',
+  path: '/clinico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EntrarRoute = EntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
@@ -39,6 +46,11 @@ const MedicoRoute = MedicoRouteImport.update({
   id: '/medico',
   path: '/medico',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAutorizarRoute = AuthenticatedAutorizarRouteImport.update({
+  id: '/autorizar',
+  path: '/autorizar',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCompartilharRoute =
   AuthenticatedCompartilharRouteImport.update({
@@ -82,8 +94,10 @@ const AuthenticatedDocumentosAdicionarRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/clinico': typeof ClinicoRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
+  '/autorizar': typeof AuthenticatedAutorizarRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -94,8 +108,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/clinico': typeof ClinicoRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
+  '/autorizar': typeof AuthenticatedAutorizarRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -108,8 +124,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/clinico': typeof ClinicoRoute
   '/entrar': typeof EntrarRoute
   '/medico': typeof MedicoRoute
+  '/_authenticated/autorizar': typeof AuthenticatedAutorizarRoute
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -122,8 +140,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/clinico'
     | '/entrar'
     | '/medico'
+    | '/autorizar'
     | '/compartilhar'
     | '/inicio'
     | '/perfil'
@@ -134,8 +154,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/clinico'
     | '/entrar'
     | '/medico'
+    | '/autorizar'
     | '/compartilhar'
     | '/inicio'
     | '/perfil'
@@ -147,8 +169,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/clinico'
     | '/entrar'
     | '/medico'
+    | '/_authenticated/autorizar'
     | '/_authenticated/compartilhar'
     | '/_authenticated/inicio'
     | '/_authenticated/perfil'
@@ -161,6 +185,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ClinicoRoute: typeof ClinicoRoute
   EntrarRoute: typeof EntrarRoute
   MedicoRoute: typeof MedicoRoute
 }
@@ -181,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clinico': {
+      id: '/clinico'
+      path: '/clinico'
+      fullPath: '/clinico'
+      preLoaderRoute: typeof ClinicoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/entrar': {
       id: '/entrar'
       path: '/entrar'
@@ -194,6 +226,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/medico'
       preLoaderRoute: typeof MedicoRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/autorizar': {
+      id: '/_authenticated/autorizar'
+      path: '/autorizar'
+      fullPath: '/autorizar'
+      preLoaderRoute: typeof AuthenticatedAutorizarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/compartilhar': {
       id: '/_authenticated/compartilhar'
@@ -248,6 +287,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAutorizarRoute: typeof AuthenticatedAutorizarRoute
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -258,6 +298,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAutorizarRoute: AuthenticatedAutorizarRoute,
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
@@ -273,6 +314,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ClinicoRoute: ClinicoRoute,
   EntrarRoute: EntrarRoute,
   MedicoRoute: MedicoRoute,
 }

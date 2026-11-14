@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity, AlertCircle, ArrowLeft, CalendarDays, ChevronRight, Clock3, FileText,
   FolderOpen, HeartPulse, LayoutDashboard, Loader2, LockKeyhole, LogOut, Pill,
@@ -56,6 +56,7 @@ function initials(name: string): string {
 }
 
 export const Route = createFileRoute("/medico")({
+  validateSearch: (s: Record<string, unknown>): { code?: string } => (typeof s["code"] === "string" ? { code: s["code"] } : {}),
   head: () => ({
     meta: [
       { title: "VITA Clínico — Histórico autorizado do paciente" },
@@ -137,6 +138,21 @@ function Medico() {
   const code = normalizeCode(input);
   const valid = /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code);
 
+  const search = Route.useSearch();
+  const openCode = async (c: string) => {
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(c)) return;
+    setBusy(true); setError("");
+    try {
+      const result = await abrir({ data: { code: c } });
+      if (result.status === "valido") setOpen(result);
+      else setError(result.status === "expirado" ? "Este código expirou. Peça ao paciente para gerar um novo." : result.status === "revogado" ? "O paciente encerrou este acesso." : "Código não encontrado. Confira os caracteres.");
+    } catch { setError("Não foi possível abrir agora. Tente novamente."); } finally { setBusy(false); }
+  };
+  useEffect(() => {
+    if (search.code) { const c = normalizeCode(search.code); setInput(c); void openCode(c); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.code]);
+
   const close = () => {
     setOpen(null); setInput(""); setError(""); setTab("resumo"); setSelectedId(null); setQuery(""); setKind("Todos");
   };
@@ -166,14 +182,8 @@ function Medico() {
             <p className="text-sm font-semibold uppercase tracking-widest text-primary">Acesso profissional</p>
             <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Abrir histórico do paciente</h2>
             <p className="mt-3 text-muted-foreground">Use o código temporário mostrado pelo paciente. Não é necessário criar uma conta.</p>
-            <form className="mt-8 rounded-2xl border bg-card p-5 shadow-soft sm:p-7" onSubmit={async (event) => {
-              event.preventDefault(); if (!valid) return; setBusy(true); setError("");
-              try {
-                const result = await abrir({ data: { code } });
-                if (result.status === "valido") setOpen(result);
-                else setError(result.status === "expirado" ? "Este código expirou. Peça ao paciente para gerar um novo." : result.status === "revogado" ? "O paciente encerrou este acesso." : "Código não encontrado. Confira os caracteres.");
-              } catch { setError("Não foi possível abrir agora. Tente novamente."); } finally { setBusy(false); }
-            }}>
+            <form className="mt-8 rounded-2xl border bg-card p-5 shadow-soft sm:p-7" onSubmit={(event) => { event.preventDefault(); void openCode(code); }}>
+
               <label htmlFor="share-code" className="text-sm font-semibold">Código de acesso</label>
               <input id="share-code" value={input} onChange={(event) => setInput(normalizeCode(event.target.value))} placeholder="XXXX-XXXX" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={9} aria-describedby="code-help"
                 className="mt-3 min-h-16 w-full rounded-xl border bg-background px-4 text-center font-display text-3xl font-semibold tracking-[0.2em] uppercase outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20" />
