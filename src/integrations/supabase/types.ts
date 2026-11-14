@@ -50,9 +50,11 @@ export type Database = {
           code: string
           created_at: string
           doctor_id: string
+          essentials_fields: string[]
           expected_patient_id: string | null
           expires_at: string
           id: string
+          include_essentials: boolean
           include_profile: boolean
           patient_id: string | null
           period_months: number
@@ -67,9 +69,11 @@ export type Database = {
           code: string
           created_at?: string
           doctor_id?: string
+          essentials_fields?: string[]
           expected_patient_id?: string | null
           expires_at: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           patient_id?: string | null
           period_months: number
@@ -84,9 +88,11 @@ export type Database = {
           code?: string
           created_at?: string
           doctor_id?: string
+          essentials_fields?: string[]
           expected_patient_id?: string | null
           expires_at?: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           patient_id?: string | null
           period_months?: number
@@ -301,6 +307,7 @@ export type Database = {
       family_access_grants: {
         Row: {
           basis: string
+          can_edit_profile: boolean
           categories: string[]
           created_at: string
           expires_at: string | null
@@ -313,6 +320,7 @@ export type Database = {
         }
         Insert: {
           basis?: string
+          can_edit_profile?: boolean
           categories?: string[]
           created_at?: string
           expires_at?: string | null
@@ -325,6 +333,7 @@ export type Database = {
         }
         Update: {
           basis?: string
+          can_edit_profile?: boolean
           categories?: string[]
           created_at?: string
           expires_at?: string | null
@@ -474,12 +483,18 @@ export type Database = {
           alcohol: string
           allergies: string
           birth_date: string | null
+          blood_type: string
           conditions: string
+          confirmed_none: string[]
+          emergency_contacts: Json
           family_history: string
+          field_sources: Json
           full_name: string
           height_cm: number | null
           medications: Json
+          organ_donor: string
           questionnaire_completed: boolean
+          sex: string
           smoking: string
           surgeries: string
           updated_at: string
@@ -491,12 +506,18 @@ export type Database = {
           alcohol?: string
           allergies?: string
           birth_date?: string | null
+          blood_type?: string
           conditions?: string
+          confirmed_none?: string[]
+          emergency_contacts?: Json
           family_history?: string
+          field_sources?: Json
           full_name?: string
           height_cm?: number | null
           medications?: Json
+          organ_donor?: string
           questionnaire_completed?: boolean
+          sex?: string
           smoking?: string
           surgeries?: string
           updated_at?: string
@@ -508,17 +529,50 @@ export type Database = {
           alcohol?: string
           allergies?: string
           birth_date?: string | null
+          blood_type?: string
           conditions?: string
+          confirmed_none?: string[]
+          emergency_contacts?: Json
           family_history?: string
+          field_sources?: Json
           full_name?: string
           height_cm?: number | null
           medications?: Json
+          organ_donor?: string
           questionnaire_completed?: boolean
+          sex?: string
           smoking?: string
           surgeries?: string
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      patient_settings: {
+        Row: {
+          default_share_essentials: boolean
+          essentials_fields: string[]
+          guided_mode: boolean
+          large_text: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          default_share_essentials?: boolean
+          essentials_fields?: string[]
+          guided_mode?: boolean
+          large_text?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          default_share_essentials?: boolean
+          essentials_fields?: string[]
+          guided_mode?: boolean
+          large_text?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -580,6 +634,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profile_suggestions: {
+        Row: {
+          confidence: number
+          created_at: string
+          excerpt: string
+          field: string
+          id: string
+          source_document_id: string | null
+          status: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          excerpt?: string
+          field: string
+          id?: string
+          source_document_id?: string | null
+          status?: string
+          user_id: string
+          value: Json
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          excerpt?: string
+          field?: string
+          id?: string
+          source_document_id?: string | null
+          status?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -709,8 +799,10 @@ export type Database = {
           categories: string[]
           code: string
           created_at: string
+          essentials_fields: string[]
           expires_at: string
           id: string
+          include_essentials: boolean
           include_profile: boolean
           period_months: number
           revoked: boolean
@@ -721,8 +813,10 @@ export type Database = {
           categories?: string[]
           code: string
           created_at?: string
+          essentials_fields?: string[]
           expires_at: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           period_months: number
           revoked?: boolean
@@ -733,8 +827,10 @@ export type Database = {
           categories?: string[]
           code?: string
           created_at?: string
+          essentials_fields?: string[]
           expires_at?: string
           id?: string
+          include_essentials?: boolean
           include_profile?: boolean
           period_months?: number
           revoked?: boolean

@@ -47,6 +47,9 @@ const ACTIONS: Record<string, string> = {
   resumo: "abriu seu histórico pelo código", documento: "abriu um documento pelo código",
   profissional_historico: "abriu seu histórico", profissional_documento: "abriu um documento", profissional_envio: "enviou um documento",
   familia_resumo: "viu seus documentos", familia_documento: "viu um documento seu",
+  ficha: "viu sua ficha essencial pelo código", profissional_ficha: "viu sua ficha essencial",
+  sinais: "viu o resumo dos seus dispositivos", profissional_sinais: "viu o resumo dos seus dispositivos",
+  familia_edicao: "alterou seu perfil (você pode desfazer em Perfil)",
 };
 
 export const listAccessLog = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])

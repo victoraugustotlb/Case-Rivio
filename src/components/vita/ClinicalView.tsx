@@ -133,7 +133,7 @@ export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded 
           <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />Anamedis Clínico</span>
           <span className="font-semibold">{profile ? `${profile.full_name.trim() || "Nome não informado"}${age !== null ? ` · ${age} anos` : ""}` : "Identificação não autorizada"}</span>
           <span className="font-mono text-xs text-muted-foreground" title="Identificador desta sessão de acesso">Sessão {opened.session}</span>
-          <span className="text-xs text-muted-foreground">Escopo: {[...CATEGORIES.filter((c) => allowed.has(c.id)).map((c) => c.label), ...(opened.includeProfile ? ["Perfil"] : [])].join(", ") || "—"} · Período: {opened.periodMonths === 60 ? "5 anos" : `${opened.periodMonths} meses`}</span>
+          <span className="text-xs text-muted-foreground">Escopo: {[...CATEGORIES.filter((c) => allowed.has(c.id)).map((c) => c.label), ...(opened.essentials ? ["Ficha essencial"] : []), ...(opened.includeProfile ? ["Perfil"] : [])].join(", ") || "—"} · Período: {opened.periodMonths === 60 ? "5 anos" : `${opened.periodMonths} meses`}</span>
           <span className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"><Eye className="h-3 w-3" aria-hidden />Somente leitura</span>
           <span role="timer" aria-label="Tempo restante do acesso" className={`ml-auto inline-flex items-center gap-1 rounded px-2 py-0.5 font-mono text-xs tabular-nums ${sec < 300 ? "bg-warning-soft font-semibold text-warning" : "bg-muted"}`}><Clock3 className="h-3.5 w-3.5" aria-hidden />{countdown}</span>
           <button type="button" onClick={onClose} className="inline-flex min-h-8 items-center gap-1 rounded border px-2 text-xs hover:bg-muted"><LogOut className="h-3.5 w-3.5" aria-hidden />Sair</button>
@@ -148,6 +148,7 @@ export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded 
 
       <main className="mx-auto max-w-[1400px] p-4">
         {view.tab === "resumo" && opened.profileIncomplete && profile && <p role="status" className="mb-3 rounded border bg-warning-soft px-3 py-2 text-xs">Perfil incompleto: algumas respostas antigas do questionário não puderam ser lidas e aparecem em branco.</p>}
+        {view.tab === "resumo" && opened.essentials && <EssentialsBand items={opened.essentials} />}
         {view.tab === "resumo" && (
           <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
             <Section title="Alergias informadas">{profile ? (profile.allergies.trim() ? <><p className="whitespace-pre-line font-medium">{profile.allergies}</p><div className="mt-1"><OriginTag origin="paciente" /> <span className="text-[11px] text-muted-foreground">· Questionário do paciente</span></div></> : <Empty text="Nenhuma alergia informada pelo paciente." />) : <Locked />}</Section>
@@ -325,5 +326,28 @@ export function AccessEnded({ onBack }: { onBack: () => void }) {
         <button type="button" onClick={onBack} className="mt-5 min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground">Abrir outro código</button>
       </div>
     </main>
+  );
+}
+
+const SOURCE_TEXT: Record<string, string> = { paciente: "Informado pelo paciente", documento: "Do documento", dispositivo: "Do dispositivo", cuidador: "Preenchido por cuidador" };
+const dm = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "America/Sao_Paulo" }) : "");
+
+/** Faixa "Ficha essencial": só o que o paciente informou, sem completar nada. */
+function EssentialsBand({ items }: { items: NonNullable<Opened["essentials"]> }) {
+  return (
+    <section aria-labelledby="ficha-essencial" className="mb-3 rounded border bg-card">
+      <h2 id="ficha-essencial" className="border-b bg-muted px-3 py-1.5 text-xs font-semibold uppercase tracking-wide">Ficha essencial</h2>
+      <dl className="grid gap-x-4 gap-y-2 p-3 sm:grid-cols-2 xl:grid-cols-4">
+        {items.map((e) => (
+          <div key={e.field} className="min-w-0">
+            <dt className="text-[11px] text-muted-foreground">{e.label}</dt>
+            <dd className="font-medium">
+              {e.state === "preenchido" ? e.value : e.state === "nenhum_confirmado" ? `Nenhuma conhecida${e.confirmedAt ? ` (confirmado em ${dm(e.confirmedAt)})` : ""}` : <span className="font-normal italic text-muted-foreground">Não informado pelo paciente</span>}
+            </dd>
+            {e.source && <p className="text-[11px] text-muted-foreground">{e.source.origem === "cuidador" && e.source.por_nome ? `Preenchido por ${e.source.por_nome}` : SOURCE_TEXT[e.source.origem]} · atualizado em {dm(e.source.atualizado_em)}</p>}
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

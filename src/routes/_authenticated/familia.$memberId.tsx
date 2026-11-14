@@ -65,6 +65,7 @@ function Membro() {
             </div>
           ) : undefined} />
         {err && <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm">{err}</p>}
+        {r.canEditProfile && <Link to="/familia/$memberId/perfil" params={{ memberId }} className="inline-flex min-h-12 items-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground">Ajudar a preencher o perfil</Link>}
         {r.scope === "tudo" && (
           <section className="rounded-2xl border bg-card p-5">
             <h2 className="font-semibold">Perfil de saúde</h2>

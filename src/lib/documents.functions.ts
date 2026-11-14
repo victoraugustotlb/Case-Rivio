@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { docVisible, normalizeCode, accessState, profileVisible } from "@/lib/share";
+import { docVisible, normalizeCode, accessState, profileVisible, essentialsVisible } from "@/lib/share";
+import { filterEssentials, type EssentialEntry } from "@/lib/profile-completion";
 import { parseProfileLenient, type HealthProfile } from "@/lib/profile";
 import { LOOKUP_WINDOW_MIN, countsAsAttempt, lookupBlocked } from "@/lib/codes";
 
@@ -155,9 +156,17 @@ export async function buildOpened(rawCode: string, viewer?: { viewerId: string; 
     }
   }
   await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer?.action ?? "resumo", viewer_id: viewer?.viewerId ?? null });
+  // Ficha essencial: só se o código a incluiu ao ser criado, e só os campos daquele momento.
+  const essentialFields = essentialsVisible(share);
+  let essentials: EssentialEntry[] | null = null;
+  if (essentialFields.length) {
+    const { data: row } = await supabaseAdmin.from("patient_profiles").select("*").eq("user_id", share.user_id).maybeSingle();
+    essentials = filterEssentials(row ? parseProfileLenient(row).profile : null, essentialFields);
+    await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer ? "profissional_ficha" : "ficha", viewer_id: viewer?.viewerId ?? null });
+  }
   const deviceSignals = await deviceSignalSummaries(supabaseAdmin, share);
   if (deviceSignals.length) await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer ? "profissional_sinais" : "sinais", viewer_id: viewer?.viewerId ?? null });
-  return { deviceSignals, status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, profileIncomplete, docs };
+  return { essentials, deviceSignals, status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, profileIncomplete, docs };
 }
 
 /** Acesso do médico: valida o código e devolve só o que o paciente autorizou. */

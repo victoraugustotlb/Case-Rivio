@@ -1,3 +1,4 @@
+import { ESSENTIAL_FIELDS } from "./profile-completion";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -101,7 +102,7 @@ export const lookupAccessRequest = createServerFn({ method: "POST" })
 
 export const respondAccessRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => codeSchema.extend({ accept: z.boolean(), allowUpload: z.boolean().default(false) }).parse(d))
+  .inputValidator((d: unknown) => codeSchema.extend({ accept: z.boolean(), allowUpload: z.boolean().default(false), includeEssentials: z.boolean().default(false), essentialsFields: z.array(z.enum(ESSENTIAL_FIELDS)).max(ESSENTIAL_FIELDS.length).default([]) }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin, r, reason } = await findOpenRequest(data.code, context.userId);
     if (!r) throw new Error(requestLookupMessage(reason as RequestLookupReason));
@@ -112,6 +113,7 @@ export const respondAccessRequest = createServerFn({ method: "POST" })
     }
     const { data: share, error } = await supabaseAdmin.from("share_codes").insert({
       user_id: context.userId, code: formatShareCode(), categories: r.categories, signals: r.signals, include_profile: r.include_profile,
+      include_essentials: data.includeEssentials && data.essentialsFields.length > 0, essentials_fields: data.includeEssentials ? data.essentialsFields : [],
       period_months: r.period_months, expires_at: new Date(Date.now() + AUTHORIZED_HOURS * 3600_000).toISOString(),
     }).select("id").single();
     if (error || !share) throw new Error("Não foi possível liberar o acesso.");

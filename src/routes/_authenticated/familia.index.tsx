@@ -163,11 +163,12 @@ function AccessRequest({ id, name, onDone }: { id: string; name: string; onDone:
   const [scope, setScope] = useState<"tudo" | "categorias">("tudo");
   const [cats, setCats] = useState<DocKind[]>([]);
   const [duration, setDuration] = useState<GrantDuration>("30d");
+  const [canEdit, setCanEdit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const send = async (approve: boolean) => {
     setBusy(true); setErr("");
-    const r = await respond({ data: { id, approve, scope, categories: cats, duration } });
+    const r = await respond({ data: { id, approve, scope, categories: cats, duration, canEditProfile: approve && canEdit } });
     if (!r.ok) setErr(r.error); else await onDone();
     setBusy(false);
   };
@@ -183,7 +184,11 @@ function AccessRequest({ id, name, onDone }: { id: string; name: string; onDone:
       {scope === "categorias" && <div className="mt-2 flex flex-wrap gap-2">{DOC_KINDS.map((k) => <button key={k} type="button" aria-pressed={cats.includes(k)} className={chip(cats.includes(k))} onClick={() => setCats((l) => (l.includes(k) ? l.filter((x) => x !== k) : [...l, k]))}>{k}</button>)}</div>}
       <p className="mt-3 text-sm font-medium">Por quanto tempo</p>
       <div className="mt-1 flex flex-wrap gap-2">{(Object.keys(GRANT_DURATIONS) as GrantDuration[]).map((d) => <button key={d} type="button" className={chip(duration === d)} onClick={() => setDuration(d)}>{GRANT_DURATIONS[d]}</button>)}</div>
-      <p className="mt-2 text-xs text-muted-foreground">Acesso somente leitura. Você pode revogar a qualquer momento em Conta e privacidade.</p>
+      <label className="mt-3 flex cursor-pointer items-start justify-between gap-4 rounded-xl border bg-card p-3">
+        <span className="text-sm"><span className="block font-semibold">Pode me ajudar a preencher meu perfil</span>{name} poderá editar seu perfil de saúde. Cada alteração aparece como "Preenchido por {name}" e você pode desfazer.</span>
+        <input type="checkbox" role="switch" checked={canEdit} onChange={(e) => setCanEdit(e.target.checked)} className="mt-1 h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-muted transition before:block before:h-5 before:w-5 before:translate-x-0.5 before:rounded-full before:bg-card before:shadow before:transition checked:bg-primary checked:before:translate-x-5" />
+      </label>
+      <p className="mt-2 text-xs text-muted-foreground">{canEdit ? "Leitura e ajuda no perfil." : "Acesso somente leitura."} Você pode revogar a qualquer momento em Minha família.</p>
       {err && <p role="alert" className="mt-2 text-sm">{err}</p>}
       <div className="mt-3 flex gap-2">
         <button type="button" disabled={busy} onClick={() => send(true)} className="min-h-11 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50">Autorizar</button>

@@ -39,7 +39,9 @@ import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authent
 import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
 import { Route as AuthenticatedFamiliaIndexRouteImport } from './routes/_authenticated/familia.index'
 import { Route as AuthenticatedFamiliaMemberIdRouteImport } from './routes/_authenticated/familia.$memberId'
+import { Route as AuthenticatedPerfilGuiadoRouteImport } from './routes/_authenticated/perfil_.guiado'
 import { Route as ClinicoPacienteIdRouteImport } from './routes/clinico/paciente.$id'
+import { Route as AuthenticatedFamiliaMemberIdPerfilRouteImport } from './routes/_authenticated/familia_.$memberId.perfil'
 import { Route as ApiPublicWearablesIngestRouteImport } from './routes/api/public/wearables/ingest'
 import { Route as ApiPublicWearablesRetentionRouteImport } from './routes/api/public/wearables/retention'
 import { Route as ApiPublicWearablesWebhookJunctionRouteImport } from './routes/api/public/wearables/webhook/junction'
@@ -205,11 +207,23 @@ const AuthenticatedFamiliaMemberIdRoute =
     path: '/familia/$memberId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPerfilGuiadoRoute =
+  AuthenticatedPerfilGuiadoRouteImport.update({
+    id: '/perfil_/guiado',
+    path: '/perfil/guiado',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ClinicoPacienteIdRoute = ClinicoPacienteIdRouteImport.update({
   id: '/paciente/$id',
   path: '/paciente/$id',
   getParentRoute: () => ClinicoRoute,
 } as any)
+const AuthenticatedFamiliaMemberIdPerfilRoute =
+  AuthenticatedFamiliaMemberIdPerfilRouteImport.update({
+    id: '/familia_/$memberId/perfil',
+    path: '/familia/$memberId/perfil',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicWearablesIngestRoute =
   ApiPublicWearablesIngestRouteImport.update({
     id: '/api/public/wearables/ingest',
@@ -255,11 +269,13 @@ export interface FileRoutesByFullPath {
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
+  '/perfil/guiado': typeof AuthenticatedPerfilGuiadoRoute
   '/clinico/paciente/$id': typeof ClinicoPacienteIdRoute
   '/consultas/': typeof AuthenticatedConsultasIndexRoute
   '/dispositivos/': typeof AuthenticatedDispositivosIndexRoute
   '/documentos/': typeof AuthenticatedDocumentosIndexRoute
   '/familia/': typeof AuthenticatedFamiliaIndexRoute
+  '/familia/$memberId/perfil': typeof AuthenticatedFamiliaMemberIdPerfilRoute
   '/api/public/wearables/ingest': typeof ApiPublicWearablesIngestRoute
   '/api/public/wearables/retention': typeof ApiPublicWearablesRetentionRoute
   '/api/public/wearables/webhook/junction': typeof ApiPublicWearablesWebhookJunctionRoute
@@ -289,11 +305,13 @@ export interface FileRoutesByTo {
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
+  '/perfil/guiado': typeof AuthenticatedPerfilGuiadoRoute
   '/clinico/paciente/$id': typeof ClinicoPacienteIdRoute
   '/consultas': typeof AuthenticatedConsultasIndexRoute
   '/dispositivos': typeof AuthenticatedDispositivosIndexRoute
   '/documentos': typeof AuthenticatedDocumentosIndexRoute
   '/familia': typeof AuthenticatedFamiliaIndexRoute
+  '/familia/$memberId/perfil': typeof AuthenticatedFamiliaMemberIdPerfilRoute
   '/api/public/wearables/ingest': typeof ApiPublicWearablesIngestRoute
   '/api/public/wearables/retention': typeof ApiPublicWearablesRetentionRoute
   '/api/public/wearables/webhook/junction': typeof ApiPublicWearablesWebhookJunctionRoute
@@ -326,11 +344,13 @@ export interface FileRoutesById {
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/_authenticated/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
+  '/_authenticated/perfil_/guiado': typeof AuthenticatedPerfilGuiadoRoute
   '/clinico/paciente/$id': typeof ClinicoPacienteIdRoute
   '/_authenticated/consultas/': typeof AuthenticatedConsultasIndexRoute
   '/_authenticated/dispositivos/': typeof AuthenticatedDispositivosIndexRoute
   '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
   '/_authenticated/familia/': typeof AuthenticatedFamiliaIndexRoute
+  '/_authenticated/familia_/$memberId/perfil': typeof AuthenticatedFamiliaMemberIdPerfilRoute
   '/api/public/wearables/ingest': typeof ApiPublicWearablesIngestRoute
   '/api/public/wearables/retention': typeof ApiPublicWearablesRetentionRoute
   '/api/public/wearables/webhook/junction': typeof ApiPublicWearablesWebhookJunctionRoute
@@ -363,11 +383,13 @@ export interface FileRouteTypes {
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/familia/$memberId'
+    | '/perfil/guiado'
     | '/clinico/paciente/$id'
     | '/consultas/'
     | '/dispositivos/'
     | '/documentos/'
     | '/familia/'
+    | '/familia/$memberId/perfil'
     | '/api/public/wearables/ingest'
     | '/api/public/wearables/retention'
     | '/api/public/wearables/webhook/junction'
@@ -397,11 +419,13 @@ export interface FileRouteTypes {
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/familia/$memberId'
+    | '/perfil/guiado'
     | '/clinico/paciente/$id'
     | '/consultas'
     | '/dispositivos'
     | '/documentos'
     | '/familia'
+    | '/familia/$memberId/perfil'
     | '/api/public/wearables/ingest'
     | '/api/public/wearables/retention'
     | '/api/public/wearables/webhook/junction'
@@ -433,11 +457,13 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/adicionar'
     | '/_authenticated/familia/$memberId'
+    | '/_authenticated/perfil_/guiado'
     | '/clinico/paciente/$id'
     | '/_authenticated/consultas/'
     | '/_authenticated/dispositivos/'
     | '/_authenticated/documentos/'
     | '/_authenticated/familia/'
+    | '/_authenticated/familia_/$memberId/perfil'
     | '/api/public/wearables/ingest'
     | '/api/public/wearables/retention'
     | '/api/public/wearables/webhook/junction'
@@ -666,12 +692,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFamiliaMemberIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/perfil_/guiado': {
+      id: '/_authenticated/perfil_/guiado'
+      path: '/perfil/guiado'
+      fullPath: '/perfil/guiado'
+      preLoaderRoute: typeof AuthenticatedPerfilGuiadoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/clinico/paciente/$id': {
       id: '/clinico/paciente/$id'
       path: '/paciente/$id'
       fullPath: '/clinico/paciente/$id'
       preLoaderRoute: typeof ClinicoPacienteIdRouteImport
       parentRoute: typeof ClinicoRoute
+    }
+    '/_authenticated/familia_/$memberId/perfil': {
+      id: '/_authenticated/familia_/$memberId/perfil'
+      path: '/familia/$memberId/perfil'
+      fullPath: '/familia/$memberId/perfil'
+      preLoaderRoute: typeof AuthenticatedFamiliaMemberIdPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/wearables/ingest': {
       id: '/api/public/wearables/ingest'
@@ -712,10 +752,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
   AuthenticatedFamiliaMemberIdRoute: typeof AuthenticatedFamiliaMemberIdRoute
+  AuthenticatedPerfilGuiadoRoute: typeof AuthenticatedPerfilGuiadoRoute
   AuthenticatedConsultasIndexRoute: typeof AuthenticatedConsultasIndexRoute
   AuthenticatedDispositivosIndexRoute: typeof AuthenticatedDispositivosIndexRoute
   AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
   AuthenticatedFamiliaIndexRoute: typeof AuthenticatedFamiliaIndexRoute
+  AuthenticatedFamiliaMemberIdPerfilRoute: typeof AuthenticatedFamiliaMemberIdPerfilRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -734,10 +776,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
   AuthenticatedFamiliaMemberIdRoute: AuthenticatedFamiliaMemberIdRoute,
+  AuthenticatedPerfilGuiadoRoute: AuthenticatedPerfilGuiadoRoute,
   AuthenticatedConsultasIndexRoute: AuthenticatedConsultasIndexRoute,
   AuthenticatedDispositivosIndexRoute: AuthenticatedDispositivosIndexRoute,
   AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
   AuthenticatedFamiliaIndexRoute: AuthenticatedFamiliaIndexRoute,
+  AuthenticatedFamiliaMemberIdPerfilRoute:
+    AuthenticatedFamiliaMemberIdPerfilRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

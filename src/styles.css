@@ -199,3 +199,19 @@
   filter: blur(7px);
   user-select: none;
 }
+
+/* Configuração "Texto grande" (patient_settings.large_text): fonte base maior e alvos de toque de 56 px. */
+html.large-text {
+  font-size: 118.75%;
+}
+html.large-text :where(button, [role="switch"], [role="checkbox"], input, select, textarea) {
+  min-height: 3.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

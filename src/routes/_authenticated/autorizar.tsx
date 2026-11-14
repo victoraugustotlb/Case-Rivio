@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, Loader2, ShieldCheck, Stethoscope } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
+import { EssentialsPicker, useEssentialsChoice } from "@/components/vita/EssentialsPicker";
 import { lookupAccessRequest, respondAccessRequest } from "@/lib/clinic.functions";
 import { AUTHORIZED_HOURS, formatRequestCode, isRequestCode, normalizeRequestCode } from "@/lib/clinic";
 import { REQUEST_CODE_LABEL, classifyCodeInput, requestLookupMessage } from "@/lib/codes";
@@ -35,6 +36,7 @@ function Autorizar() {
   const [error, setError] = useState("");
   const [done, setDone] = useState<"ok" | "no" | null>(null);
   const [allowUpload, setAllowUpload] = useState(false);
+  const [essentials, setEssentials] = useEssentialsChoice();
   const lookup = useServerFn(lookupAccessRequest);
   const respond = useServerFn(respondAccessRequest);
   const qc = useQueryClient();
@@ -49,7 +51,7 @@ function Autorizar() {
   };
   const responder = async (accept: boolean) => {
     setBusy(true); setError("");
-    try { await respond({ data: { code, accept, allowUpload: accept && allowUpload } }); setDone(accept ? "ok" : "no"); qc.invalidateQueries(); }
+    try { await respond({ data: { code, accept, allowUpload: accept && allowUpload, includeEssentials: accept && essentials.include && essentials.fields.length > 0, essentialsFields: essentials.fields } }); setDone(accept ? "ok" : "no"); qc.invalidateQueries(); }
     catch (err) { setError(err instanceof Error ? err.message : "Não foi possível responder."); } finally { setBusy(false); }
   };
 
@@ -85,6 +87,7 @@ function Autorizar() {
               {found.signals.map((s) => <li key={s}>• {SIG[s] ?? s} (dispositivos)</li>)}
             </ul>
             <p className="mt-3 text-sm text-muted-foreground">Documentos dos últimos {found.periodMonths === 60 ? "5 anos" : `${found.periodMonths} meses`} · acesso por {AUTHORIZED_HOURS} horas</p>
+            <div className="mt-5"><EssentialsPicker value={essentials} onChange={setEssentials} title="Ficha essencial (sua escolha)" /></div>
             {found.requestUpload && (
               <label className="mt-5 flex cursor-pointer items-start justify-between gap-4 rounded-xl border p-4">
                 <span className="text-sm"><span className="block font-semibold">Permissão para enviar documentos</span>Permitir que este profissional adicione documentos ao meu histórico enquanto o acesso estiver ativo</span>

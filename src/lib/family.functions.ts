@@ -4,9 +4,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { normalizeCard, isCardNumber } from "./accounts";
-import { ageFromBirthDate, profileSchema } from "./profile";
-import { canShareFor, canViewMember, decideFamilyRequest, familyKey, findHolder, grantExpiry, kindAllowed, resolveFamily, type FamilyGrant, type FamilyMember, type FamilyMembership } from "./family";
+import { ageFromBirthDate, emptyProfile, parseProfileLenient, profileSchema } from "./profile";
+import { canEditMember, canShareFor, canViewMember, decideFamilyRequest, familyKey, findHolder, grantExpiry, kindAllowed, resolveFamily, type FamilyGrant, type FamilyMember, type FamilyMembership } from "./family";
 import { formatShareCode, validateShare } from "./share";
+import { writeProfile } from "./profile-write";
+import { ESSENTIAL_FIELDS } from "./profile-completion";
 
 const auth = requireSupabaseAuth;
 async function admin() { return (await import("@/integrations/supabase/client.server")).supabaseAdmin; }
@@ -44,11 +46,14 @@ async function decide(sb: Admin, viewerId: string, ownerId: string) {
   const fam = await loadFamily(sb, viewerId);
   const ownerRow = fam?.rows.find((r) => r.user_id === ownerId);
   const viewerRow = fam?.rows.find((r) => r.user_id === viewerId);
-  if (!fam || !ownerRow || !viewerRow) return { decision: { allowed: false as const, reason: "outra_familia" as const }, info: null };
+  if (!fam || !ownerRow || !viewerRow) return { decision: { allowed: false as const, reason: "outra_familia" as const }, info: null, canEdit: false };
   const info = await names(sb, [viewerId, ownerId]);
   const { data: g } = await sb.from("family_access_grants").select("*").eq("owner_id", ownerId).eq("viewer_id", viewerId).eq("basis", "consentimento").order("created_at", { ascending: false }).limit(1).maybeSingle();
-  const decision = canViewMember(asMember(viewerRow, info.get(viewerId)?.birth ?? null), asMember(ownerRow, info.get(ownerId)?.birth ?? null), (g as FamilyGrant | null) ?? null);
-  return { decision, info };
+  const viewer = asMember(viewerRow, info.get(viewerId)?.birth ?? null);
+  const owner = asMember(ownerRow, info.get(ownerId)?.birth ?? null);
+  const grant = (g as (FamilyGrant & { can_edit_profile?: boolean }) | null) ?? null;
+  const decision = canViewMember(viewer, owner, grant);
+  return { decision, info, canEdit: canEditMember(viewer, owner, grant) };
 }
 
 export const getFamily = createServerFn({ method: "POST" }).middleware([auth]).handler(async ({ context }) => {
@@ -149,6 +154,7 @@ export const respondMemberAccess = createServerFn({ method: "POST" }).middleware
     scope: z.enum(["tudo", "categorias"]).default("tudo"),
     categories: z.array(z.enum(["Exame", "Laudo", "Consulta", "Receita", "Vacina"])).max(5).default([]),
     duration: z.enum(["30d", "6m", "sem_prazo"]).default("30d"),
+    canEditProfile: z.boolean().default(false),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const sb = await admin();
@@ -156,7 +162,7 @@ export const respondMemberAccess = createServerFn({ method: "POST" }).middleware
     if (!g || g.owner_id !== context.userId || g.status !== "pendente") return { ok: false as const, error: "Pedido não encontrado ou já respondido." };
     if (data.approve && data.scope === "categorias" && data.categories.length === 0) return { ok: false as const, error: "Escolha ao menos uma categoria." };
     await sb.from("family_access_grants").update(data.approve
-      ? { status: "ativo", scope: data.scope, categories: data.scope === "tudo" ? [] : data.categories, expires_at: grantExpiry(data.duration) }
+      ? { status: "ativo", scope: data.scope, categories: data.scope === "tudo" ? [] : data.categories, expires_at: grantExpiry(data.duration), can_edit_profile: data.canEditProfile }
       : { status: "recusado" }).eq("id", g.id);
     return { ok: true as const };
   });
@@ -173,7 +179,7 @@ export const getMemberRecords = createServerFn({ method: "POST" }).middleware([a
   .inputValidator((d: unknown) => z.object({ memberId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const sb = await admin();
-    const { decision, info } = await decide(sb, context.userId, data.memberId);
+    const { decision, info, canEdit } = await decide(sb, context.userId, data.memberId);
     const name = info?.get(data.memberId)?.name || "Familiar";
     if (!decision.allowed || decision.basis === "proprio") return { allowed: false as const, name, reason: decision.allowed ? "proprio" : decision.reason };
     const [{ data: docs }, { data: prof }] = await Promise.all([
@@ -183,7 +189,7 @@ export const getMemberRecords = createServerFn({ method: "POST" }).middleware([a
     await sb.from("access_logs").insert({ user_id: data.memberId, viewer_id: context.userId, action: "familia_resumo" });
     const parsed = prof ? profileSchema.safeParse({ ...prof, medications: prof.medications ?? [] }) : null;
     return {
-      allowed: true as const, name, basis: decision.basis, canWrite: decision.canWrite, canShare: canShareFor(decision),
+      allowed: true as const, name, basis: decision.basis, canWrite: decision.canWrite, canEditProfile: canEdit, canShare: canShareFor(decision),
       scope: decision.scope, categories: decision.categories, age: ageFromBirthDate(info?.get(data.memberId)?.birth ?? null),
       documents: (docs ?? []).filter((d) => kindAllowed(decision, d.kind)),
       profile: parsed?.success ? parsed.data : null,
@@ -235,18 +241,49 @@ export const createMinorShareCode = createServerFn({ method: "POST" }).middlewar
     categories: z.array(z.enum(["exames", "laudos", "consultas", "receitas", "vacinas"])).max(5),
     signals: z.array(z.enum(["fc", "sono", "spo2", "passos", "pressao", "glicose"])).max(6),
     includeProfile: z.boolean(), periodMonths: z.number().int(), validityHours: z.number().int(),
+    includeEssentials: z.boolean().default(false), essentialsFields: z.array(z.enum(ESSENTIAL_FIELDS)).max(ESSENTIAL_FIELDS.length).default([]),
   }).parse(d))
   .handler(async ({ data, context }) => {
-    const errs = validateShare({ categories: data.categories, signals: data.signals, includeProfile: data.includeProfile, periodMonths: data.periodMonths, validityHours: data.validityHours } as never);
+    const errs = validateShare({ categories: data.categories, signals: data.signals, includeProfile: data.includeProfile, includeEssentials: data.includeEssentials && data.essentialsFields.length > 0, periodMonths: data.periodMonths, validityHours: data.validityHours } as never);
     if (errs.length) return { ok: false as const, error: errs[0]! };
     const sb = await admin();
     const { decision } = await decide(sb, context.userId, data.memberId);
     if (!canShareFor(decision) || (decision.allowed && decision.basis === "proprio")) return { ok: false as const, error: "Só o responsável legal de um menor gera código para o perfil dele." };
     for (let i = 0; i < 3; i++) {
       const code = formatShareCode();
-      const { error } = await sb.from("share_codes").insert({ user_id: data.memberId, code, categories: data.categories, signals: data.signals, include_profile: data.includeProfile, period_months: data.periodMonths, expires_at: new Date(Date.now() + data.validityHours * 3600_000).toISOString() });
+      const { error } = await sb.from("share_codes").insert({ user_id: data.memberId, code, categories: data.categories, signals: data.signals, include_profile: data.includeProfile, include_essentials: data.includeEssentials && data.essentialsFields.length > 0, essentials_fields: data.includeEssentials ? data.essentialsFields : [], period_months: data.periodMonths, expires_at: new Date(Date.now() + data.validityHours * 3600_000).toISOString() });
       if (!error) return { ok: true as const, code };
       if (error.code !== "23505") break;
     }
     return { ok: false as const, error: "Não foi possível gerar o código. Tente novamente." };
+  });
+
+/** Perfil de outra pessoa para edição pelo cuidador (só com canEditMember). */
+export const getMemberProfileForEdit = createServerFn({ method: "POST" }).middleware([auth])
+  .inputValidator((d: unknown) => z.object({ memberId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const sb = await admin();
+    const { info, canEdit } = await decide(sb, context.userId, data.memberId);
+    const name = info?.get(data.memberId)?.name || "Familiar";
+    if (!canEdit || data.memberId === context.userId) return { ok: false as const, name };
+    const { data: row } = await sb.from("patient_profiles").select("*").eq("user_id", data.memberId).maybeSingle();
+    return { ok: true as const, name, profile: row ? parseProfileLenient(row).profile : null };
+  });
+
+/** Edição pelo cuidador: origem "cuidador", nome de quem preencheu e registro em access_logs. O dono pode desfazer. */
+export const saveMemberProfile = createServerFn({ method: "POST" }).middleware([auth])
+  .inputValidator((d: unknown) => z.object({ memberId: z.string().uuid(), patch: z.record(z.string(), z.unknown()) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const sb = await admin();
+    const { info, canEdit } = await decide(sb, context.userId, data.memberId);
+    if (!canEdit || data.memberId === context.userId) return { ok: false as const, error: "Você não tem permissão para editar este perfil." };
+    const { data: row } = await sb.from("patient_profiles").select("*").eq("user_id", data.memberId).maybeSingle();
+    const prev = row ? parseProfileLenient(row).profile : null;
+    const base = prev ?? { ...emptyProfile, full_name: info?.get(data.memberId)?.name ?? "" };
+    const { field_sources: _ignored, ...patch } = data.patch;
+    const parsed = profileSchema.safeParse({ ...base, ...patch });
+    if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0]?.message ?? "Confira a resposta." };
+    const profile = await writeProfile(sb, data.memberId, prev, { ...parsed.data, field_sources: base.field_sources }, { origem: "cuidador", por_nome: info?.get(context.userId)?.name || "Familiar" });
+    await sb.from("access_logs").insert({ user_id: data.memberId, viewer_id: context.userId, action: "familia_edicao" });
+    return { ok: true as const, profile };
   });

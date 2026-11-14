@@ -9,6 +9,7 @@ import { appointmentsQuery } from "@/lib/scheduling-query";
 import { isTomorrow } from "@/lib/scheduling";
 import { accountQuery } from "@/lib/account-query";
 import { familyQuery } from "@/lib/family-query";
+import { patientSettingsQuery } from "@/lib/patient-settings-query";
 
 const nav = [
   { label: "Início", to: "/inicio", icon: Home },
@@ -38,6 +39,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => { const u = data.session?.user; setName((u?.user_metadata?.["full_name"] as string) || u?.email || ""); });
   }, []);
   const account = useQuery(accountQuery);
+  // "Texto grande": aumenta a fonte base e os alvos de toque no app todo.
+  const settings = useQuery({ ...patientSettingsQuery, enabled: account.data?.type !== "doctor" && account.data?.type !== "laboratory" });
+  const largeText = !!settings.data?.large_text;
+  useEffect(() => { document.documentElement.classList.toggle("large-text", largeText); }, [largeText]);
   const isPlan = account.data?.type === "patient_plan";
   const family = useQuery({ ...familyQuery, enabled: isPlan });
   const pending = (family.data?.incomingRequests.length ?? 0) + (family.data?.accessRequests.length ?? 0);

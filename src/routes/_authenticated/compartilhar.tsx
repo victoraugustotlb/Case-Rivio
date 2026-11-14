@@ -9,6 +9,7 @@ import { createMinorShareCode } from "@/lib/family.functions";
 import { attachShareToAppointment } from "@/lib/scheduling.functions";
 import { createShareCode } from "@/lib/share.functions";
 import { PATIENT_CODE_LABEL, createShareMessage } from "@/lib/codes";
+import { EssentialsPicker, essentialsSummary, useEssentialsChoice } from "@/components/vita/EssentialsPicker";
 import { PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
 
 export const Route = createFileRoute("/_authenticated/compartilhar")({
@@ -62,16 +63,27 @@ function Compartilhar() {
   const [revoked, setRevoked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState("");
-  const errors = validateShare({ categories, signals, includeProfile, periodMonths, validityHours });
+  const [essentials, setEssentials] = useEssentialsChoice();
+  const [confirming, setConfirming] = useState(false);
+  const includeEssentials = essentials.include && essentials.fields.length > 0;
+  const ess = { includeEssentials, essentialsFields: includeEssentials ? essentials.fields : [] };
+  const errors = validateShare({ categories, signals, includeProfile, includeEssentials, periodMonths, validityHours });
+  const summary = [
+    includeEssentials && `Ficha essencial: ${essentialsSummary(essentials.fields)}.`,
+    includeProfile && "Questionário completo: hábitos e histórico familiar.",
+    categories.length > 0 && `Documentos: ${cats.filter((c) => categories.includes(c.id)).map((c) => c.label.toLowerCase()).join(", ")}, dos últimos ${periodLabel(periodMonths)}.`,
+    signals.length > 0 && `Resumo de dispositivos: ${sigs.filter((x) => signals.includes(x.id)).map((x) => x.label).join(", ")}.`,
+    untilAppt ? `O acesso vale até o fim da consulta (${untilLabel}).` : `O acesso vale por ${validityLabel(validityHours)}.`,
+  ].filter(Boolean) as string[];
   const gerar = async () => {
-    setBusy(true); setFail("");
+    setBusy(true); setFail(""); setConfirming(false);
     try {
       if (para) {
-        const r = await createMinor({ data: { memberId: para, categories, signals, includeProfile, periodMonths, validityHours } });
+        const r = await createMinor({ data: { memberId: para, categories, signals, includeProfile, ...ess, periodMonths, validityHours } });
         if (r.ok) setCode(r.code); else setFail(r.error);
         return;
       }
-      const r = await createCode({ data: { categories, signals, includeProfile, periodMonths, validityHours, ...(untilAppt ? { until: untilAppt } : {}) } });
+      const r = await createCode({ data: { categories, signals, includeProfile, ...ess, periodMonths, validityHours, ...(untilAppt ? { until: untilAppt } : {}) } });
       if (!r.ok) { setFail(createShareMessage(r.error)); return; }
       if (untilAppt && consulta) await attach({ data: { id: consulta, code: r.code } }).catch(() => undefined);
       setCode(r.code);
@@ -88,7 +100,8 @@ function Compartilhar() {
             <p className="mt-2 font-display text-5xl font-bold tracking-widest text-primary">{code}</p>
             <p className="mt-4 text-sm text-muted-foreground">O médico acessa em <strong>{typeof window !== "undefined" ? window.location.host : ""}/medico</strong> no computador dele.</p>
             <ul className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
-              {includeProfile && <li className="rounded-full bg-primary-soft px-2 py-1 text-primary">Perfil de saúde</li>}
+              {includeEssentials && <li className="rounded-full bg-primary-soft px-2 py-1 text-primary">Ficha essencial</li>}
+              {includeProfile && <li className="rounded-full bg-primary-soft px-2 py-1 text-primary">Questionário completo</li>}
               {[...cats.filter((c) => categories.includes(c.id)), ...sigs.filter((s) => signals.includes(s.id))].map((x) => <li key={x.id} className="rounded-full bg-muted px-2 py-1">{x.label}</li>)}
               <li className="rounded-full bg-muted px-2 py-1">Últimos {periodLabel(periodMonths)}</li>
             </ul>
@@ -108,43 +121,56 @@ function Compartilhar() {
   return (
     <AppShell>
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageTitle title="Compartilhar com médico" subtitle="Você escolhe o que ele vê. Nada vem marcado." />
+        <PageTitle title="Compartilhar com médico" subtitle="Você escolhe o que ele vê e por quanto tempo." />
         {untilAppt && <p role="status" className="mb-4 rounded-lg bg-primary-soft p-3 text-sm">Compartilhamento para a consulta agendada. Escolha o que o profissional poderá ver.</p>}
         {para && <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm">Este código abre o histórico do seu dependente menor de idade, gerado por você como responsável legal.</p>}
+        <EssentialsPicker value={essentials} onChange={setEssentials} title="1. Ficha essencial" />
         <section className="rounded-2xl border bg-card p-5">
           <div className="flex items-start gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary"><UserRound className="h-5 w-5" aria-hidden /></span>
-            <div className="min-w-0"><h2 className="font-semibold">1. Perfil de saúde</h2><p className="mt-1 text-sm text-muted-foreground">Inclui dados pessoais, medicamentos, alergias, histórico e hábitos do questionário.</p></div>
+            <div className="min-w-0"><h2 className="font-semibold">2. Questionário completo (opcional)</h2><p className="mt-1 text-sm text-muted-foreground">Hábitos (tabagismo, álcool, atividade física) e histórico familiar.</p></div>
           </div>
           <button type="button" role="switch" aria-checked={includeProfile} onClick={() => setIncludeProfile((value) => !value)} className={`mt-4 flex min-h-12 w-full items-center justify-between gap-4 rounded-lg border px-4 text-left text-sm font-medium ${includeProfile ? "border-primary bg-primary-soft text-primary" : "bg-card hover:bg-muted"}`}>
-            <span>{includeProfile ? "Perfil autorizado neste código" : "Não compartilhar o perfil"}</span>
+            <span>{includeProfile ? "Questionário autorizado neste código" : "Não compartilhar o questionário"}</span>
             <span aria-hidden className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${includeProfile ? "bg-primary" : "bg-muted-foreground/30"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-card transition-transform ${includeProfile ? "translate-x-1 left-1/2" : "left-1"}`} /></span>
           </button>
           <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />Códigos já criados não mudam: este consentimento vale apenas para o novo código.</p>
         </section>
         <section className="rounded-2xl border bg-card p-5">
-          <h2 className="font-semibold">2. Documentos</h2>
+          <h2 className="font-semibold">3. Documentos</h2>
           <div className="mt-3 flex flex-wrap gap-2">{cats.map((c) => <Chip key={c.id} on={categories.includes(c.id)} onClick={() => setCategories((l) => toggle(l, c.id))}>{c.label}</Chip>)}</div>
         </section>
         <section className="rounded-2xl border bg-card p-5">
-          <h2 className="font-semibold">3. Dados de dispositivos</h2>
+          <h2 className="font-semibold">4. Dados de dispositivos</h2>
           <div className="mt-3 flex flex-wrap gap-2">{sigs.map((s) => <Chip key={s.id} on={signals.includes(s.id)} onClick={() => setSignals((l) => toggle(l, s.id))}>{s.label}</Chip>)}</div>
         </section>
         <div className="grid gap-6 sm:grid-cols-2">
           <section className="rounded-2xl border bg-card p-5">
-            <h2 className="font-semibold">4. Dados de quando</h2>
+            <h2 className="font-semibold">5. Dados de quando</h2>
             <div className="mt-3 grid grid-cols-2 gap-2">{PERIOD_OPTIONS.map((m) => <Chip key={m} on={periodMonths === m} onClick={() => setPeriod(m)}>{periodLabel(m)}</Chip>)}</div>
           </section>
           <section className="rounded-2xl border bg-card p-5">
-            <h2 className="font-semibold">5. Acesso válido por</h2>
+            <h2 className="font-semibold">6. Acesso válido por</h2>
             {untilAppt ? <p className="mt-3 rounded-lg bg-primary-soft p-3 text-sm text-primary">Até o fim da consulta agendada ({untilLabel}).</p> : <div className="mt-3 grid grid-cols-2 gap-2">{VALIDITY_OPTIONS.map((h) => <Chip key={h} on={validityHours === h} onClick={() => setValidity(h)}>{validityLabel(h)}</Chip>)}</div>}
           </section>
         </div>
         <p className="flex gap-2 rounded-xl bg-primary-soft p-4 text-sm"><Info className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Encerrar o acesso impede novas consultas, mas não desfaz o que o médico já viu.</p>
         {errors.length > 0 && <p className="text-sm text-muted-foreground">{errors[0]}</p>}
         {fail && <p role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-danger-soft p-3 text-sm"><span>{fail}</span><button type="button" onClick={() => void gerar()} className="min-h-11 rounded-lg border bg-card px-4 font-semibold">Tentar de novo</button></p>}
-        <button type="button" disabled={errors.length > 0 || busy} onClick={() => void gerar()}
-          className="min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">{busy ? "Gerando…" : "Gerar código"}</button>
+        {confirming ? (
+          <section aria-labelledby="confirmar" className="rounded-2xl border-2 border-primary bg-card p-5">
+            <h2 id="confirmar" className="font-semibold">Confira antes de gerar</h2>
+            <p className="mt-1 text-sm text-muted-foreground">O médico com este código poderá ver:</p>
+            <ul className="mt-3 space-y-1.5 text-sm">{summary.map((t) => <li key={t} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-teal-strong" aria-hidden />{t}</li>)}</ul>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => void gerar()} className="min-h-12 flex-1 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50">{busy ? "Gerando…" : "Confirmar e gerar código"}</button>
+              <button type="button" onClick={() => setConfirming(false)} className="min-h-12 rounded-lg border px-4 font-medium">Voltar e mudar</button>
+            </div>
+          </section>
+        ) : (
+          <button type="button" disabled={errors.length > 0 || busy} onClick={() => setConfirming(true)}
+            className="min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">Revisar e gerar código</button>
+        )}
       </div>
     </AppShell>
   );
