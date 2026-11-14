@@ -78,7 +78,7 @@ export const openShare = createServerFn({ method: "POST" })
     const { data: rows } = await supabaseAdmin.from("documents").select("id,title,kind,doc_date,source,origin,file_path,fields,summary,confirmed,created_at").eq("user_id", share.user_id).order("created_at", { ascending: false });
     const docs = await Promise.all((rows ?? []).filter((d) => docVisible(d, share)).map(async (d) => {
       let url: string | null = null;
-      if (d.file_path) url = (await supabaseAdmin.storage.from("medical-documents").createSignedUrl(d.file_path, 900)).data?.signedUrl ?? null;
+      if (d.file_path && d.file_path.startsWith(`${share.user_id}/`)) url = (await supabaseAdmin.storage.from("medical-documents").createSignedUrl(d.file_path, 120)).data?.signedUrl ?? null;
       return { ...d, fields: (d.fields ?? []) as { label: string; value: string }[], file_path: undefined, url };
     }));
     let profile: HealthProfile | null = null;

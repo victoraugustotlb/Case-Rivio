@@ -24,9 +24,12 @@ export function validateShare(r: ShareRequest): string[] {
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem 0/O e 1/I para leitura em voz alta
 
 /** Código de 8 caracteres no formato XXXX-XXXX. */
-export function formatShareCode(random: () => number = Math.random): string {
+export function formatShareCode(random?: () => number): string {
   let s = "";
-  for (let i = 0; i < 8; i++) s += ALPHABET[Math.floor(random() * ALPHABET.length)];
+  const bytes = new Uint8Array(8);
+  if (!random) crypto.getRandomValues(bytes);
+  // ALPHABET tem 32 símbolos: byte % 32 é uniforme, sem viés.
+  for (let i = 0; i < 8; i++) s += ALPHABET[random ? Math.floor(random() * ALPHABET.length) : bytes[i] % ALPHABET.length];
   return `${s.slice(0, 4)}-${s.slice(4)}`;
 }
 
