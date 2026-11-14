@@ -211,7 +211,7 @@ function Timeline({ docs, allowed, onOpen }: { docs: Doc[]; allowed: Set<string>
                 <td><button type="button" className="text-left font-medium text-primary hover:underline" onClick={(e) => { e.stopPropagation(); onOpen(d.id); }}>{d.title}</button></td>
                 <td className="text-muted-foreground">{d.source || "—"}</td>
                 <td className="tabular-nums">{out ? <span className="font-semibold text-destructive">{out}</span> : "—"}</td>
-                <td><OriginTag origin={d.origin === "Arquivo" || d.origin === "Câmera" ? "original" : "paciente"} /></td>
+                <td><OriginTag origin={d.origin === "Arquivo" || d.origin === "Escaneado" ? "original" : "paciente"} /></td>
                 <td className="pr-3">{d.confirmed ? "Confirmada pelo paciente" : "Sugerida por IA"}</td>
               </tr>
             ))}
