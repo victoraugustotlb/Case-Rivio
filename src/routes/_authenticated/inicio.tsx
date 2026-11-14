@@ -8,6 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { healthProfileQuery } from "@/lib/profile-query";
 import { Button } from "@/components/ui/button";
 import { firstAccessDestination } from "@/lib/profile";
+import { accountQuery } from "@/lib/account-query";
+import { homeFor } from "@/lib/accounts";
+import { AccessStatus } from "@/components/vita/AccessStatus";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -21,10 +24,9 @@ export const Route = createFileRoute("/_authenticated/inicio")({
     ],
   }),
   loader: async ({ context }) => {
-    const { data: u } = await supabase.auth.getUser();
-    const isDoctor = u.user?.user_metadata?.["account_type"] === "doctor"
-      || !!(u.user && (await supabase.from("doctor_profiles").select("user_id").eq("user_id", u.user.id).maybeSingle()).data);
-    if (isDoctor) throw redirect({ to: "/clinico", replace: true });
+    const account = await context.queryClient.fetchQuery(accountQuery);
+    if (homeFor(account.type) === "/clinico") throw redirect({ to: "/clinico", replace: true });
+    if (account.type === "patient_plan" && !account.membership) throw redirect({ to: "/plano", replace: true });
     const profile = await context.queryClient.fetchQuery(healthProfileQuery);
     if (firstAccessDestination(profile) === "/perfil") throw redirect({ to: "/perfil", replace: true });
     await context.queryClient.ensureQueryData(documentsQuery);
@@ -55,6 +57,8 @@ function Inicio() {
             {hidden ? "Mostrar nomes" : "Ocultar nomes"}
           </button>
         </section>
+
+        <AccessStatus />
 
         {!profile?.questionnaire_completed && <section className="flex flex-wrap items-center justify-between gap-4 border-y py-5">
           <div><h2 className="font-display text-xl font-semibold">Seu perfil de saúde</h2><p className="mt-1 text-sm text-muted-foreground">Questionário inicial · Medidas, medicamentos e histórico</p></div>

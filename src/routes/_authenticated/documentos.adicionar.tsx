@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { extractDocument } from "@/lib/documents.functions";
 import { DOC_KINDS } from "@/lib/vita-data";
 import { AlertCircle, ArrowLeft, Camera, Check, FileUp, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { WriteGate } from "@/components/vita/AccessStatus";
 import { AppShell } from "@/components/vita/AppShell";
 
 export const Route = createFileRoute("/_authenticated/documentos/adicionar")({
@@ -96,6 +97,7 @@ function Adicionar() {
 
   return (
     <AppShell>
+      <WriteGate action="O envio de documentos">
       <div className="mx-auto max-w-5xl">
         <Link to="/documentos" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary"><ArrowLeft className="h-4 w-4" aria-hidden /> Meus documentos</Link>
         <h1 className="font-display text-3xl font-bold tracking-tight">Adicionar documento</h1>
@@ -186,6 +188,7 @@ function Adicionar() {
           )}
         </div>
       </div>
+    </WriteGate>
     </AppShell>
   );
 }

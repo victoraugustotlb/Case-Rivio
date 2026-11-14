@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Copy, Info, ShieldCheck, ShieldOff, UserRound } from "lucide-react";
+import { WriteGate } from "@/components/vita/AccessStatus";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
@@ -114,6 +115,7 @@ function Compartilhar() {
         <p className="flex gap-2 rounded-xl bg-primary-soft p-4 text-sm"><Info className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Encerrar o acesso impede novas consultas, mas não desfaz o que o médico já viu.</p>
         {errors.length > 0 && <p className="text-sm text-muted-foreground">{errors[0]}</p>}
         {fail && <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm">{fail}</p>}
+        <WriteGate action="A geração de novos códigos">
         <button type="button" disabled={errors.length > 0 || busy} onClick={async () => {
           setBusy(true); setFail("");
           for (let i = 0; i < 3; i++) {
@@ -125,6 +127,7 @@ function Compartilhar() {
           setFail("Não foi possível gerar o código. Tente novamente."); setBusy(false);
         }}
           className="min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">Gerar código</button>
+        </WriteGate>
       </div>
     </AppShell>
   );
