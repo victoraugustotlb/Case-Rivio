@@ -92,6 +92,89 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          coverage: string
+          created_at: string
+          id: string
+          mode: string
+          patient_id: string
+          provider_id: string
+          share_code_id: string | null
+          slot_id: string
+          status: string
+        }
+        Insert: {
+          coverage?: string
+          created_at?: string
+          id?: string
+          mode: string
+          patient_id?: string
+          provider_id: string
+          share_code_id?: string | null
+          slot_id: string
+          status?: string
+        }
+        Update: {
+          coverage?: string
+          created_at?: string
+          id?: string
+          mode?: string
+          patient_id?: string
+          provider_id?: string
+          share_code_id?: string | null
+          slot_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "availability_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_slots: {
+        Row: {
+          booked: boolean
+          duration_min: number
+          id: string
+          provider_id: string
+          starts_at: string
+        }
+        Insert: {
+          booked?: boolean
+          duration_min?: number
+          id?: string
+          provider_id: string
+          starts_at: string
+        }
+        Update: {
+          booked?: boolean
+          duration_min?: number
+          id?: string
+          provider_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_patients: {
         Row: {
           doctor_id: string
@@ -462,6 +545,90 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_plans: {
+        Row: {
+          plan_id: string
+          provider_id: string
+        }
+        Insert: {
+          plan_id: string
+          provider_id: string
+        }
+        Update: {
+          plan_id?: string
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_plans_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_plans_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      providers: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          id: string
+          in_person: boolean
+          is_demo: boolean
+          kind: string
+          lat: number
+          lng: number
+          name: string
+          price_private: number | null
+          specialties: string[]
+          telehealth: boolean
+          uf: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string
+          city: string
+          created_at?: string
+          id?: string
+          in_person?: boolean
+          is_demo?: boolean
+          kind: string
+          lat: number
+          lng: number
+          name: string
+          price_private?: number | null
+          specialties?: string[]
+          telehealth?: boolean
+          uf: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          id?: string
+          in_person?: boolean
+          is_demo?: boolean
+          kind?: string
+          lat?: number
+          lng?: number
+          name?: string
+          price_private?: number | null
+          specialties?: string[]
+          telehealth?: boolean
+          uf?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       request_attempts: {
         Row: {
           created_at: string
@@ -557,7 +724,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attach_appointment_share: {
+        Args: { _id: string; _share: string }
+        Returns: undefined
+      }
+      book_slot: {
+        Args: { _coverage: string; _mode: string; _slot: string }
+        Returns: string
+      }
       can_write_records: { Args: { _uid: string }; Returns: boolean }
+      cancel_appointment: { Args: { _id: string }; Returns: undefined }
+      reschedule_appointment: {
+        Args: { _id: string; _new_slot: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

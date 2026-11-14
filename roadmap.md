@@ -44,3 +44,8 @@
 - [x] Menu, troca de perfil, faixa somente leitura, pedidos de conexão e de acesso, privacidade, responsável legal, código para menor; regras com testes
 - [ ] Teste completo com titular + dependente reais — precisa de duas contas de plano na mesma família
 - [ ] Encerrar pelo app um código gerado para um menor — hoje só expira sozinho
+
+## Agendamento de consultas
+- [x] Navegação com Consultas e menu Mais; busca com filtros, lista/mapa, detalhe, resumo, agendar, cancelar/remarcar, lembrete na véspera; regras com testes; testado com sessão real
+- [ ] Rede credenciada real das operadoras — depende de acesso às APIs das operadoras
+- [ ] Novos horários de demonstração após 30 dias — hoje cobrem só os próximos 30 dias

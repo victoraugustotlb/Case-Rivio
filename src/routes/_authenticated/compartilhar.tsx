@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createMinorShareCode } from "@/lib/family.functions";
+import { attachShareToAppointment } from "@/lib/scheduling.functions";
 import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
 
 export const Route = createFileRoute("/_authenticated/compartilhar")({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/compartilhar")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => z.object({ para: z.string().uuid().optional() }).catch({}).parse(s),
+  validateSearch: (s: Record<string, unknown>) => z.object({ para: z.string().uuid().optional(), consulta: z.string().uuid().optional(), ate: z.string().datetime({ offset: true }).optional() }).catch({}).parse(s),
   component: Compartilhar,
 });
 
@@ -45,7 +46,10 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 }
 
 function Compartilhar() {
-  const { para } = Route.useSearch();
+  const { para, consulta, ate } = Route.useSearch();
+  const attach = useServerFn(attachShareToAppointment);
+  const untilAppt = consulta && ate && new Date(ate).getTime() > Date.now() ? ate : null;
+  const untilLabel = untilAppt ? new Date(untilAppt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }) : "";
   const createMinor = useServerFn(createMinorShareCode);
   const [categories, setCategories] = useState<ShareCategory[]>([]);
   const [signals, setSignals] = useState<ShareSignal[]>([]);
@@ -62,7 +66,7 @@ function Compartilhar() {
     return (
       <AppShell>
         <div className="mx-auto max-w-xl text-center">
-          <PageTitle title={revoked ? "Acesso encerrado" : "Código pronto"} subtitle={revoked ? "O médico não consegue mais abrir seu histórico com este código." : `Válido por ${validityLabel(validityHours)}. Mostre ao médico.`} />
+          <PageTitle title={revoked ? "Acesso encerrado" : "Código pronto"} subtitle={revoked ? "O médico não consegue mais abrir seu histórico com este código." : untilAppt ? `Válido até o fim da consulta (${untilLabel}).` : `Válido por ${validityLabel(validityHours)}. Mostre ao médico.`} />
           <div className={`rounded-2xl border bg-card p-8 ${revoked ? "opacity-50" : ""}`}>
             <p className="text-sm text-muted-foreground">Código de acesso</p>
             <p className="mt-2 font-display text-5xl font-bold tracking-widest text-primary">{code}</p>
@@ -89,6 +93,7 @@ function Compartilhar() {
     <AppShell>
       <div className="mx-auto max-w-3xl space-y-6">
         <PageTitle title="Compartilhar com médico" subtitle="Você escolhe o que ele vê. Nada vem marcado." />
+        {untilAppt && <p role="status" className="mb-4 rounded-lg bg-primary-soft p-3 text-sm">Compartilhamento para a consulta agendada. Escolha o que o profissional poderá ver.</p>}
         {para && <p role="status" className="mb-4 rounded-lg bg-warning-soft p-3 text-sm">Este código abre o histórico do seu dependente menor de idade, gerado por você como responsável legal.</p>}
         <section className="rounded-2xl border bg-card p-5">
           <div className="flex items-start gap-3">
@@ -116,7 +121,7 @@ function Compartilhar() {
           </section>
           <section className="rounded-2xl border bg-card p-5">
             <h2 className="font-semibold">5. Acesso válido por</h2>
-            <div className="mt-3 grid grid-cols-2 gap-2">{VALIDITY_OPTIONS.map((h) => <Chip key={h} on={validityHours === h} onClick={() => setValidity(h)}>{validityLabel(h)}</Chip>)}</div>
+            {untilAppt ? <p className="mt-3 rounded-lg bg-primary-soft p-3 text-sm text-primary">Até o fim da consulta agendada ({untilLabel}).</p> : <div className="mt-3 grid grid-cols-2 gap-2">{VALIDITY_OPTIONS.map((h) => <Chip key={h} on={validityHours === h} onClick={() => setValidity(h)}>{validityLabel(h)}</Chip>)}</div>}
           </section>
         </div>
         <p className="flex gap-2 rounded-xl bg-primary-soft p-4 text-sm"><Info className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Encerrar o acesso impede novas consultas, mas não desfaz o que o médico já viu.</p>
@@ -132,8 +137,8 @@ function Compartilhar() {
           }
           for (let i = 0; i < 3; i++) {
             const c = formatShareCode();
-            const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, include_profile: includeProfile, period_months: periodMonths, expires_at: new Date(Date.now() + validityHours * 3600_000).toISOString() });
-            if (!error) { setCode(c); setBusy(false); return; }
+            const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, include_profile: includeProfile, period_months: periodMonths, expires_at: untilAppt ?? new Date(Date.now() + validityHours * 3600_000).toISOString() });
+            if (!error) { if (untilAppt && consulta) await attach({ data: { id: consulta, code: c } }); setCode(c); setBusy(false); return; }
             if (error.code !== "23505") break;
           }
           setFail("Não foi possível gerar o código. Tente novamente."); setBusy(false);

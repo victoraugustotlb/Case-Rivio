@@ -20,6 +20,9 @@ import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authent
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPlanoRouteImport } from './routes/_authenticated/plano'
+import { Route as AuthenticatedConsultasIndexRouteImport } from './routes/_authenticated/consultas.index'
+import { Route as AuthenticatedConsultasProviderIdRouteImport } from './routes/_authenticated/consultas.$providerId'
+import { Route as AuthenticatedConsultasAgendamentosRouteImport } from './routes/_authenticated/consultas.agendamentos'
 import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
@@ -81,6 +84,24 @@ const AuthenticatedPlanoRoute = AuthenticatedPlanoRouteImport.update({
   path: '/plano',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConsultasIndexRoute =
+  AuthenticatedConsultasIndexRouteImport.update({
+    id: '/consultas/',
+    path: '/consultas/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedConsultasProviderIdRoute =
+  AuthenticatedConsultasProviderIdRouteImport.update({
+    id: '/consultas/$providerId',
+    path: '/consultas/$providerId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedConsultasAgendamentosRoute =
+  AuthenticatedConsultasAgendamentosRouteImport.update({
+    id: '/consultas/agendamentos',
+    path: '/consultas/agendamentos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDocumentosIndexRoute =
   AuthenticatedDocumentosIndexRouteImport.update({
     id: '/documentos/',
@@ -123,9 +144,12 @@ export interface FileRoutesByFullPath {
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/plano': typeof AuthenticatedPlanoRoute
+  '/consultas/$providerId': typeof AuthenticatedConsultasProviderIdRoute
+  '/consultas/agendamentos': typeof AuthenticatedConsultasAgendamentosRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
+  '/consultas/': typeof AuthenticatedConsultasIndexRoute
   '/documentos/': typeof AuthenticatedDocumentosIndexRoute
   '/familia/': typeof AuthenticatedFamiliaIndexRoute
 }
@@ -140,9 +164,12 @@ export interface FileRoutesByTo {
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/plano': typeof AuthenticatedPlanoRoute
+  '/consultas/$providerId': typeof AuthenticatedConsultasProviderIdRoute
+  '/consultas/agendamentos': typeof AuthenticatedConsultasAgendamentosRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
+  '/consultas': typeof AuthenticatedConsultasIndexRoute
   '/documentos': typeof AuthenticatedDocumentosIndexRoute
   '/familia': typeof AuthenticatedFamiliaIndexRoute
 }
@@ -159,9 +186,12 @@ export interface FileRoutesById {
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/plano': typeof AuthenticatedPlanoRoute
+  '/_authenticated/consultas/$providerId': typeof AuthenticatedConsultasProviderIdRoute
+  '/_authenticated/consultas/agendamentos': typeof AuthenticatedConsultasAgendamentosRoute
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/_authenticated/familia/$memberId': typeof AuthenticatedFamiliaMemberIdRoute
+  '/_authenticated/consultas/': typeof AuthenticatedConsultasIndexRoute
   '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
   '/_authenticated/familia/': typeof AuthenticatedFamiliaIndexRoute
 }
@@ -178,9 +208,12 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/perfil'
     | '/plano'
+    | '/consultas/$providerId'
+    | '/consultas/agendamentos'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/familia/$memberId'
+    | '/consultas/'
     | '/documentos/'
     | '/familia/'
   fileRoutesByTo: FileRoutesByTo
@@ -195,9 +228,12 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/perfil'
     | '/plano'
+    | '/consultas/$providerId'
+    | '/consultas/agendamentos'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/familia/$memberId'
+    | '/consultas'
     | '/documentos'
     | '/familia'
   id:
@@ -213,9 +249,12 @@ export interface FileRouteTypes {
     | '/_authenticated/inicio'
     | '/_authenticated/perfil'
     | '/_authenticated/plano'
+    | '/_authenticated/consultas/$providerId'
+    | '/_authenticated/consultas/agendamentos'
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/adicionar'
     | '/_authenticated/familia/$memberId'
+    | '/_authenticated/consultas/'
     | '/_authenticated/documentos/'
     | '/_authenticated/familia/'
   fileRoutesById: FileRoutesById
@@ -307,6 +346,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlanoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/consultas/': {
+      id: '/_authenticated/consultas/'
+      path: '/consultas'
+      fullPath: '/consultas/'
+      preLoaderRoute: typeof AuthenticatedConsultasIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/consultas/$providerId': {
+      id: '/_authenticated/consultas/$providerId'
+      path: '/consultas/$providerId'
+      fullPath: '/consultas/$providerId'
+      preLoaderRoute: typeof AuthenticatedConsultasProviderIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/consultas/agendamentos': {
+      id: '/_authenticated/consultas/agendamentos'
+      path: '/consultas/agendamentos'
+      fullPath: '/consultas/agendamentos'
+      preLoaderRoute: typeof AuthenticatedConsultasAgendamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documentos/': {
       id: '/_authenticated/documentos/'
       path: '/documentos'
@@ -352,9 +412,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPlanoRoute: typeof AuthenticatedPlanoRoute
+  AuthenticatedConsultasProviderIdRoute: typeof AuthenticatedConsultasProviderIdRoute
+  AuthenticatedConsultasAgendamentosRoute: typeof AuthenticatedConsultasAgendamentosRoute
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
   AuthenticatedFamiliaMemberIdRoute: typeof AuthenticatedFamiliaMemberIdRoute
+  AuthenticatedConsultasIndexRoute: typeof AuthenticatedConsultasIndexRoute
   AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
   AuthenticatedFamiliaIndexRoute: typeof AuthenticatedFamiliaIndexRoute
 }
@@ -366,9 +429,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPlanoRoute: AuthenticatedPlanoRoute,
+  AuthenticatedConsultasProviderIdRoute: AuthenticatedConsultasProviderIdRoute,
+  AuthenticatedConsultasAgendamentosRoute:
+    AuthenticatedConsultasAgendamentosRoute,
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
   AuthenticatedFamiliaMemberIdRoute: AuthenticatedFamiliaMemberIdRoute,
+  AuthenticatedConsultasIndexRoute: AuthenticatedConsultasIndexRoute,
   AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
   AuthenticatedFamiliaIndexRoute: AuthenticatedFamiliaIndexRoute,
 }
