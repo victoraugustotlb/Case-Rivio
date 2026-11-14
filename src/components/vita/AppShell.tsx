@@ -8,7 +8,6 @@ import { Activity, FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } f
 const nav = [
   { label: "Início", to: "/inicio", icon: Home },
   { label: "Documentos", to: "/documentos", icon: FolderHeart },
-  { label: "Saúde", to: "/saude", icon: Activity },
   { label: "Compartilhar", to: "/compartilhar", icon: Share2 },
   { label: "Perfil", to: "/perfil", icon: User },
 ] as const;
