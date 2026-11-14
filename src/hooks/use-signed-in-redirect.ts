@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { resolveHome } from "@/lib/account.functions";
+import { accountQuery } from "@/lib/account-query";
 
 export const INTENT_KEY = "vita_entry_path";
 export type EntryIntent = "patient_plan" | "patient_individual" | "doctor" | "laboratory";
@@ -14,6 +16,7 @@ const INTENTS: readonly string[] = ["patient_plan", "patient_individual", "docto
  */
 export function useSignedInRedirect(): "verificando" | "livre" {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const done = useRef(false);
   const [state, setState] = useState<"verificando" | "livre">("livre");
   useEffect(() => {
@@ -27,6 +30,7 @@ export function useSignedInRedirect(): "verificando" | "livre" {
       const intent = stored && INTENTS.includes(stored) ? (stored as EntryIntent) : null;
       try {
         const r = await resolveHome({ data: { intent } });
+        qc.setQueryData(accountQuery.queryKey, r.account);
         nav({ to: r.destino, replace: true });
       } catch { done.current = false; setState("livre"); }
     };
@@ -34,6 +38,6 @@ export function useSignedInRedirect(): "verificando" | "livre" {
       if (e === "SIGNED_IN" || e === "INITIAL_SESSION") setTimeout(() => void go(s), 0);
     });
     return () => data.subscription.unsubscribe();
-  }, [nav]);
+  }, [nav, qc]);
   return state;
 }

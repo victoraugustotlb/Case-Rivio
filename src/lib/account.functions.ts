@@ -1,28 +1,33 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { canWriteRecords, membershipRules, normalizeCard, PLAN_MAX_ATTEMPTS, subscriptionState, type AccountType } from "./accounts";
 
+type Sb = SupabaseClient<Database>;
+
+async function loadAccount(sb: Sb, userId: string) {
+  const [{ data: p }, { data: m }, { data: sub }] = await Promise.all([
+    sb.from("profiles").select("account_type,billing_exempt").eq("user_id", userId).maybeSingle(),
+    sb.from("plan_memberships").select("status,role,plan_id,insurance_plans(name)").eq("user_id", userId).maybeSingle(),
+    sb.from("subscriptions").select("status,current_period_end,cancel_at_period_end").eq("user_id", userId).maybeSingle(),
+  ]);
+  const type = (p?.account_type ?? "patient_individual") as AccountType;
+  const exempt = p?.billing_exempt ?? false;
+  const planName = (m?.insurance_plans as { name: string } | null)?.name ?? null;
+  return {
+    type, exempt,
+    membership: m ? { status: m.status, role: m.role, planName } : null,
+    subscription: sub ? { ...sub, state: subscriptionState(sub) } : null,
+    subscriptionState: subscriptionState(sub ?? null),
+    canWrite: canWriteRecords({ type, exempt, membershipStatus: m?.status ?? null, sub: sub ?? null }),
+  };
+}
+
 export const getAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const sb = context.supabase;
-    const [{ data: p }, { data: m }, { data: sub }] = await Promise.all([
-      sb.from("profiles").select("account_type,billing_exempt").eq("user_id", context.userId).maybeSingle(),
-      sb.from("plan_memberships").select("status,role,plan_id,insurance_plans(name)").eq("user_id", context.userId).maybeSingle(),
-      sb.from("subscriptions").select("status,current_period_end,cancel_at_period_end").eq("user_id", context.userId).maybeSingle(),
-    ]);
-    const type = (p?.account_type ?? "patient_individual") as AccountType;
-    const exempt = p?.billing_exempt ?? false;
-    const planName = (m?.insurance_plans as { name: string } | null)?.name ?? null;
-    return {
-      type, exempt,
-      membership: m ? { status: m.status, role: m.role, planName } : null,
-      subscription: sub ? { ...sub, state: subscriptionState(sub) } : null,
-      subscriptionState: subscriptionState(sub ?? null),
-      canWrite: canWriteRecords({ type, exempt, membershipStatus: m?.status ?? null, sub: sub ?? null }),
-    };
-  });
+  .handler(async ({ context }) => loadAccount(context.supabase, context.userId));
 
 /** Paciente escolhe outro caminho (plano ↔ assinatura individual). Profissionais não mudam por aqui. */
 export const choosePatientPath = createServerFn({ method: "POST" })
@@ -115,27 +120,24 @@ export const resolveHome = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { applyEntryIntent, destinationFor } = await import("./routing");
     const sb = context.supabase;
-    const read = () => Promise.all([
-      sb.from("profiles").select("account_type").eq("user_id", context.userId).maybeSingle(),
-      sb.from("plan_memberships").select("id").eq("user_id", context.userId).maybeSingle(),
-    ]);
-    let [{ data: p }, { data: m }] = await read();
+    let account = await loadAccount(sb, context.userId);
     if (data.intent) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
       const provider = (u.user?.app_metadata?.["provider"] as string | undefined) ?? null;
       if (applyEntryIntent({ provider, createdAt: u.user?.created_at ?? null })) {
-        const current = p?.account_type ?? null;
-        const pro = (t: string | null) => t === "doctor" || t === "laboratory";
+        const current = account.type;
+        const pro = (t: string) => t === "doctor" || t === "laboratory";
         const wantsPro = data.intent === "doctor" || data.intent === "laboratory";
-        // Conta nova com Google: define o tipo escolhido. Nunca troca entre paciente e profissional se já houver documentos.
+        // Conta nova com Google: define o tipo escolhido. Profissional nunca vira paciente, e conta com documentos não vira profissional.
         const { count: docs } = await sb.from("documents").select("id", { count: "exact", head: true }).eq("user_id", context.userId);
         if (current !== data.intent && !pro(current) && (!wantsPro || (docs ?? 0) === 0)) {
           await supabaseAdmin.from("profiles").upsert({ user_id: context.userId, account_type: data.intent, billing_exempt: false }, { onConflict: "user_id" });
-          [{ data: p }, { data: m }] = await read();
+          account = await loadAccount(sb, context.userId);
         }
       }
     }
-    const accountType = (p?.account_type ?? "patient_individual") as AccountType;
-    return { accountType, destino: destinationFor({ accountType, temVinculoPlano: !!m }) };
+    const accountType = account.type;
+    // Devolve a conta junto: o cliente põe no cache e /inicio não precisa buscá-la de novo.
+    return { accountType, destino: destinationFor({ accountType, temVinculoPlano: !!account.membership }), account };
   });

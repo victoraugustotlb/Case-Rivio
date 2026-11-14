@@ -53,4 +53,8 @@
 ## Área do profissional (/clinico)
 - [x] Menu lateral, Painel, Pacientes com acesso, Histórico, Pedir acesso (escopo, ID VT, permissão de envio, solicitações enviadas), Adicionar documento, Agenda, Minha conta
 - [x] Paciente: interruptor de envio em Autorizar, documentos aguardando aceitação (Início/Documentos), avisos e página Acessos; regras com testes
-- [ ] Teste completo com conta de médico + paciente reais — precisa de duas contas na prévia
+- [x] Teste completo com conta de médico + paciente (contas de teste temporárias)
+
+## Códigos e velocidade
+- [x] Parte A: códigos do paciente e do médico (geração no servidor, mensagens, limites, nomes)
+- [x] Parte B: login com 1 chamada + 1 redirecionamento, sem chamadas ao Auth na navegação, guarda de papel único

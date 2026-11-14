@@ -1,4 +1,5 @@
-import { useRouterState } from "@tanstack/react-router";
+import { useRouter, useRouterState } from "@tanstack/react-router";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/vita/AppShell";
 
 function Blocks() {
@@ -23,7 +24,9 @@ export function BareSkeleton() {
 /** Esqueleto padrão das transições: dentro do AppShell nas telas do paciente, para não piscar em branco. */
 export function PageSkeleton() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const qc = (useRouter().options.context as { queryClient?: QueryClient } | undefined)?.queryClient;
   const patientArea = !["/", "/entrar", "/medico"].includes(path) && !path.startsWith("/clinico");
-  if (!patientArea) return <BareSkeleton />;
-  return <AppShell><div role="status" aria-label="Carregando"><Blocks /></div></AppShell>;
+  if (!patientArea || !qc) return <BareSkeleton />;
+  // O esqueleto pode aparecer acima do provider da raiz (SSR/primeira carga): traz o próprio provider.
+  return <QueryClientProvider client={qc}><AppShell><div role="status" aria-label="Carregando"><Blocks /></div></AppShell></QueryClientProvider>;
 }

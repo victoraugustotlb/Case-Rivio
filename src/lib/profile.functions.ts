@@ -1,13 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { profileSchema } from "./profile";
+import { parseProfileLenient, profileSchema } from "./profile";
 
 export const getHealthProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase.from("patient_profiles").select("*").eq("user_id", context.userId).maybeSingle();
     if (error) throw new Error("Não foi possível carregar seu perfil. Tente novamente.");
-    return data ? profileSchema.parse(data) : null;
+    // Respostas antigas fora do formato voltam em branco em vez de derrubar a tela.
+    return data ? parseProfileLenient(data).profile : null;
   });
 
 export const saveHealthProfile = createServerFn({ method: "POST" })
