@@ -734,6 +734,7 @@ export type Database = {
       }
       can_write_records: { Args: { _uid: string }; Returns: boolean }
       cancel_appointment: { Args: { _id: string }; Returns: undefined }
+      is_patient_account: { Args: { _uid: string }; Returns: boolean }
       reschedule_appointment: {
         Args: { _id: string; _new_slot: string }
         Returns: string

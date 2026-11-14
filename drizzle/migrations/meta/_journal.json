@@ -8,6 +8,13 @@
       "when": 1794668878691,
       "tag": "0000_appointments_scheduling",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794670701434,
+      "tag": "0001_tighten_directory_policies",
+      "breakpoints": true
     }
   ]
 }
