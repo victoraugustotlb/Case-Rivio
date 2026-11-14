@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Activity, FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } from "lucide-react";
+import { FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } from "lucide-react";
 
 const nav = [
   { label: "Início", to: "/inicio", icon: Home },

@@ -18,7 +18,6 @@ import { Route as AuthenticatedAutorizarRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
-import { Route as AuthenticatedSaudeRouteImport } from './routes/_authenticated/saude'
 import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedDocumentosAdicionarRouteImport } from './routes/_authenticated/documentos.adicionar'
@@ -68,11 +67,6 @@ const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSaudeRoute = AuthenticatedSaudeRouteImport.update({
-  id: '/saude',
-  path: '/saude',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedDocumentosIndexRoute =
   AuthenticatedDocumentosIndexRouteImport.update({
     id: '/documentos/',
@@ -101,7 +95,6 @@ export interface FileRoutesByFullPath {
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/saude': typeof AuthenticatedSaudeRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/documentos/': typeof AuthenticatedDocumentosIndexRoute
@@ -115,7 +108,6 @@ export interface FileRoutesByTo {
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/saude': typeof AuthenticatedSaudeRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/documentos': typeof AuthenticatedDocumentosIndexRoute
@@ -131,7 +123,6 @@ export interface FileRoutesById {
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
-  '/_authenticated/saude': typeof AuthenticatedSaudeRoute
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/adicionar': typeof AuthenticatedDocumentosAdicionarRoute
   '/_authenticated/documentos/': typeof AuthenticatedDocumentosIndexRoute
@@ -147,7 +138,6 @@ export interface FileRouteTypes {
     | '/compartilhar'
     | '/inicio'
     | '/perfil'
-    | '/saude'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/documentos/'
@@ -161,7 +151,6 @@ export interface FileRouteTypes {
     | '/compartilhar'
     | '/inicio'
     | '/perfil'
-    | '/saude'
     | '/documentos/$id'
     | '/documentos/adicionar'
     | '/documentos'
@@ -176,7 +165,6 @@ export interface FileRouteTypes {
     | '/_authenticated/compartilhar'
     | '/_authenticated/inicio'
     | '/_authenticated/perfil'
-    | '/_authenticated/saude'
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/adicionar'
     | '/_authenticated/documentos/'
@@ -255,13 +243,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/saude': {
-      id: '/_authenticated/saude'
-      path: '/saude'
-      fullPath: '/saude'
-      preLoaderRoute: typeof AuthenticatedSaudeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/documentos/': {
       id: '/_authenticated/documentos/'
       path: '/documentos'
@@ -291,7 +272,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
-  AuthenticatedSaudeRoute: typeof AuthenticatedSaudeRoute
   AuthenticatedDocumentosIdRoute: typeof AuthenticatedDocumentosIdRoute
   AuthenticatedDocumentosAdicionarRoute: typeof AuthenticatedDocumentosAdicionarRoute
   AuthenticatedDocumentosIndexRoute: typeof AuthenticatedDocumentosIndexRoute
@@ -302,7 +282,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
-  AuthenticatedSaudeRoute: AuthenticatedSaudeRoute,
   AuthenticatedDocumentosIdRoute: AuthenticatedDocumentosIdRoute,
   AuthenticatedDocumentosAdicionarRoute: AuthenticatedDocumentosAdicionarRoute,
   AuthenticatedDocumentosIndexRoute: AuthenticatedDocumentosIndexRoute,
