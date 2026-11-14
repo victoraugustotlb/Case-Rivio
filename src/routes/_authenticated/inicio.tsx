@@ -22,6 +22,10 @@ export const Route = createFileRoute("/_authenticated/inicio")({
     ],
   }),
   loader: async ({ context }) => {
+    const { data: u } = await supabase.auth.getUser();
+    const isDoctor = u.user?.user_metadata?.["account_type"] === "doctor"
+      || !!(u.user && (await supabase.from("doctor_profiles").select("user_id").eq("user_id", u.user.id).maybeSingle()).data);
+    if (isDoctor) throw redirect({ to: "/clinico", replace: true });
     const profile = await context.queryClient.fetchQuery(healthProfileQuery);
     if (firstAccessDestination(profile) === "/perfil") throw redirect({ to: "/perfil", replace: true });
     await context.queryClient.ensureQueryData(documentsQuery);
