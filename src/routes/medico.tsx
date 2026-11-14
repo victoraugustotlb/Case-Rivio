@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Clock3, FolderOpen, Loader2, LockKeyhole, ShieldCheck, Stethoscope } from "lucide-react";
 import { normalizeCode } from "@/lib/share";
 import { useServerFn } from "@tanstack/react-start";
 import { openShare } from "@/lib/documents.functions";
-import { ClinicalView, type Opened } from "@/components/vita/ClinicalView";
+import { AccessEnded, ClinicalView, type Opened } from "@/components/vita/ClinicalView";
 
 export const Route = createFileRoute("/medico")({
   validateSearch: (s: Record<string, unknown>): { code?: string } => (typeof s["code"] === "string" ? { code: s["code"] } : {}),
@@ -27,6 +27,8 @@ function Medico() {
   const [busy, setBusy] = useState(false);
   const abrir = useServerFn(openShare);
   const [error, setError] = useState("");
+  const [ended, setEnded] = useState(false);
+  const onEnded = useCallback(() => { setOpen(null); setEnded(true); }, []);
   const code = normalizeCode(input);
   const valid = /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code);
 
@@ -46,9 +48,10 @@ function Medico() {
   }, [search.code]);
 
   const close = () => {
-    setOpen(null); setInput(""); setError("");
+    setOpen(null); setInput(""); setError(""); setEnded(false);
   };
 
+  if (ended) return <AccessEnded onBack={close} />;
   if (!open) {
     return (
       <main className="grid min-h-screen bg-background font-sans text-foreground lg:grid-cols-2">
@@ -91,5 +94,5 @@ function Medico() {
   }
 
 
-  return <ClinicalView opened={open} onClose={close} />;
+  return <ClinicalView opened={open} onClose={close} onEnded={onEnded} />;
 }
