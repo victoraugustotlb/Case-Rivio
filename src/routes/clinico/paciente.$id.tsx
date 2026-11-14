@@ -8,8 +8,8 @@ import { ClinicalView, type Opened } from "@/components/vita/ClinicalView";
 
 export const Route = createFileRoute("/clinico/paciente/$id")({
   head: () => ({ meta: [
-    { title: "Histórico do paciente — VITA Clínico" }, { name: "description", content: "Visão clínica do que o paciente autorizou, durante o acesso ativo." },
-    { property: "og:title", content: "Histórico do paciente — VITA Clínico" }, { property: "og:description", content: "Somente leitura, com registro de cada acesso." },
+    { title: "Histórico do paciente — Anamedis Clínico" }, { name: "description", content: "Visão clínica do que o paciente autorizou, durante o acesso ativo." },
+    { property: "og:title", content: "Histórico do paciente — Anamedis Clínico" }, { property: "og:description", content: "Somente leitura, com registro de cada acesso." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" },
   ] }),
   component: Paciente,

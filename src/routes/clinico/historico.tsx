@@ -8,8 +8,8 @@ import { ProPage, SearchBox, StatusTag, fmtDT, scopeText, td, th } from "@/compo
 
 export const Route = createFileRoute("/clinico/historico")({
   head: () => ({ meta: [
-    { title: "Histórico de pacientes — VITA Clínico" }, { name: "description", content: "Pacientes que já tiveram acesso encerrado: nome, ID, estado e datas." },
-    { property: "og:title", content: "Histórico de pacientes — VITA Clínico" }, { property: "og:description", content: "Acessos encerrados, sem dados de saúde." },
+    { title: "Histórico de pacientes — Anamedis Clínico" }, { name: "description", content: "Pacientes que já tiveram acesso encerrado: nome, ID, estado e datas." },
+    { property: "og:title", content: "Histórico de pacientes — Anamedis Clínico" }, { property: "og:description", content: "Acessos encerrados, sem dados de saúde." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Historico,

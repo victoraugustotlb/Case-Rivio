@@ -14,9 +14,9 @@ const ProviderMap = lazy(() => import("@/components/vita/ProviderMap"));
 export const Route = createFileRoute("/_authenticated/consultas/")({
   head: () => ({
     meta: [
-      { title: "Agendar consulta — VITA" },
+      { title: "Agendar consulta — Anamedis" },
       { name: "description", content: "Encontre profissionais por especialidade, distância e convênio e agende sua consulta." },
-      { property: "og:title", content: "Agendar consulta — VITA" },
+      { property: "og:title", content: "Agendar consulta — Anamedis" },
       { property: "og:description", content: "Busca de profissionais e clínicas com horários disponíveis." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -90,7 +90,7 @@ function Consultas() {
   return (
     <AppShell>
       <div className="mx-auto max-w-6xl">
-        <PageTitle title="Consultas" subtitle="Encontre um profissional e agende pelo VITA." action={<Link to="/consultas/agendamentos" className="inline-flex min-h-11 items-center gap-2 rounded-lg border bg-card px-4 font-medium"><CalendarClock className="h-4 w-4" aria-hidden />Meus agendamentos</Link>} />
+        <PageTitle title="Consultas" subtitle="Encontre um profissional e agende pelo Anamedis." action={<Link to="/consultas/agendamentos" className="inline-flex min-h-11 items-center gap-2 rounded-lg border bg-card px-4 font-medium"><CalendarClock className="h-4 w-4" aria-hidden />Meus agendamentos</Link>} />
         <div className="mb-4"><DemoTag /> <span className="ml-1 text-sm text-muted-foreground">Os profissionais e clínicas listados são fictícios.</span></div>
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
           <aside aria-label="Filtros" className="space-y-5 rounded-2xl border bg-card p-5 lg:self-start">

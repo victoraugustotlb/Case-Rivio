@@ -179,7 +179,7 @@ export const listMyUploads = createServerFn({ method: "POST" }).middleware([requ
     return (data ?? []).map((d) => ({ id: d.id, title: d.title, kind: d.kind, status: d.status, createdAt: d.created_at, patient: `${link.get(d.user_id)?.patient_name ?? "Paciente"} · ${link.get(d.user_id)?.patient_ref ?? patientRef(d.user_id)}` }));
   });
 
-/** Agenda do profissional com cadastro em providers (consultas marcadas pelo VITA). */
+/** Agenda do profissional com cadastro em providers (consultas marcadas pelo Anamedis). */
 export const getProAgenda = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data: provs } = await context.supabase.from("providers").select("id, name").eq("user_id", context.userId);

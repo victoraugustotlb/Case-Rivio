@@ -9,10 +9,10 @@ import { healthProfileQuery } from "@/lib/profile-query";
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
     meta: [
-      { title: "Meu perfil de saúde — VITA" },
+      { title: "Meu perfil de saúde — Anamedis" },
       { name: "description", content: "Seu perfil privado com medidas, medicamentos, alergias e questionário inicial de saúde." },
-      { property: "og:title", content: "Meu perfil de saúde — VITA" },
-      { property: "og:description", content: "Registre suas informações pessoais e seu histórico de saúde no VITA." },
+      { property: "og:title", content: "Meu perfil de saúde — Anamedis" },
+      { property: "og:description", content: "Registre suas informações pessoais e seu histórico de saúde no Anamedis." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

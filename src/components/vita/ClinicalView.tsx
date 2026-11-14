@@ -129,7 +129,7 @@ export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded 
     <div className={`${embedded ? "" : "min-h-screen"} bg-background font-sans text-[13px] text-foreground`}>
       <header className="sticky top-0 z-10 border-b bg-card">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2">
-          <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />VITA Clínico</span>
+          <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />Anamedis Clínico</span>
           <span className="font-semibold">{profile ? `${profile.full_name.trim() || "Nome não informado"}${age !== null ? ` · ${age} anos` : ""}` : "Identificação não autorizada"}</span>
           <span className="font-mono text-xs text-muted-foreground" title="Identificador desta sessão de acesso">Sessão {opened.session}</span>
           <span className="text-xs text-muted-foreground">Escopo: {[...CATEGORIES.filter((c) => allowed.has(c.id)).map((c) => c.label), ...(opened.includeProfile ? ["Perfil"] : [])].join(", ") || "—"} · Período: {opened.periodMonths === 60 ? "5 anos" : `${opened.periodMonths} meses`}</span>

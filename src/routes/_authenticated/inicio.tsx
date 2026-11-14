@@ -15,9 +15,9 @@ import { NotificationsCard, PendingUploads } from "@/components/vita/PatientInbo
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
     meta: [
-      { title: "Início — VITA" },
+      { title: "Início — Anamedis" },
       { name: "description", content: "Seus exames, laudos, consultas antigas e dados de wearables reunidos para mostrar ao médico com um código." },
-      { property: "og:title", content: "Início — VITA" },
+      { property: "og:title", content: "Início — Anamedis" },
       { property: "og:description", content: "Seu histórico de saúde completo em um só lugar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

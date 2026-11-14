@@ -4,8 +4,8 @@ import { ProPage } from "@/components/vita/pro-ui";
 
 export const Route = createFileRoute("/clinico/conta")({
   head: () => ({ meta: [
-    { title: "Minha conta — VITA Clínico" }, { name: "description", content: "Dados profissionais informados no cadastro." },
-    { property: "og:title", content: "Minha conta — VITA Clínico" }, { property: "og:description", content: "Cadastro profissional informado." },
+    { title: "Minha conta — Anamedis Clínico" }, { name: "description", content: "Dados profissionais informados no cadastro." },
+    { property: "og:title", content: "Minha conta — Anamedis Clínico" }, { property: "og:description", content: "Cadastro profissional informado." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Conta,

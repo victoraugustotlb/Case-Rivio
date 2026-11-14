@@ -11,9 +11,9 @@ import { REQUEST_CODE_LABEL, classifyCodeInput, requestLookupMessage } from "@/l
 export const Route = createFileRoute("/_authenticated/autorizar")({
   head: () => ({
     meta: [
-      { title: "Autorizar médico — VITA" },
+      { title: "Autorizar médico — Anamedis" },
       { name: "description", content: "Digite o código de 6 dígitos do seu médico e escolha se libera o acesso." },
-      { property: "og:title", content: "Autorizar médico — VITA" },
+      { property: "og:title", content: "Autorizar médico — Anamedis" },
       { property: "og:description", content: "Libere ao seu médico apenas o que ele pediu, por tempo limitado." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

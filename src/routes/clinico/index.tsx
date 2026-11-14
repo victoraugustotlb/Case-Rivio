@@ -6,8 +6,8 @@ import { Countdown, ProPage, StatusTag, fmtDT, scopeText, td, th } from "@/compo
 
 export const Route = createFileRoute("/clinico/")({
   head: () => ({ meta: [
-    { title: "Painel — VITA Clínico" }, { name: "description", content: "Resumo dos acessos ativos, solicitações e documentos enviados." },
-    { property: "og:title", content: "Painel — VITA Clínico" }, { property: "og:description", content: "Acessos ativos e solicitações em um só lugar." },
+    { title: "Painel — Anamedis Clínico" }, { name: "description", content: "Resumo dos acessos ativos, solicitações e documentos enviados." },
+    { property: "og:title", content: "Painel — Anamedis Clínico" }, { property: "og:description", content: "Acessos ativos e solicitações em um só lugar." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Painel,

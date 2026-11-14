@@ -11,7 +11,7 @@ const scopeSchema = z.object({
   includeProfile: z.boolean(),
   periodMonths: z.number().refine((n) => (PERIOD_OPTIONS as readonly number[]).includes(n)),
   patientId: z.string().uuid().optional(),
-  patientRef: z.string().regex(/^VT-[0-9A-F]{8}$/).optional(),
+  patientRef: z.string().regex(/^AM-[0-9A-F]{8}$/).optional(),
   requestUpload: z.boolean().default(false),
 });
 

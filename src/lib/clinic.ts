@@ -30,7 +30,7 @@ export function requestOpen(r: { status: string; expires_at: string }, now: Date
 
 /** Identificador exibido ao médico: não revela dados de saúde. */
 export function patientRef(patientId: string): string {
-  return `VT-${patientId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+  return `AM-${patientId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 }
 
 export const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"] as const;
@@ -98,11 +98,11 @@ export const PRO_DOC_TYPES = [
 export type ProDocType = (typeof PRO_DOC_TYPES)[number]["id"];
 
 export function normalizePatientRef(input: string): string {
-  const raw = input.toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^VT/, "").slice(0, 8);
-  return `VT-${raw}`;
+  const raw = input.toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^(VT|AM)/, "").slice(0, 8);
+  return `AM-${raw}`;
 }
 export function isPatientRef(ref: string): boolean {
-  return /^VT-[0-9A-F]{8}$/.test(ref);
+  return /^AM-[0-9A-F]{8}$/.test(ref);
 }
 
 /** Por que um código de 6 números não pode ser respondido por este paciente ("ok" = pode). */

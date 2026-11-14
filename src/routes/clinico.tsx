@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Logo } from "@/components/vita/Logo";
 import { requireRole } from "@/lib/require-role";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,9 +15,9 @@ export const Route = createFileRoute("/clinico")({
   beforeLoad: ({ context }) => requireRole("profissional", context),
   head: () => ({
     meta: [
-      { title: "Área do profissional — VITA Clínico" },
+      { title: "Área do profissional — Anamedis Clínico" },
       { name: "description", content: "Pacientes com acesso, histórico, pedidos por código de 6 dígitos, envio de documentos e agenda." },
-      { property: "og:title", content: "Área do profissional — VITA Clínico" },
+      { property: "og:title", content: "Área do profissional — Anamedis Clínico" },
       { property: "og:description", content: "Veja só o que o paciente liberou, pelo tempo que ele escolheu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -65,7 +66,7 @@ function ClinicoLayout() {
   );
   const side = (
     <div className="flex h-full flex-col gap-4 p-3 text-sidebar-foreground">
-      <div className="flex items-center gap-2 px-1 text-sm font-bold text-sidebar-accent-foreground"><Stethoscope className="h-5 w-5" aria-hidden />VITA Clínico</div>
+      <Logo variant="escuro" label="Clínico" className="px-1" />
       <div className="rounded border border-sidebar-border px-2 py-1.5 text-xs"><p className="truncate font-semibold">{who.name}</p><p className="opacity-75">{who.cred}</p></div>
       {menu}
       <button onClick={sair} className="mt-auto flex h-9 items-center gap-2 rounded px-2 text-[13px] hover:bg-sidebar-accent"><LogOut className="h-4 w-4" aria-hidden />Sair</button>
@@ -75,7 +76,7 @@ function ClinicoLayout() {
     <div className="min-h-screen bg-background font-sans text-[13px] text-foreground">
       <aside className="fixed inset-y-0 left-0 hidden w-56 bg-sidebar lg:block">{side}</aside>
       <header className="sticky top-0 z-20 flex h-11 items-center justify-between border-b bg-card px-3 lg:hidden">
-        <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />VITA Clínico</span>
+        <span className="flex items-center gap-1.5"><Logo variant="completo" height={24} /><span className="font-display text-xs font-bold text-primary">Clínico</span></span>
         <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="grid h-10 w-10 place-items-center rounded hover:bg-muted"><Menu className="h-5 w-5" aria-hidden /></button>
       </header>
       {open && (

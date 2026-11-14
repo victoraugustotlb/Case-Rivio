@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/consultas/$providerId")({
   validateSearch: (s: Record<string, unknown>) => z.object({ remarcar: z.string().uuid().optional(), horario: z.string().uuid().optional() }).catch({}).parse(s),
   head: () => ({
     meta: [
-      { title: "Horários e agendamento — VITA" },
+      { title: "Horários e agendamento — Anamedis" },
       { name: "description", content: "Veja convênios aceitos, preço particular e horários livres para agendar." },
-      { property: "og:title", content: "Horários e agendamento — VITA" },
+      { property: "og:title", content: "Horários e agendamento — Anamedis" },
       { property: "og:description", content: "Escolha um horário e confirme o agendamento." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -58,7 +58,7 @@ function Detalhe() {
       <AppShell>
         <div className="mx-auto max-w-xl rounded-2xl border bg-card p-8 text-center">
           <CalendarCheck className="mx-auto h-12 w-12 text-success" aria-hidden />
-          <h1 className="mt-3 font-display text-2xl font-bold">{remarcar ? "Remarcado pelo VITA" : "Agendado pelo VITA"}</h1>
+          <h1 className="mt-3 font-display text-2xl font-bold">{remarcar ? "Remarcado pelo Anamedis" : "Agendado pelo Anamedis"}</h1>
           <p className="mt-2 text-muted-foreground">{p.name} · {slot ? fmtFull(slot.starts_at) : ""}</p>
           {p.is_demo && <p className="mt-3 text-sm"><DemoTag /> Este profissional é fictício: nenhum consultório real foi avisado.</p>}
           <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -95,7 +95,7 @@ function Detalhe() {
                 <div><dt className="text-muted-foreground">Convênios aceitos</dt><dd className="font-medium">{planNames.length ? planNames.join(", ") : "Somente particular"}</dd></div>
                 <div><dt className="text-muted-foreground">Preço particular (informativo)</dt><dd className="font-medium">{brl(p.price_private)}</dd></div>
               </dl>
-              <p className="mt-3 text-xs text-muted-foreground">Não há pagamento pelo VITA. O valor é pago diretamente ao profissional, se for particular.</p>
+              <p className="mt-3 text-xs text-muted-foreground">Não há pagamento pelo Anamedis. O valor é pago diretamente ao profissional, se for particular.</p>
             </section>
             <section className="rounded-2xl border bg-card p-5">
               <h2 className="font-semibold">Horários disponíveis</h2>

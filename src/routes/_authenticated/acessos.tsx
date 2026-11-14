@@ -9,9 +9,9 @@ import { listAccessLog } from "@/lib/patient-inbox.functions";
 export const Route = createFileRoute("/_authenticated/acessos")({
   head: () => ({
     meta: [
-      { title: "Acessos ao meu histórico — VITA" },
+      { title: "Acessos ao meu histórico — Anamedis" },
       { name: "description", content: "Veja quem abriu seu histórico, seus documentos ou enviou arquivos, e quando." },
-      { property: "og:title", content: "Acessos ao meu histórico — VITA" },
+      { property: "og:title", content: "Acessos ao meu histórico — Anamedis" },
       { property: "og:description", content: "Registro de cada acesso de profissionais e familiares." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

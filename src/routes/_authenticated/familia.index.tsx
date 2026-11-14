@@ -16,9 +16,9 @@ export const Route = createFileRoute("/_authenticated/familia/")({
   beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
-      { title: "Minha família — VITA" },
+      { title: "Minha família — Anamedis" },
       { name: "description", content: "Conecte titular e dependentes do plano e escolha quem pode ver seu histórico." },
-      { property: "og:title", content: "Minha família — VITA" },
+      { property: "og:title", content: "Minha família — Anamedis" },
       { property: "og:description", content: "Família do plano de saúde com acesso somente por consentimento." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -43,7 +43,7 @@ function Familia() {
           <div className="rounded-2xl border bg-card p-6">
             <Users className="h-8 w-8 text-primary" aria-hidden />
             <h2 className="mt-3 text-lg font-semibold">A família é criada pelo plano de saúde</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Na assinatura individual cada pessoa tem a própria conta. Quando titular e dependentes usam o VITA pelo plano oferecido pela operadora, eles podem se conectar aqui — sempre com aprovação do titular e consentimento de cada adulto.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Na assinatura individual cada pessoa tem a própria conta. Quando titular e dependentes usam o Anamedis pelo plano oferecido pela operadora, eles podem se conectar aqui — sempre com aprovação do titular e consentimento de cada adulto.</p>
             <Link to="/plano" className="mt-4 inline-flex min-h-11 items-center rounded-lg border px-4 font-medium">Usar meu plano de saúde</Link>
           </div>
         </div>

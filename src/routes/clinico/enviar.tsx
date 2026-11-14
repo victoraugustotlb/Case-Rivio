@@ -11,8 +11,8 @@ import { ProPage, StatusTag, fmtDT, td, th } from "@/components/vita/pro-ui";
 
 export const Route = createFileRoute("/clinico/enviar")({
   head: () => ({ meta: [
-    { title: "Adicionar documento ao paciente — VITA Clínico" }, { name: "description", content: "Envie laudos, exames e receitas a pacientes que liberaram o envio." },
-    { property: "og:title", content: "Adicionar documento — VITA Clínico" }, { property: "og:description", content: "O paciente aceita antes do documento entrar no histórico." },
+    { title: "Adicionar documento ao paciente — Anamedis Clínico" }, { name: "description", content: "Envie laudos, exames e receitas a pacientes que liberaram o envio." },
+    { property: "og:title", content: "Adicionar documento — Anamedis Clínico" }, { property: "og:description", content: "O paciente aceita antes do documento entrar no histórico." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Enviar,

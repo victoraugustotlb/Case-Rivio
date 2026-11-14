@@ -1,4 +1,4 @@
-// Os dois códigos do VITA e as mensagens de erro de cada um — funções puras, testadas em codes.test.ts.
+// Os dois códigos do Anamedis e as mensagens de erro de cada um — funções puras, testadas em codes.test.ts.
 
 /** "paciente" = XXXX-XXXX (letras e números, gerado pelo paciente); "solicitacao" = 6 números (gerado pelo médico). */
 export type CodeKind = "paciente" | "solicitacao" | "invalido";

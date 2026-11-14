@@ -53,5 +53,5 @@ describe("estados da solicitação", () => {
     expect(displayRequestStatus({ status: "pending", expires_at: past }, now)).toBe("expired");
     expect(displayRequestStatus({ status: "pending", expires_at: future }, now)).toBe("pending");
   });
-  it("normaliza ID do paciente", () => expect(normalizePatientRef("vt 1544b77c")).toBe("VT-1544B77C"));
+  it("normaliza ID do paciente", () => expect(normalizePatientRef("am 1544b77c")).toBe("AM-1544B77C"));
 });

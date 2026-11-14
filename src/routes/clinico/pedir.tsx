@@ -13,8 +13,8 @@ import { CATS, SIGS, ProPage, StatusTag, fmtDT, scopeText, td, th } from "@/comp
 export const Route = createFileRoute("/clinico/pedir")({
   validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s["ref"] === "string" ? { ref: s["ref"] } : {}),
   head: () => ({ meta: [
-    { title: "Pedir acesso — VITA Clínico" }, { name: "description", content: "Gere um código de 6 dígitos e peça ao paciente só o que precisa." },
-    { property: "og:title", content: "Pedir acesso — VITA Clínico" }, { property: "og:description", content: "Pedido de acesso com escopo, período e permissão de envio." },
+    { title: "Pedir acesso — Anamedis Clínico" }, { name: "description", content: "Gere um código de 6 dígitos e peça ao paciente só o que precisa." },
+    { property: "og:title", content: "Pedir acesso — Anamedis Clínico" }, { property: "og:description", content: "Pedido de acesso com escopo, período e permissão de envio." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Pedir,
@@ -64,7 +64,7 @@ function Pedir() {
   }, [req, state, poll, nav, qc]);
 
   const gerar = async () => {
-    if (refNorm && !isPatientRef(refNorm)) { setError("ID inválido. Use o formato VT-XXXXXXXX."); return; }
+    if (refNorm && !isPatientRef(refNorm)) { setError("ID inválido. Use o formato AM-XXXXXXXX."); return; }
     setBusy(true); setError("");
     try {
       setReq(await create({ data: { categories: cats, signals: sigs, includeProfile: profile, periodMonths: period, requestUpload: upload, ...(refNorm ? { patientRef: refNorm } : {}) } }));
@@ -78,7 +78,7 @@ function Pedir() {
         <section className="space-y-3 rounded border bg-card p-3">
           {!req ? (<>
             <label className="block text-xs font-semibold">Paciente já atendido (opcional)
-              <input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="VT-XXXXXXXX — deixe vazio para novo paciente" className="mt-1 h-9 w-full rounded border bg-background px-2 font-mono text-sm" /></label>
+              <input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="AM-XXXXXXXX — deixe vazio para novo paciente" className="mt-1 h-9 w-full rounded border bg-background px-2 font-mono text-sm" /></label>
             <fieldset><legend className="text-xs font-semibold">Informações</legend><div className="mt-1 flex flex-wrap gap-1.5">
               <button type="button" aria-pressed={profile} onClick={() => setProfile(!profile)} className={chip(profile)}>Perfil de saúde</button>
               {CATS.map(([k, l]) => <button key={k} type="button" aria-pressed={cats.includes(k)} onClick={() => setCats(toggle(cats, k))} className={chip(cats.includes(k))}>{l}</button>)}
@@ -91,7 +91,7 @@ function Pedir() {
             <button onClick={gerar} disabled={busy} className="flex h-9 items-center gap-2 rounded bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50">{busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}Gerar código de 6 dígitos</button>
           </>) : (
             <div className="py-4 text-center">
-              <p className="text-xs text-muted-foreground"><strong>{REQUEST_CODE_LABEL}</strong> · o paciente abre o VITA → Autorizar médico → digita:</p>
+              <p className="text-xs text-muted-foreground"><strong>{REQUEST_CODE_LABEL}</strong> · o paciente abre o Anamedis → Autorizar médico → digita:</p>
               <p className="mt-3 font-mono text-5xl font-bold tracking-[0.2em] text-primary" aria-live="polite">{formatRequestCode(req.code)}</p>
               <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Clock3 className="h-3.5 w-3.5" aria-hidden />Válido até {new Date(req.expires_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p>
               <p className="mx-auto mt-4 flex max-w-sm items-center justify-center gap-2 rounded bg-muted p-2 text-xs" role="status">

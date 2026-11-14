@@ -10,9 +10,9 @@ import { PendingUploads } from "@/components/vita/PatientInbox";
 export const Route = createFileRoute("/_authenticated/documentos/")({
   head: () => ({
     meta: [
-      { title: "Meus documentos — VITA" },
+      { title: "Meus documentos — Anamedis" },
       { name: "description", content: "Biblioteca de exames, laudos, consultas antigas, receitas e vacinas." },
-      { property: "og:title", content: "Meus documentos — VITA" },
+      { property: "og:title", content: "Meus documentos — Anamedis" },
       { property: "og:description", content: "Todos os seus documentos médicos organizados." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

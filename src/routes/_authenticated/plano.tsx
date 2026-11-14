@@ -12,10 +12,10 @@ export const Route = createFileRoute("/_authenticated/plano")({
   beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
-      { title: "Plano de saúde — VITA" },
-      { name: "description", content: "Vincule a carteirinha do seu plano de saúde para usar o VITA sem cobrança." },
-      { property: "og:title", content: "Plano de saúde — VITA" },
-      { property: "og:description", content: "Acesso ao VITA oferecido pela operadora, com o mesmo controle do paciente." },
+      { title: "Plano de saúde — Anamedis" },
+      { name: "description", content: "Vincule a carteirinha do seu plano de saúde para usar o Anamedis sem cobrança." },
+      { property: "og:title", content: "Plano de saúde — Anamedis" },
+      { property: "og:description", content: "Acesso ao Anamedis oferecido pela operadora, com o mesmo controle do paciente." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

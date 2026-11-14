@@ -9,10 +9,10 @@ export const Route = createFileRoute("/_authenticated/documentos/$id")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(documentQuery(params.id)),
   head: () => ({
     meta: [
-      { title: "Documento — VITA" },
+      { title: "Documento — Anamedis" },
       { name: "description", content: "Original e informações confirmadas do documento." },
-      { property: "og:title", content: "Documento — VITA" },
-      { property: "og:description", content: "Detalhe do documento no VITA." },
+      { property: "og:title", content: "Documento — Anamedis" },
+      { property: "og:description", content: "Detalhe do documento no Anamedis." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
     ],

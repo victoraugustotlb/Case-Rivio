@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { resolveHome } from "@/lib/account.functions";
 import { accountQuery } from "@/lib/account-query";
 
-export const INTENT_KEY = "vita_entry_path";
+export const INTENT_KEY = "anamedis_entry_path";
 export type EntryIntent = "patient_plan" | "patient_individual" | "doctor" | "laboratory";
 const INTENTS: readonly string[] = ["patient_plan", "patient_individual", "doctor", "laboratory"];
 

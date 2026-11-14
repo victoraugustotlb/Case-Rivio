@@ -10,9 +10,9 @@ export const Route = createFileRoute("/_authenticated/assinatura")({
   beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
-      { title: "Assinatura e pagamento — VITA" },
-      { name: "description", content: "Assinatura individual do VITA: preço, o que está incluso e a situação do seu pagamento." },
-      { property: "og:title", content: "Assinatura individual — VITA" },
+      { title: "Assinatura e pagamento — Anamedis" },
+      { name: "description", content: "Assinatura individual do Anamedis: preço, o que está incluso e a situação do seu pagamento." },
+      { property: "og:title", content: "Assinatura individual — Anamedis" },
       { property: "og:description", content: "Mesma segurança e mesmo controle do acesso pelo plano." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

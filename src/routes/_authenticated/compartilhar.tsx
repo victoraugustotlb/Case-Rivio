@@ -14,9 +14,9 @@ import { PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, ty
 export const Route = createFileRoute("/_authenticated/compartilhar")({
   head: () => ({
     meta: [
-      { title: "Compartilhar com médico — VITA" },
+      { title: "Compartilhar com médico — Anamedis" },
       { name: "description", content: "Escolha o que o médico pode ver, por quanto tempo, e gere um código temporário." },
-      { property: "og:title", content: "Compartilhar com médico — VITA" },
+      { property: "og:title", content: "Compartilhar com médico — Anamedis" },
       { property: "og:description", content: "Acesso temporário e granular ao seu histórico." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

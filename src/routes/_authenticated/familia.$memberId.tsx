@@ -12,9 +12,9 @@ export const Route = createFileRoute("/_authenticated/familia/$memberId")({
   beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
-      { title: "Perfil de familiar — VITA" },
+      { title: "Perfil de familiar — Anamedis" },
       { name: "description", content: "Histórico de um familiar, aberto com autorização e somente para leitura." },
-      { property: "og:title", content: "Perfil de familiar — VITA" },
+      { property: "og:title", content: "Perfil de familiar — Anamedis" },
       { property: "og:description", content: "Acesso familiar somente leitura, registrado para o dono do histórico." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

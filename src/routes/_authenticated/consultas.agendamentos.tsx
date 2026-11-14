@@ -12,9 +12,9 @@ import { canChange, isTomorrow } from "@/lib/scheduling";
 export const Route = createFileRoute("/_authenticated/consultas/agendamentos")({
   head: () => ({
     meta: [
-      { title: "Meus agendamentos — VITA" },
-      { name: "description", content: "Consultas agendadas pelo VITA: próximas e anteriores, cancelar ou remarcar." },
-      { property: "og:title", content: "Meus agendamentos — VITA" },
+      { title: "Meus agendamentos — Anamedis" },
+      { name: "description", content: "Consultas agendadas pelo Anamedis: próximas e anteriores, cancelar ou remarcar." },
+      { property: "og:title", content: "Meus agendamentos — Anamedis" },
       { property: "og:description", content: "Acompanhe, cancele ou remarque suas consultas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/consultas/agendamentos")({
   component: Agendamentos,
 });
 
-const statusLabel: Record<string, string> = { agendado: "Agendado pelo VITA", cancelado: "Cancelado", remarcado: "Remarcado" };
+const statusLabel: Record<string, string> = { agendado: "Agendado pelo Anamedis", cancelado: "Cancelado", remarcado: "Remarcado" };
 
 function Agendamentos() {
   const { data } = useSuspenseQuery(appointmentsQuery);

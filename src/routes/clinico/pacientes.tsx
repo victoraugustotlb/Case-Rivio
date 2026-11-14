@@ -8,8 +8,8 @@ import { Countdown, ProPage, SearchBox, fmtDT, scopeText, td, th } from "@/compo
 
 export const Route = createFileRoute("/clinico/pacientes")({
   head: () => ({ meta: [
-    { title: "Pacientes com acesso — VITA Clínico" }, { name: "description", content: "Pacientes com acesso ativo, escopo autorizado e tempo restante." },
-    { property: "og:title", content: "Pacientes com acesso — VITA Clínico" }, { property: "og:description", content: "Acessos ativos liberados pelos pacientes." },
+    { title: "Pacientes com acesso — Anamedis Clínico" }, { name: "description", content: "Pacientes com acesso ativo, escopo autorizado e tempo restante." },
+    { property: "og:title", content: "Pacientes com acesso — Anamedis Clínico" }, { property: "og:description", content: "Acessos ativos liberados pelos pacientes." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Pacientes,

@@ -48,5 +48,5 @@ export function StatusTag({ s }: { s: string }) {
 }
 
 export function SearchBox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Buscar por nome ou ID (VT-…)" aria-label="Buscar paciente" className="h-9 w-full rounded border bg-card px-2 text-sm sm:w-72" />;
+  return <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Buscar por nome ou ID (AM-…)" aria-label="Buscar paciente" className="h-9 w-full rounded border bg-card px-2 text-sm sm:w-72" />;
 }

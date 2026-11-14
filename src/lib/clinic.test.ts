@@ -18,6 +18,6 @@ describe("solicitações do médico", () => {
     expect(requestOpen({ status: "authorized", expires_at: "2026-01-01T12:10:00Z" }, now)).toBe(false);
   });
   it("ID do paciente não expõe o identificador completo", () => {
-    expect(patientRef("1544b77c-3075-4c0d-b265-7cb59532259e")).toBe("VT-1544B77C");
+    expect(patientRef("1544b77c-3075-4c0d-b265-7cb59532259e")).toBe("AM-1544B77C");
   });
 });

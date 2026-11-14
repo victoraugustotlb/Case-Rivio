@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Logo } from "@/components/vita/Logo";
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Clock3, FolderOpen, Loader2, LockKeyhole, ShieldCheck, Stethoscope } from "lucide-react";
 import { normalizeCode } from "@/lib/share";
@@ -12,9 +13,9 @@ export const Route = createFileRoute("/medico")({
   validateSearch: (s: Record<string, unknown>): { code?: string } => (typeof s["code"] === "string" ? { code: s["code"] } : {}),
   head: () => ({
     meta: [
-      { title: "VITA Clínico — Histórico autorizado do paciente" },
+      { title: "Anamedis Clínico — Histórico autorizado do paciente" },
       { name: "description", content: "Acesse documentos, perfil de saúde e sinais autorizados pelo paciente com um código temporário." },
-      { property: "og:title", content: "VITA Clínico — Histórico autorizado" },
+      { property: "og:title", content: "Anamedis Clínico — Histórico autorizado" },
       { property: "og:description", content: "Documentos e informações do paciente reunidos em uma visão clínica objetiva." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -62,16 +63,16 @@ function Medico() {
     return (
       <main className="grid min-h-screen bg-background font-sans text-foreground lg:grid-cols-2">
         <section className="relative hidden overflow-hidden bg-hero p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between xl:p-16">
-          <div className="flex items-center gap-3 font-display text-2xl font-bold"><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary-foreground/10"><Stethoscope className="h-6 w-6" aria-hidden /></span>VITA Clínico</div>
+          <Logo variant="escuro" label="Clínico" />
           <div className="max-w-xl">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 px-4 py-2 text-sm"><ShieldCheck className="h-4 w-4" aria-hidden />Histórico com consentimento do paciente</p>
             <h1 className="font-display text-5xl font-semibold leading-tight xl:text-6xl">Mais contexto.<br />Menos repetição.</h1>
-            <p className="mt-6 max-w-lg text-lg text-primary-foreground/80">Documentos, medicamentos e histórico reunidos para você dedicar mais tempo à decisão clínica.</p>
+            <p className="mt-6 max-w-lg text-lg text-primary-foreground">Documentos, medicamentos e histórico reunidos para você dedicar mais tempo à decisão clínica.</p>
           </div>
           <ul className="grid gap-4 text-sm sm:grid-cols-3">
             {[[FolderOpen, "Tudo em um lugar"], [Clock3, "Acesso temporário"], [LockKeyhole, "Escopo autorizado"]].map(([Icon, label]) => {
               const FeatureIcon = Icon as typeof FolderOpen;
-              return <li key={label as string} className="flex items-center gap-2 text-primary-foreground/85"><FeatureIcon className="h-5 w-5 shrink-0" aria-hidden />{label as string}</li>;
+              return <li key={label as string} className="flex items-center gap-2 text-primary-foreground"><FeatureIcon className="h-5 w-5 shrink-0" aria-hidden />{label as string}</li>;
             })}
           </ul>
         </section>
@@ -79,7 +80,7 @@ function Medico() {
         <section className="relative flex min-h-screen items-center justify-center px-4 py-20 sm:px-8">
           <Link to={signedIn ? "/clinico" : "/entrar"} className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"><ArrowLeft className="h-4 w-4" aria-hidden />Voltar</Link>
           <div className="w-full max-w-lg">
-            <div className="mb-8 flex items-center gap-2 font-display text-2xl font-bold text-primary lg:hidden"><Stethoscope className="h-7 w-7" aria-hidden />VITA Clínico</div>
+            <div className="mb-8 flex items-center gap-2 lg:hidden"><Logo variant="completo" height={32} /><span className="font-display text-sm font-bold text-primary">Clínico</span></div>
             <p className="text-sm font-semibold uppercase tracking-widest text-primary">Acesso profissional</p>
             <h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Abrir histórico do paciente</h2>
             <p className="mt-3 text-muted-foreground">Use o código temporário mostrado pelo paciente. Não é necessário criar uma conta.</p>
