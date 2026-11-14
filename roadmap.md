@@ -27,5 +27,6 @@
 - [x] Envio de arquivo/foto, leitura por IA, conferência e salvamento no histórico.
 - [x] Códigos de compartilhamento salvos; médico abre só o autorizado.
 - [ ] Teste completo logado — precisa de uma conta criada pelo usuário no preview.
-- [ ] Contas profissionais com validação de CRM.
+- [x] Contas profissionais (CRM informado), histórico de pacientes e código de 6 dígitos pedido pelo médico.
+- [ ] Validar CRM junto ao conselho — depende de uma fonte oficial de consulta.
 - [ ] Integração real com wearables.
