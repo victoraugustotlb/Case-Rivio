@@ -28,7 +28,7 @@ const stepIndex: Record<Step, number> = { escolher: 0, analisando: 1, conferir: 
 const ACCEPT = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const MAX = 20 * 1024 * 1024;
 
-type Draft = { title: string; kind: string; doc_date: string; source: string; summary: string; fields: { label: string; value: string }[] };
+type Draft = { title: string; kind: string; doc_date: string; source: string; summary: string; fields: { label: string; value: string; ai_value?: string; excerpt?: string; confidence?: string }[] };
 
 function Adicionar() {
   const [step, setStep] = useState<Step>("escolher");
@@ -61,7 +61,7 @@ function Adicionar() {
       if (!r.legivel) {
         setError("Não conseguimos ler um documento médico nesse arquivo. Você pode preencher os campos à mão.");
       }
-      setDraft({ title: r.titulo, kind: DOC_KINDS.includes(r.tipo as never) ? r.tipo : "Exame", doc_date: r.data, source: r.emissor, summary: r.resumo, fields: r.campos.map((c) => ({ label: c.rotulo, value: c.valor })) });
+      setDraft({ title: r.titulo, kind: DOC_KINDS.includes(r.tipo as never) ? r.tipo : "Exame", doc_date: r.data, source: r.emissor, summary: r.resumo, fields: r.campos.map((c) => ({ label: c.rotulo, value: c.valor, ai_value: c.valor, excerpt: c.trecho, confidence: c.confianca })) });
       setStep("conferir");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha na leitura. Tente novamente.");
