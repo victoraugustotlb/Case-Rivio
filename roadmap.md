@@ -15,10 +15,11 @@
 - [x] Salvar dados de verdade (contas e armazenamento).
 
 # VITA Clínico — acesso e perfil compartilhado
-- [ ] Renovar a entrada por código e a navegação da visão profissional.
-- [ ] Adicionar consentimento separado para compartilhar o questionário de saúde.
-- [ ] Exibir perfil, medicamentos, histórico e hábitos autorizados no VITA Clínico.
-- [ ] Testar regras, fluxo público e apresentação responsiva.
+- [x] Renovar a entrada por código e a navegação da visão profissional.
+- [x] Adicionar consentimento separado para compartilhar o questionário de saúde, sem ampliar códigos antigos.
+- [x] Exibir perfil, medicamentos, histórico e hábitos autorizados no VITA Clínico.
+- [x] Testar regras, código inválido e apresentação pública no computador e celular.
+- [ ] Confirmar geração de código e leitura do perfil com sessão autenticada — depende de o usuário identificar qual conta usar; há várias contas e nenhuma corresponde ao acesso automático.
 
 # VITA Web — documentos reais
 - [x] Contas de paciente (e-mail/senha e Google), telas protegidas.
