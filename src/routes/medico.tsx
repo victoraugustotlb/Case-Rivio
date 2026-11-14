@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Clock3, FolderOpen, Loader2, LockKeyhole, ShieldCheck, Stethoscope } from "lucide-react";
 import { normalizeCode } from "@/lib/share";
+import { PATIENT_CODE_LABEL, RETRY_LABEL, classifyCodeInput, failureFromError, isRetryable, openShareMessage } from "@/lib/codes";
+import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { openShare } from "@/lib/documents.functions";
 import { AccessEnded, ClinicalView, type Opened } from "@/components/vita/ClinicalView";
@@ -27,20 +29,24 @@ function Medico() {
   const [busy, setBusy] = useState(false);
   const abrir = useServerFn(openShare);
   const [error, setError] = useState("");
+  const [retry, setRetry] = useState(false);
   const [ended, setEnded] = useState(false);
   const onEnded = useCallback(() => { setOpen(null); setEnded(true); }, []);
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => { void supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session)); }, []);
+  const kind = classifyCodeInput(input);
   const code = normalizeCode(input);
   const valid = /^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code);
 
   const search = Route.useSearch();
   const openCode = async (c: string) => {
     if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(c)) return;
-    setBusy(true); setError("");
+    setBusy(true); setError(""); setRetry(false);
     try {
       const result = await abrir({ data: { code: c } });
       if (result.status === "valido") setOpen(result);
-      else setError(result.status === "expirado" ? "Este código expirou. Peça ao paciente para gerar um novo." : result.status === "revogado" ? "O paciente encerrou este acesso." : "Código não encontrado. Confira os caracteres.");
-    } catch { setError("Não foi possível abrir agora. Tente novamente."); } finally { setBusy(false); }
+      else { setError(openShareMessage(result.status)); setRetry(isRetryable(result.status)); }
+    } catch (err) { setError(openShareMessage(failureFromError(err, navigator.onLine))); setRetry(true); } finally { setBusy(false); }
   };
   useEffect(() => {
     if (search.code) { const c = normalizeCode(search.code); setInput(c); void openCode(c); }
@@ -71,7 +77,7 @@ function Medico() {
         </section>
 
         <section className="relative flex min-h-screen items-center justify-center px-4 py-20 sm:px-8">
-          <Link to="/entrar" className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"><ArrowLeft className="h-4 w-4" aria-hidden />Voltar</Link>
+          <Link to={signedIn ? "/clinico" : "/entrar"} className="absolute left-5 top-5 inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"><ArrowLeft className="h-4 w-4" aria-hidden />Voltar</Link>
           <div className="w-full max-w-lg">
             <div className="mb-8 flex items-center gap-2 font-display text-2xl font-bold text-primary lg:hidden"><Stethoscope className="h-7 w-7" aria-hidden />VITA Clínico</div>
             <p className="text-sm font-semibold uppercase tracking-widest text-primary">Acesso profissional</p>
@@ -79,11 +85,12 @@ function Medico() {
             <p className="mt-3 text-muted-foreground">Use o código temporário mostrado pelo paciente. Não é necessário criar uma conta.</p>
             <form className="mt-8 rounded-2xl border bg-card p-5 shadow-soft sm:p-7" onSubmit={(event) => { event.preventDefault(); void openCode(code); }}>
 
-              <label htmlFor="share-code" className="text-sm font-semibold">Código de acesso</label>
+              <label htmlFor="share-code" className="text-sm font-semibold">{PATIENT_CODE_LABEL}</label>
               <input id="share-code" value={input} onChange={(event) => setInput(normalizeCode(event.target.value))} placeholder="XXXX-XXXX" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={9} aria-describedby="code-help"
                 className="mt-3 min-h-16 w-full rounded-xl border bg-background px-4 text-center font-display text-3xl font-semibold tracking-[0.2em] uppercase outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20" />
               <p id="code-help" className="mt-2 text-center text-xs text-muted-foreground">8 caracteres · o hífen é adicionado automaticamente</p>
-              {error && <p role="alert" className="mt-4 flex items-start gap-2 rounded-lg bg-danger-soft p-3 text-sm"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{error}</p>}
+              {kind === "solicitacao" && <p role="status" className="mt-4 rounded-lg bg-warning-soft p-3 text-sm">Estes 6 números são um <strong>código de solicitação do médico</strong>: é o paciente quem o digita, em Autorizar médico, no app dele. Aqui vai o código do paciente (XXXX-XXXX). <Link to="/clinico/pedir" className="font-semibold text-primary underline">Acompanhar meu pedido</Link></p>}
+              {error && <p role="alert" className="mt-4 flex items-start gap-2 rounded-lg bg-danger-soft p-3 text-sm"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span className="flex-1">{error}</span>{retry && <button type="button" onClick={() => void openCode(code)} className="font-semibold text-primary underline">{RETRY_LABEL}</button>}</p>}
               <button type="submit" disabled={!valid || busy} className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">{busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <LockKeyhole className="h-4 w-4" aria-hidden />}{busy ? "Abrindo histórico…" : "Abrir histórico"}</button>
             </form>
             <p className="mt-5 flex items-start gap-2 text-sm text-muted-foreground"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />Você verá apenas as informações que o paciente escolheu compartilhar, durante a validade do código.</p>

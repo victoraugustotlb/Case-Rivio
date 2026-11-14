@@ -7,9 +7,8 @@ import { documentsQuery } from "@/lib/documents";
 import { supabase } from "@/integrations/supabase/client";
 import { healthProfileQuery } from "@/lib/profile-query";
 import { Button } from "@/components/ui/button";
-import { firstAccessDestination } from "@/lib/profile";
-import { accountQuery } from "@/lib/account-query";
-import { homeFor } from "@/lib/accounts";
+import { requireRole } from "@/lib/require-role";
+import { destinationFor } from "@/lib/routing";
 import { AccessStatus } from "@/components/vita/AccessStatus";
 import { NotificationsCard, PendingUploads } from "@/components/vita/PatientInbox";
 
@@ -24,13 +23,14 @@ export const Route = createFileRoute("/_authenticated/inicio")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  beforeLoad: async ({ context }) => {
+    const { account } = await requireRole("paciente", context);
+    // Plano sem carteirinha: mesma regra do pós-login (destinationFor).
+    if (destinationFor({ accountType: account.type, temVinculoPlano: !!account.membership }) === "/plano") throw redirect({ to: "/plano", replace: true });
+  },
   loader: async ({ context }) => {
-    const account = await context.queryClient.fetchQuery(accountQuery);
-    if (homeFor(account.type) === "/clinico") throw redirect({ to: "/clinico", replace: true });
-    if (account.type === "patient_plan" && !account.membership) throw redirect({ to: "/plano", replace: true });
-    const profile = await context.queryClient.fetchQuery(healthProfileQuery);
-    if (firstAccessDestination(profile) === "/perfil") throw redirect({ to: "/perfil", replace: true });
-    await context.queryClient.ensureQueryData(documentsQuery);
+    // O perfil nunca bloqueia o app: sem perfil, o cartão "Complete seu perfil" aparece aqui.
+    await Promise.all([context.queryClient.ensureQueryData(healthProfileQuery), context.queryClient.ensureQueryData(documentsQuery)]);
   },
   errorComponent: () => <AppShell><p role="alert">Não foi possível carregar seu histórico. Atualize a página para tentar novamente.</p></AppShell>,
   notFoundComponent: () => <AppShell><p>Página não encontrada.</p></AppShell>,
@@ -42,7 +42,7 @@ function Inicio() {
   const { data: docs } = useSuspenseQuery(documentsQuery);
   const { data: profile } = useSuspenseQuery(healthProfileQuery);
   const [nome, setNome] = useState("");
-  useEffect(() => { supabase.auth.getUser().then(({ data }) => setNome(((data.user?.user_metadata?.["full_name"] as string) || "").split(" ")[0] ?? "")); }, []);
+  useEffect(() => { supabase.auth.getSession().then(({ data }) => setNome(((data.session?.user.user_metadata?.["full_name"] as string) || "").split(" ")[0] ?? "")); }, []);
   const counts = { exames: docs.filter((d) => d.kind === "Exame" || d.kind === "Laudo").length, total: docs.length, pend: 0 };
   return (
     <AppShell>
@@ -64,7 +64,7 @@ function Inicio() {
         <NotificationsCard />
 
         {!profile?.questionnaire_completed && <section className="flex flex-wrap items-center justify-between gap-4 border-y py-5">
-          <div><h2 className="font-display text-xl font-semibold">Seu perfil de saúde</h2><p className="mt-1 text-sm text-muted-foreground">Questionário inicial · Medidas, medicamentos e histórico</p></div>
+          <div><h2 className="font-display text-xl font-semibold">Complete seu perfil</h2><p className="mt-1 text-sm text-muted-foreground">Questionário inicial · Medidas, medicamentos e histórico</p></div>
           <Button asChild className="min-h-11"><Link to="/perfil">Preencher perfil<ChevronRight aria-hidden /></Link></Button>
         </section>}
 

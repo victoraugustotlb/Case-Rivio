@@ -103,3 +103,39 @@ export const validatePlanMembership = createServerFn({ method: "POST" })
     await supabaseAdmin.from("profiles").upsert({ user_id: context.userId, account_type: "patient_plan", billing_exempt: false }, { onConflict: "user_id" });
     return { ok: true as const, status: rules.status };
   });
+
+/**
+ * Destino único depois do login, numa só ida ao servidor.
+ * A intenção (plano/individual/médico/laboratório) só é aplicada no primeiro login com Google;
+ * conta criada por e-mail já leva o tipo no cadastro, e login de conta existente nunca muda o tipo.
+ */
+export const resolveHome = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ intent: z.enum(["patient_plan", "patient_individual", "doctor", "laboratory"]).nullable() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { applyEntryIntent, destinationFor } = await import("./routing");
+    const sb = context.supabase;
+    const read = () => Promise.all([
+      sb.from("profiles").select("account_type").eq("user_id", context.userId).maybeSingle(),
+      sb.from("plan_memberships").select("id").eq("user_id", context.userId).maybeSingle(),
+    ]);
+    let [{ data: p }, { data: m }] = await read();
+    if (data.intent) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      const provider = (u.user?.app_metadata?.["provider"] as string | undefined) ?? null;
+      if (applyEntryIntent({ provider, createdAt: u.user?.created_at ?? null })) {
+        const current = p?.account_type ?? null;
+        const pro = (t: string | null) => t === "doctor" || t === "laboratory";
+        const wantsPro = data.intent === "doctor" || data.intent === "laboratory";
+        // Conta nova com Google: define o tipo escolhido. Nunca troca entre paciente e profissional se já houver documentos.
+        const { count: docs } = await sb.from("documents").select("id", { count: "exact", head: true }).eq("user_id", context.userId);
+        if (current !== data.intent && !pro(current) && (!wantsPro || (docs ?? 0) === 0)) {
+          await supabaseAdmin.from("profiles").upsert({ user_id: context.userId, account_type: data.intent, billing_exempt: false }, { onConflict: "user_id" });
+          [{ data: p }, { data: m }] = await read();
+        }
+      }
+    }
+    const accountType = (p?.account_type ?? "patient_individual") as AccountType;
+    return { accountType, destino: destinationFor({ accountType, temVinculoPlano: !!m }) };
+  });

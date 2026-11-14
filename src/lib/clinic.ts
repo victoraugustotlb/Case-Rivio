@@ -104,3 +104,16 @@ export function normalizePatientRef(input: string): string {
 export function isPatientRef(ref: string): boolean {
   return /^VT-[0-9A-F]{8}$/.test(ref);
 }
+
+/** Por que um código de 6 números não pode ser respondido por este paciente ("ok" = pode). */
+export function requestLookupReason(
+  r: { status: string; expires_at: string; expected_patient_id: string | null } | null,
+  userId: string,
+  now: Date = new Date(),
+): "ok" | "nao_encontrado" | "expirado" | "outro_paciente" | "ja_respondido" {
+  if (!r) return "nao_encontrado";
+  if (r.expected_patient_id && r.expected_patient_id !== userId) return "outro_paciente";
+  if (r.status === "expired" || (r.status === "pending" && new Date(r.expires_at).getTime() <= now.getTime())) return "expirado";
+  if (r.status !== "pending") return "ja_respondido";
+  return "ok";
+}

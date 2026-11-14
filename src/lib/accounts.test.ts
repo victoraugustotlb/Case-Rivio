@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canWriteRecords, homeFor, isCardNumber, membershipRules, subscriptionState } from "./accounts";
+import { canShareRecords, canWriteRecords, homeFor, isCardNumber, membershipRules, subscriptionState } from "./accounts";
 
 const now = new Date("2026-11-14T12:00:00Z");
 describe("carteirinha", () => {
@@ -37,5 +37,11 @@ describe("destino após o login", () => {
   it("profissionais vão ao painel; pacientes ao início", () => {
     expect(homeFor("doctor")).toBe("/clinico"); expect(homeFor("laboratory")).toBe("/clinico");
     expect(homeFor("patient_plan")).toBe("/inicio"); expect(homeFor("patient_individual")).toBe("/inicio");
+  });
+  it("compartilhar não depende de cobrança: paciente sem plano nem assinatura gera códigos", () => {
+    expect(canWriteRecords({ type: "patient_individual", exempt: false, membershipStatus: null, sub: null })).toBe(false);
+    expect(canShareRecords("patient_individual")).toBe(true);
+    expect(canShareRecords("patient_plan")).toBe(true);
+    expect(canShareRecords("doctor")).toBe(false);
   });
 });

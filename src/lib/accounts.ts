@@ -40,9 +40,14 @@ export function subscriptionState(sub: SubscriptionRow, now: Date = new Date()):
   return "vencida";
 }
 
-/** Igual à função can_write_records do banco: enviar documentos e gerar códigos. Ler e exportar nunca é bloqueado. */
+/** Igual à função can_write_records do banco: só ENVIAR documentos novos. Gerar códigos, compartilhar, ler e exportar nunca é bloqueado. */
 export function canWriteRecords(a: { type: AccountType; exempt: boolean; membershipStatus: string | null; sub: SubscriptionRow }, now: Date = new Date()): boolean {
   if (a.type === "patient_plan") return a.membershipStatus === "active";
   if (a.type === "patient_individual") { const s = subscriptionState(a.sub, now); return a.exempt || s === "ativa" || s === "cancelando"; }
   return false;
+}
+
+/** Compartilhar o que já existe (gerar código, autorizar pedido do médico) não depende de cobrança. */
+export function canShareRecords(type: AccountType | null | undefined): boolean {
+  return isPatient(type ?? "patient_individual");
 }

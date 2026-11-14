@@ -112,7 +112,6 @@ function PatientForm({ path }: { path: "plano" | "individual" }) {
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault(); setMsg(null); setBusy(true);
     try {
-      localStorage.setItem(INTENT_KEY, intent);
       if (modo === "criar") {
         const { error } = await supabase.auth.signUp({ email, password: senha, options: { emailRedirectTo: window.location.origin, data: { full_name: nome, account_type: intent } } });
         if (error) throw error;
@@ -171,7 +170,6 @@ function ProfessionalForm() {
         if (error) throw error;
         setMsg({ tipo: "ok", texto: "Conta criada. Enviamos um e-mail de confirmação — clique no link para entrar." });
       } else {
-        localStorage.setItem(INTENT_KEY, kind);
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
       }

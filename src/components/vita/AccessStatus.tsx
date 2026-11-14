@@ -30,7 +30,7 @@ export function AccessStatus({ detailed = false }: { detailed?: boolean }) {
       : a.subscriptionState === "cancelando" ? `Assinatura cancelada · acesso completo até ${fmt(s?.current_period_end)}`
       : a.subscriptionState === "vencida" ? "Assinatura vencida · você continua vendo seus documentos."
       : `Assinatura individual · ${formatPrice()}/mês`;
-    if (!a.canWrite) sub = "Envio de documentos e novos códigos ficam pausados até regularizar.";
+    if (!a.canWrite) sub = "O envio de documentos novos fica pausado até regularizar. Compartilhar o que você já tem continua liberado.";
     link = { to: "/assinatura", label: detailed ? "Assinatura e pagamento" : a.canWrite ? "Detalhes" : "Regularizar" };
   }
   const Icon = a.type === "patient_plan" ? ShieldCheck : CreditCard;

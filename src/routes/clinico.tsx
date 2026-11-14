@@ -1,4 +1,5 @@
-import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { requireRole } from "@/lib/require-role";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { NoDoctor, NoLab } from "@/components/vita/ProOnboarding";
 
 export const Route = createFileRoute("/clinico")({
   ssr: false,
+  beforeLoad: ({ context }) => requireRole("profissional", context),
   head: () => ({
     meta: [
       { title: "Área do profissional — VITA Clínico" },
@@ -31,12 +33,10 @@ function ClinicoLayout() {
   const [open, setOpen] = useState(false);
   const provFn = useServerFn(hasProvider);
   const prov = useQuery({ queryKey: ["pro-has-provider"], queryFn: () => provFn(), enabled: !!(me.data?.doctor || me.data?.lab) });
-  useEffect(() => { if (me.data && !me.data.user) nav({ to: "/entrar", replace: true }); }, [me.data, nav]);
   useEffect(() => setOpen(false), [path]);
   const sair = async () => { qc.clear(); await supabase.auth.signOut(); nav({ to: "/entrar", replace: true }); };
 
-  if (me.isLoading || !me.data?.user) return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" aria-label="Carregando" /></div>;
-  if (me.data.type === "patient") return <Navigate to="/inicio" replace />;
+  if (me.isLoading || !me.data?.user || me.data.type === "patient") return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" aria-label="Carregando" /></div>;
   if (me.data.type === "laboratory" && !me.data.lab) return <NoLab onDone={() => me.refetch()} />;
   if (me.data.type === "doctor" && !me.data.doctor) return <NoDoctor onDone={() => me.refetch()} />;
   const who = me.data.doctor

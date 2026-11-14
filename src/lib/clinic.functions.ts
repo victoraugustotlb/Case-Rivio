@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { AUTHORIZED_HOURS, MAX_LOOKUPS, REQUEST_MINUTES, generateRequestCode, patientRef, requestOpen } from "@/lib/clinic";
+import { AUTHORIZED_HOURS, REQUEST_MINUTES, generateRequestCode, patientRef, requestLookupReason, requestOpen } from "@/lib/clinic";
+import { countsAsAttempt, lookupBlocked, requestLookupMessage, type RequestLookupReason } from "@/lib/codes";
 import { PERIOD_OPTIONS, formatShareCode, validateShare } from "@/lib/share";
 
 const scopeSchema = z.object({
@@ -64,15 +65,17 @@ export const getAccessRequest = createServerFn({ method: "POST" })
     return { status, shareCode: s?.code ?? null, patientId: r.patient_id };
   });
 
+/** Busca o pedido pelo código. Só tentativas que falham contam no limite (10 a cada 15 min por paciente). */
 async function findOpenRequest(code: string, userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const since = new Date(Date.now() - 15 * 60_000).toISOString();
   const { count } = await supabaseAdmin.from("request_attempts").select("id", { count: "exact", head: true }).eq("user_id", userId).gte("created_at", since);
-  if ((count ?? 0) >= MAX_LOOKUPS) throw new Error("Muitas tentativas. Aguarde 15 minutos e tente de novo.");
-  await supabaseAdmin.from("request_attempts").insert({ user_id: userId });
-  const { data: r } = await supabaseAdmin.from("access_requests").select("*").eq("code", code).eq("status", "pending").maybeSingle();
-  if (!r || !requestOpen(r) || (r.expected_patient_id && r.expected_patient_id !== userId)) return { supabaseAdmin, r: null };
-  return { supabaseAdmin, r };
+  if (lookupBlocked(count ?? 0)) return { supabaseAdmin, r: null, reason: "bloqueado" as const };
+  const { data: rows } = await supabaseAdmin.from("access_requests").select("*").eq("code", code).order("created_at", { ascending: false }).limit(1);
+  const r = rows?.[0] ?? null;
+  const reason = requestLookupReason(r, userId);
+  if (countsAsAttempt(reason === "ok")) await supabaseAdmin.from("request_attempts").insert({ user_id: userId });
+  return reason === "ok" ? { supabaseAdmin, r: r!, reason } : { supabaseAdmin, r: null, reason };
 }
 
 const codeSchema = z.object({ code: z.string().regex(/^[0-9]{6}$/) });
@@ -81,14 +84,15 @@ export const lookupAccessRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => codeSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin, r } = await findOpenRequest(data.code, context.userId);
-    if (!r) return null;
+    const { supabaseAdmin, r, reason } = await findOpenRequest(data.code, context.userId);
+    if (!r) return { ok: false as const, reason: reason as RequestLookupReason };
     const [{ data: doc }, { data: lab }] = await Promise.all([
       supabaseAdmin.from("doctor_profiles").select("full_name, crm, uf, specialty").eq("user_id", r.doctor_id).maybeSingle(),
       supabaseAdmin.from("lab_profiles").select("legal_name, cnpj, city, uf").eq("user_id", r.doctor_id).maybeSingle(),
     ]);
     const credential = doc ? `CRM ${doc.crm}/${doc.uf} informado${doc.specialty ? ` · ${doc.specialty}` : ""}` : lab ? `CNPJ ${lab.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")} informado · ${lab.city}/${lab.uf}` : "";
     return {
+      ok: true as const,
       doctor: { full_name: doc?.full_name ?? lab?.legal_name ?? "Profissional", credential, kind: lab && !doc ? "laboratory" as const : "doctor" as const },
       requestUpload: r.request_upload,
       categories: r.categories, signals: r.signals, includeProfile: r.include_profile, periodMonths: r.period_months, expiresAt: r.expires_at,
@@ -99,15 +103,13 @@ export const respondAccessRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => codeSchema.extend({ accept: z.boolean(), allowUpload: z.boolean().default(false) }).parse(d))
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin, r } = await findOpenRequest(data.code, context.userId);
-    if (!r) throw new Error("Código não encontrado ou expirado.");
+    const { supabaseAdmin, r, reason } = await findOpenRequest(data.code, context.userId);
+    if (!r) throw new Error(requestLookupMessage(reason as RequestLookupReason));
     if (r.doctor_id === context.userId) throw new Error("Você não pode autorizar a própria solicitação.");
     if (!data.accept) {
       await supabaseAdmin.from("access_requests").update({ status: "declined", patient_id: context.userId }).eq("id", r.id).eq("status", "pending");
       return { ok: true };
     }
-    const { data: allowed } = await context.supabase.rpc("can_write_records", { _uid: context.userId });
-    if (!allowed) throw new Error("Regularize seu acesso para autorizar novos códigos. Seus documentos continuam guardados.");
     const { data: share, error } = await supabaseAdmin.from("share_codes").insert({
       user_id: context.userId, code: formatShareCode(), categories: r.categories, signals: r.signals, include_profile: r.include_profile,
       period_months: r.period_months, expires_at: new Date(Date.now() + AUTHORIZED_HOURS * 3600_000).toISOString(),

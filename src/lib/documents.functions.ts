@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { docVisible, normalizeCode, accessState, profileVisible } from "@/lib/share";
-import { profileSchema, type HealthProfile } from "@/lib/profile";
+import { parseProfileLenient, type HealthProfile } from "@/lib/profile";
+import { LOOKUP_WINDOW_MIN, countsAsAttempt, lookupBlocked } from "@/lib/codes";
 
 const extractSchema = {
   type: "object",
@@ -84,13 +85,33 @@ async function loadValidShare(rawCode: string) {
   return { admin: supabaseAdmin, share, state: accessState(new Date(share.expires_at), share.revoked) };
 }
 
+/** Hash do IP de quem digita o código (o IP puro nunca é guardado). */
+async function callerIpHash(): Promise<string> {
+  const { getRequestHeader } = await import("@tanstack/react-start/server");
+  const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ?? getRequestHeader("x-real-ip") ?? "desconhecido";
+  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`vita-ip:${ip}`)));
+  return Array.from(h, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Limite: 10 códigos inexistentes do mesmo IP bloqueiam por 15 minutos. Abrir um código válido nunca conta. */
+async function withLookupLimit<T extends { status: string }>(run: () => Promise<T>): Promise<T | { status: "bloqueado" }> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const ipHash = await callerIpHash();
+  const since = new Date(Date.now() - LOOKUP_WINDOW_MIN * 60_000).toISOString();
+  const { count } = await supabaseAdmin.from("share_lookup_attempts").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", since);
+  if (lookupBlocked(count ?? 0)) return { status: "bloqueado" };
+  const result = await run();
+  if (countsAsAttempt(result.status !== "invalido")) await supabaseAdmin.from("share_lookup_attempts").insert({ ip_hash: ipHash });
+  return result;
+}
+
 /** Verificação periódica: o médico só continua vendo enquanto o código for válido. */
 export const checkShare = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ code: z.string().min(8).max(12) }).parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }) => withLookupLimit(async () => {
     const { share, state } = await loadValidShare(data.code);
     return { status: state, expiresAt: share?.expires_at ?? null };
-  });
+  }));
 
 /** Abre um documento autorizado: registra em access_logs e devolve um link novo e curto. */
 export async function openDocumentForShare(code: string, documentId: string, viewerId?: string) {
@@ -119,6 +140,7 @@ export async function buildOpened(rawCode: string, viewer?: { viewerId: string; 
   const { data: rows } = await supabaseAdmin.from("documents").select("id,title,kind,doc_date,source,origin,file_path,file_type,file_hash,fields,summary,confirmed,created_at,status,uploaded_by_name").eq("user_id", share.user_id).eq("status", "accepted").order("created_at", { ascending: false });
   const docs = (rows ?? []).filter((d) => docVisible(d, share)).map((d) => ({ ...d, fields: (d.fields ?? []) as SharedField[], file_path: undefined, url: null as string | null }));
   let profile: HealthProfile | null = null;
+  let profileIncomplete = false;
   if (profileVisible(share)) {
     const { data: profileRow, error: profileError } = await supabaseAdmin
       .from("patient_profiles")
@@ -126,13 +148,17 @@ export async function buildOpened(rawCode: string, viewer?: { viewerId: string; 
       .eq("user_id", share.user_id)
       .maybeSingle();
     if (profileError) throw new Error("Não foi possível carregar o perfil autorizado.");
-    profile = profileRow ? profileSchema.parse(profileRow) : null;
+    if (profileRow) {
+      const parsed = parseProfileLenient(profileRow);
+      profile = parsed.profile; profileIncomplete = parsed.incomplete;
+      if (parsed.incomplete) console.warn("openShare: perfil com campos fora do formato", parsed.invalid.join(","));
+    }
   }
   await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer?.action ?? "resumo", viewer_id: viewer?.viewerId ?? null });
-  return { status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, docs };
+  return { status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, profileIncomplete, docs };
 }
 
 /** Acesso do médico: valida o código e devolve só o que o paciente autorizou. */
 export const openShare = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ code: z.string().min(8).max(12) }).parse(d))
-  .handler(async ({ data }) => buildOpened(data.code));
+  .handler(async ({ data }) => withLookupLimit(() => buildOpened(data.code)));

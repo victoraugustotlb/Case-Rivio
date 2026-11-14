@@ -242,8 +242,6 @@ export const createMinorShareCode = createServerFn({ method: "POST" }).middlewar
     const sb = await admin();
     const { decision } = await decide(sb, context.userId, data.memberId);
     if (!canShareFor(decision) || (decision.allowed && decision.basis === "proprio")) return { ok: false as const, error: "Só o responsável legal de um menor gera código para o perfil dele." };
-    const { data: can } = await sb.rpc("can_write_records", { _uid: context.userId });
-    if (!can) return { ok: false as const, error: "Seu acesso não permite gerar códigos agora." };
     for (let i = 0; i < 3; i++) {
       const code = formatShareCode();
       const { error } = await sb.from("share_codes").insert({ user_id: data.memberId, code, categories: data.categories, signals: data.signals, include_profile: data.includeProfile, period_months: data.periodMonths, expires_at: new Date(Date.now() + data.validityHours * 3600_000).toISOString() });

@@ -10,8 +10,10 @@ import { listPlans } from "@/lib/account.functions";
 import { requestFamilyLink, requestMemberAccess, respondFamilyRequest, respondMemberAccess, revokeMemberAccess } from "@/lib/family.functions";
 import { GRANT_DURATIONS, type GrantDuration } from "@/lib/family";
 import { DOC_KINDS, type DocKind } from "@/lib/vita-data";
+import { requireRole } from "@/lib/require-role";
 
 export const Route = createFileRoute("/_authenticated/familia/")({
+  beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
       { title: "Minha família — VITA" },

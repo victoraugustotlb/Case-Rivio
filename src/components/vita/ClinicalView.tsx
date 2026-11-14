@@ -90,7 +90,7 @@ export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded 
   const verify = useCallback(async () => {
     try {
       const r = await check({ data: { code: opened.code } });
-      if (r.status !== "valido" && !endedRef.current) { endedRef.current = true; onEnded(); }
+      if (r.status !== "valido" && r.status !== "bloqueado" && !endedRef.current) { endedRef.current = true; onEnded(); }
     } catch { /* rede instável: tenta de novo no próximo ciclo */ }
   }, [check, opened.code, onEnded]);
 
@@ -146,6 +146,7 @@ export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded 
       </header>
 
       <main className="mx-auto max-w-[1400px] p-4">
+        {view.tab === "resumo" && opened.profileIncomplete && profile && <p role="status" className="mb-3 rounded border bg-warning-soft px-3 py-2 text-xs">Perfil incompleto: algumas respostas antigas do questionário não puderam ser lidas e aparecem em branco.</p>}
         {view.tab === "resumo" && (
           <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
             <Section title="Alergias informadas">{profile ? (profile.allergies.trim() ? <><p className="whitespace-pre-line font-medium">{profile.allergies}</p><div className="mt-1"><OriginTag origin="paciente" /> <span className="text-[11px] text-muted-foreground">· Questionário do paciente</span></div></> : <Empty text="Nenhuma alergia informada pelo paciente." />) : <Locked />}</Section>

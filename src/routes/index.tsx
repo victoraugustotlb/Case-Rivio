@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSignedInRedirect } from "@/hooks/use-signed-in-redirect";
+import { BareSkeleton } from "@/components/vita/PageSkeleton";
 import { FileUp, Share2, Stethoscope, Watch } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -13,14 +15,24 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    // Antes de hidratar: se há sessão guardada, mostra o esqueleto em vez da landing (evita o pulo).
+    scripts: [{ children: "try{for(var i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i)||'')){document.documentElement.setAttribute('data-session','1');break}}}catch(e){}" }],
   }),
   component: Landing,
 });
 
 function Landing() {
-  useSignedInRedirect();
+  const state = useSignedInRedirect();
+  useEffect(() => {
+    // Sem sessão válida: libera a landing (remove a marca do script inicial).
+    void supabase.auth.getSession().then(({ data }) => { if (!data.session) document.documentElement.removeAttribute("data-session"); });
+  }, []);
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
+    <>
+    <div className="session-skeleton"><BareSkeleton /></div>
+    {state === "livre" && <style>{"html[data-session] .landing{display:none} html:not([data-session]) .session-skeleton{display:none}"}</style>}
+    {state === "verificando" && <style>{".landing{display:none}"}</style>}
+    <div className="landing min-h-screen bg-background font-sans text-foreground">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <span className="flex items-center gap-2 font-display text-2xl font-bold text-primary"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-sm text-primary-foreground">V</span> VITA</span>
         <div className="flex gap-2">
@@ -45,5 +57,6 @@ function Landing() {
         </section>
       </main>
     </div>
+    </>
   );
 }

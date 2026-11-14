@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock3, Loader2, RefreshCw } from "lucide-react";
 import { createAccessRequest, getAccessRequest } from "@/lib/clinic.functions";
 import { listSentRequests } from "@/lib/pro.functions";
+import { REQUEST_CODE_LABEL } from "@/lib/codes";
 import { formatRequestCode, isPatientRef, normalizePatientRef } from "@/lib/clinic";
 import { PERIOD_OPTIONS, type ShareCategory, type ShareSignal } from "@/lib/share";
 import { CATS, SIGS, ProPage, StatusTag, fmtDT, scopeText, td, th } from "@/components/vita/pro-ui";
@@ -42,25 +43,32 @@ function Pedir() {
   const [busy, setBusy] = useState(false);
   const refNorm = ref.trim() ? normalizePatientRef(ref) : "";
 
+  const navigated = useRef(false);
+  // Repete a cada 3 s só enquanto pendente; para ao desmontar; consulta de novo quando a aba volta ao foco.
   useEffect(() => {
-    if (!req) return;
-    const t = setInterval(async () => {
+    if (!req || state !== "pending") return;
+    let alive = true;
+    const tick = async () => {
       try {
         const r = await poll({ data: { id: req.id } });
+        if (!alive) return;
         setState(r.status);
-        if (r.status !== "pending") { clearInterval(t); void qc.invalidateQueries({ queryKey: ["pro-requests"] }); void qc.invalidateQueries({ queryKey: ["pro-patients"] }); }
-        if (r.status === "authorized" && r.patientId) nav({ to: "/clinico/paciente/$id", params: { id: r.patientId } });
-      } catch { /* tenta de novo */ }
-    }, 3000);
-    return () => clearInterval(t);
-  }, [req, poll, nav, qc]);
+        if (r.status !== "pending") { void qc.invalidateQueries({ queryKey: ["pro-requests"] }); void qc.invalidateQueries({ queryKey: ["pro-patients"] }); }
+        if (r.status === "authorized" && r.patientId && !navigated.current) { navigated.current = true; nav({ to: "/clinico/paciente/$id", params: { id: r.patientId } }); }
+      } catch { /* tenta de novo no próximo ciclo */ }
+    };
+    const t = setInterval(tick, 3000);
+    const onVis = () => { if (document.visibilityState === "visible") void tick(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { alive = false; clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
+  }, [req, state, poll, nav, qc]);
 
   const gerar = async () => {
     if (refNorm && !isPatientRef(refNorm)) { setError("ID inválido. Use o formato VT-XXXXXXXX."); return; }
     setBusy(true); setError("");
     try {
       setReq(await create({ data: { categories: cats, signals: sigs, includeProfile: profile, periodMonths: period, requestUpload: upload, ...(refNorm ? { patientRef: refNorm } : {}) } }));
-      setState("pending"); void qc.invalidateQueries({ queryKey: ["pro-requests"] });
+      navigated.current = false; setState("pending"); void qc.invalidateQueries({ queryKey: ["pro-requests"] });
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível gerar."); } finally { setBusy(false); }
   };
 
@@ -83,13 +91,13 @@ function Pedir() {
             <button onClick={gerar} disabled={busy} className="flex h-9 items-center gap-2 rounded bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50">{busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}Gerar código de 6 dígitos</button>
           </>) : (
             <div className="py-4 text-center">
-              <p className="text-xs text-muted-foreground">Paciente abre o VITA → <strong>Autorizar médico</strong> → digita:</p>
+              <p className="text-xs text-muted-foreground"><strong>{REQUEST_CODE_LABEL}</strong> · o paciente abre o VITA → Autorizar médico → digita:</p>
               <p className="mt-3 font-mono text-5xl font-bold tracking-[0.2em] text-primary" aria-live="polite">{formatRequestCode(req.code)}</p>
               <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Clock3 className="h-3.5 w-3.5" aria-hidden />Válido até {new Date(req.expires_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p>
               <p className="mx-auto mt-4 flex max-w-sm items-center justify-center gap-2 rounded bg-muted p-2 text-xs" role="status">
-                {state === "pending" ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden />Aguardando o paciente…</> : state === "authorized" ? "Autorizado. Abrindo histórico…" : state === "declined" ? "O paciente recusou." : "O código expirou."}
+                {state === "pending" ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden />Aguardando o paciente…</> : state === "authorized" ? "Autorizado. Abrindo histórico…" : state === "declined" ? "O paciente recusou o pedido. Nenhuma informação foi liberada." : "O código expirou antes de o paciente responder."}
               </p>
-              <button onClick={() => setReq(null)} className="mt-3 inline-flex h-9 items-center gap-2 rounded border px-3 text-xs font-semibold"><RefreshCw className="h-3.5 w-3.5" aria-hidden />Novo pedido</button>
+              <button onClick={() => setReq(null)} className="mt-3 inline-flex h-9 items-center gap-2 rounded border px-3 text-xs font-semibold"><RefreshCw className="h-3.5 w-3.5" aria-hidden />{state === "declined" || state === "expired" ? "Gerar novo código" : "Novo pedido"}</button>
             </div>
           )}
         </section>

@@ -6,8 +6,10 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { listPlans, validatePlanMembership, choosePatientPath } from "@/lib/account.functions";
 import { accountQuery } from "@/lib/account-query";
+import { requireRole } from "@/lib/require-role";
 
 export const Route = createFileRoute("/_authenticated/plano")({
+  beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
       { title: "Plano de saúde — VITA" },

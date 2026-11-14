@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/entrar" });
-    return { user: data.user };
+    // Sessão local (sem ida ao Auth): as server functions revalidam o token e o RLS protege os dados.
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/entrar" });
+    return { user: data.session.user };
   },
   component: () => <Outlet />,
 });

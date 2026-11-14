@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Copy, Info, ShieldCheck, ShieldOff, UserRound } from "lucide-react";
-import { WriteGate } from "@/components/vita/AccessStatus";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createMinorShareCode } from "@/lib/family.functions";
 import { attachShareToAppointment } from "@/lib/scheduling.functions";
-import { formatShareCode, PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
+import { createShareCode } from "@/lib/share.functions";
+import { PATIENT_CODE_LABEL, createShareMessage } from "@/lib/codes";
+import { PERIOD_OPTIONS, VALIDITY_OPTIONS, validateShare, type ShareCategory, type ShareSignal } from "@/lib/share";
 
 export const Route = createFileRoute("/_authenticated/compartilhar")({
   head: () => ({
@@ -51,6 +52,7 @@ function Compartilhar() {
   const untilAppt = consulta && ate && new Date(ate).getTime() > Date.now() ? ate : null;
   const untilLabel = untilAppt ? new Date(untilAppt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }) : "";
   const createMinor = useServerFn(createMinorShareCode);
+  const createCode = useServerFn(createShareCode);
   const [categories, setCategories] = useState<ShareCategory[]>([]);
   const [signals, setSignals] = useState<ShareSignal[]>([]);
   const [includeProfile, setIncludeProfile] = useState(false);
@@ -61,6 +63,20 @@ function Compartilhar() {
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState("");
   const errors = validateShare({ categories, signals, includeProfile, periodMonths, validityHours });
+  const gerar = async () => {
+    setBusy(true); setFail("");
+    try {
+      if (para) {
+        const r = await createMinor({ data: { memberId: para, categories, signals, includeProfile, periodMonths, validityHours } });
+        if (r.ok) setCode(r.code); else setFail(r.error);
+        return;
+      }
+      const r = await createCode({ data: { categories, signals, includeProfile, periodMonths, validityHours, ...(untilAppt ? { until: untilAppt } : {}) } });
+      if (!r.ok) { setFail(createShareMessage(r.error)); return; }
+      if (untilAppt && consulta) await attach({ data: { id: consulta, code: r.code } }).catch(() => undefined);
+      setCode(r.code);
+    } catch { setFail(createShareMessage("falha_servidor")); } finally { setBusy(false); }
+  };
 
   if (code) {
     return (
@@ -68,7 +84,7 @@ function Compartilhar() {
         <div className="mx-auto max-w-xl text-center">
           <PageTitle title={revoked ? "Acesso encerrado" : "Código pronto"} subtitle={revoked ? "O médico não consegue mais abrir seu histórico com este código." : untilAppt ? `Válido até o fim da consulta (${untilLabel}).` : `Válido por ${validityLabel(validityHours)}. Mostre ao médico.`} />
           <div className={`rounded-2xl border bg-card p-8 ${revoked ? "opacity-50" : ""}`}>
-            <p className="text-sm text-muted-foreground">Código de acesso</p>
+            <p className="text-sm text-muted-foreground">{PATIENT_CODE_LABEL}</p>
             <p className="mt-2 font-display text-5xl font-bold tracking-widest text-primary">{code}</p>
             <p className="mt-4 text-sm text-muted-foreground">O médico acessa em <strong>{typeof window !== "undefined" ? window.location.host : ""}/medico</strong> no computador dele.</p>
             <ul className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
@@ -126,25 +142,9 @@ function Compartilhar() {
         </div>
         <p className="flex gap-2 rounded-xl bg-primary-soft p-4 text-sm"><Info className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Encerrar o acesso impede novas consultas, mas não desfaz o que o médico já viu.</p>
         {errors.length > 0 && <p className="text-sm text-muted-foreground">{errors[0]}</p>}
-        {fail && <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm">{fail}</p>}
-        <WriteGate action="A geração de novos códigos">
-        <button type="button" disabled={errors.length > 0 || busy} onClick={async () => {
-          setBusy(true); setFail("");
-          if (para) {
-            const r = await createMinor({ data: { memberId: para, categories, signals, includeProfile, periodMonths, validityHours } });
-            if (r.ok) setCode(r.code); else setFail(r.error);
-            setBusy(false); return;
-          }
-          for (let i = 0; i < 3; i++) {
-            const c = formatShareCode();
-            const { error } = await supabase.from("share_codes").insert({ code: c, categories, signals, include_profile: includeProfile, period_months: periodMonths, expires_at: untilAppt ?? new Date(Date.now() + validityHours * 3600_000).toISOString() });
-            if (!error) { if (untilAppt && consulta) await attach({ data: { id: consulta, code: c } }); setCode(c); setBusy(false); return; }
-            if (error.code !== "23505") break;
-          }
-          setFail("Não foi possível gerar o código. Tente novamente."); setBusy(false);
-        }}
-          className="min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">Gerar código</button>
-        </WriteGate>
+        {fail && <p role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-danger-soft p-3 text-sm"><span>{fail}</span><button type="button" onClick={() => void gerar()} className="min-h-11 rounded-lg border bg-card px-4 font-semibold">Tentar de novo</button></p>}
+        <button type="button" disabled={errors.length > 0 || busy} onClick={() => void gerar()}
+          className="min-h-12 w-full rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">{busy ? "Gerando…" : "Gerar código"}</button>
       </div>
     </AppShell>
   );

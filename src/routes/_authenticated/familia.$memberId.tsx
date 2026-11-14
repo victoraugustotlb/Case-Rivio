@@ -6,8 +6,10 @@ import { FileText, FileUp, Loader2, Lock, Share2 } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { memberRecordsQuery } from "@/lib/family-query";
 import { openMemberDocument } from "@/lib/family.functions";
+import { requireRole } from "@/lib/require-role";
 
 export const Route = createFileRoute("/_authenticated/familia/$memberId")({
+  beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
       { title: "Perfil de familiar — VITA" },

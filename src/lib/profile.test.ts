@@ -1,15 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { ageFromBirthDate, emptyProfile, firstAccessDestination, profileSchema } from "./profile";
+import { ageFromBirthDate, emptyProfile, parseProfileLenient, profileSchema } from "./profile";
 
 describe("perfil de saúde", () => {
-  it("abre o questionário no primeiro acesso de uma conta sem perfil", () => {
-    expect(firstAccessDestination(null)).toBe("/perfil");
+  it("perfil com valores antigos abre com os campos válidos e marca incompleto", () => {
+    const r = parseProfileLenient({ ...emptyProfile, full_name: "Ana", smoking: "Fumante", alcohol: "Ocasionalmente", activity: 3, medications: [{ name: "Remédio de teste", dose: "1", frequency: "1x" }, { dose: "sem nome" }] });
+    expect(r.incomplete).toBe(true);
+    expect(r.profile.full_name).toBe("Ana");
+    expect(r.profile.alcohol).toBe("Ocasionalmente");
+    expect(r.profile.smoking).toBe("");
+    expect(r.profile.activity).toBe("");
+    expect(r.profile.medications).toHaveLength(1);
+    expect(r.invalid).toEqual(expect.arrayContaining(["smoking", "activity", "medications"]));
   });
-  it("permite acessar o início depois de adiar o questionário", () => {
-    expect(firstAccessDestination(emptyProfile)).toBe("/inicio");
+  it("perfil válido não é marcado como incompleto", () => {
+    expect(parseProfileLenient(emptyProfile)).toEqual({ profile: emptyProfile, incomplete: false, invalid: [] });
   });
-  it("não repete o questionário de um perfil concluído", () => {
-    expect(firstAccessDestination({ ...emptyProfile, questionnaire_completed: true })).toBe("/inicio");
+  it("perfil sem nenhum dado legível volta vazio, sem erro", () => {
+    expect(parseProfileLenient(null).profile).toEqual(emptyProfile);
   });
   it("calcula a idade pela data de nascimento, antes do aniversário", () => {
     expect(ageFromBirthDate("1990-11-15", new Date(2026, 10, 14))).toBe(35);

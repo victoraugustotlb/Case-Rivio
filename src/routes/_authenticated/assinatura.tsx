@@ -4,8 +4,10 @@ import { Check, CreditCard, ShieldCheck } from "lucide-react";
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { accountQuery } from "@/lib/account-query";
 import { formatPrice, INDIVIDUAL_PLAN } from "@/lib/pricing";
+import { requireRole } from "@/lib/require-role";
 
 export const Route = createFileRoute("/_authenticated/assinatura")({
+  beforeLoad: ({ context }) => requireRole("paciente", context),
   head: () => ({
     meta: [
       { title: "Assinatura e pagamento — VITA" },
@@ -47,7 +49,7 @@ function Assinatura() {
               <dt className="text-muted-foreground">Período atual até</dt><dd>{fmt(s?.current_period_end)}</dd>
               <dt className="text-muted-foreground">Próxima cobrança</dt><dd>{a?.subscriptionState === "ativa" ? fmt(s?.current_period_end) : "—"}</dd>
             </dl>
-            {a && !a.canWrite && a.type === "patient_individual" && <p className="mt-4 rounded-lg bg-warning-soft p-3 text-sm">Você continua vendo e baixando seus documentos. Envio de novos documentos e novos códigos voltam quando a assinatura for regularizada. Nada é apagado por falta de pagamento.</p>}
+            {a && !a.canWrite && a.type === "patient_individual" && <p className="mt-4 rounded-lg bg-warning-soft p-3 text-sm">Você continua vendo e baixando seus documentos. O envio de novos documentos volta quando a assinatura for regularizada; gerar códigos para o médico continua liberado. Nada é apagado por falta de pagamento.</p>}
             <p className="mt-4 text-xs text-muted-foreground">Seus documentos continuam guardados em qualquer situação.</p>
           </section>
         </div>

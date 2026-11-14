@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setName((data.user?.user_metadata?.["full_name"] as string) || data.user?.email || ""));
+    supabase.auth.getSession().then(({ data }) => { const u = data.session?.user; setName((u?.user_metadata?.["full_name"] as string) || u?.email || ""); });
   }, []);
   const account = useQuery(accountQuery);
   const isPlan = account.data?.type === "patient_plan";

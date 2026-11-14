@@ -6,7 +6,8 @@ export function useProMe() {
   return useQuery({
     queryKey: ["doctor-me"],
     queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: s } = await supabase.auth.getSession();
+      const u = { user: s.session?.user ?? null };
       if (!u.user) return { user: null, doctor: null, lab: null, type: null };
       const { data: prof } = await supabase.from("profiles").select("account_type").eq("user_id", u.user.id).maybeSingle();
       if (prof?.account_type === "laboratory") {

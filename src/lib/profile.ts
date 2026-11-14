@@ -32,11 +32,31 @@ export const profileSchema = z.object({
   questionnaire_completed: z.boolean(),
 });
 export type HealthProfile = z.infer<typeof profileSchema>;
-export function firstAccessDestination(profile: HealthProfile | null): "/perfil" | "/inicio" {
-  return profile === null ? "/perfil" : "/inicio";
-}
 export type Medication = z.infer<typeof medicationSchema>;
 export const emptyProfile: HealthProfile = {
   full_name: "", birth_date: null, height_cm: null, weight_kg: null, medications: [],
   allergies: "", conditions: "", surgeries: "", family_history: "", smoking: "", alcohol: "", activity: "", questionnaire_completed: false,
 };
+/**
+ * Leitura tolerante para o médico: um valor antigo ou fora do formato não derruba o acesso.
+ * Mantém só os campos válidos (os demais voltam vazios) e informa quais foram descartados.
+ */
+export function parseProfileLenient(row: unknown): { profile: HealthProfile; incomplete: boolean; invalid: string[] } {
+  const full = profileSchema.safeParse(row);
+  if (full.success) return { profile: full.data, incomplete: false, invalid: [] };
+  const src = (row && typeof row === "object" ? row : {}) as Record<string, unknown>;
+  const shape = profileSchema.shape;
+  const out: Record<string, unknown> = { ...emptyProfile };
+  const invalid: string[] = [];
+  for (const key of Object.keys(shape) as (keyof typeof shape)[]) {
+    if (!(key in src)) continue;
+    if (key === "medications" && Array.isArray(src[key])) {
+      const meds = (src[key] as unknown[]).map((m) => medicationSchema.safeParse(m)).filter((r) => r.success).map((r) => r.data);
+      if (meds.length !== (src[key] as unknown[]).length) invalid.push(key);
+      out[key] = meds.slice(0, 50); continue;
+    }
+    const r = shape[key].safeParse(src[key]);
+    if (r.success) out[key] = r.data; else invalid.push(key);
+  }
+  return { profile: out as HealthProfile, incomplete: true, invalid };
+}

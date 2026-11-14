@@ -11,6 +11,7 @@ export type VitaDoc = {
 
 export const documentsQuery = queryOptions({
   queryKey: ["documents"],
+  staleTime: 60_000,
   queryFn: async (): Promise<VitaDoc[]> => {
     const { data, error } = await supabase.from("documents").select("*").eq("status", "accepted").order("created_at", { ascending: false });
     if (error) throw error;

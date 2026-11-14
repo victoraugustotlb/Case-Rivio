@@ -6,6 +6,7 @@ import { AlertCircle, CheckCircle2, Loader2, ShieldCheck, Stethoscope } from "lu
 import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { lookupAccessRequest, respondAccessRequest } from "@/lib/clinic.functions";
 import { AUTHORIZED_HOURS, formatRequestCode, isRequestCode, normalizeRequestCode } from "@/lib/clinic";
+import { REQUEST_CODE_LABEL, classifyCodeInput, requestLookupMessage } from "@/lib/codes";
 
 export const Route = createFileRoute("/_authenticated/autorizar")({
   head: () => ({
@@ -23,10 +24,12 @@ export const Route = createFileRoute("/_authenticated/autorizar")({
 
 const CAT: Record<string, string> = { exames: "Exames", laudos: "Laudos", consultas: "Consultas antigas", receitas: "Receitas", vacinas: "Vacinas" };
 const SIG: Record<string, string> = { fc: "Frequência cardíaca", sono: "Sono", spo2: "Oxigenação", passos: "Passos", pressao: "Pressão", glicose: "Glicose" };
-type Found = NonNullable<Awaited<ReturnType<typeof lookupAccessRequest>>>;
+type Found = Extract<Awaited<ReturnType<typeof lookupAccessRequest>>, { ok: true }>;
 
 function Autorizar() {
-  const [code, setCode] = useState("");
+  const [raw, setRaw] = useState("");
+  const code = normalizeRequestCode(raw);
+  const kind = classifyCodeInput(raw);
   const [found, setFound] = useState<Found | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -41,8 +44,7 @@ function Autorizar() {
     setBusy(true); setError("");
     try {
       const r = await lookup({ data: { code } });
-      if (!r) setError("Código não encontrado ou expirado. Peça ao médico um novo código.");
-      setFound(r);
+      if (!r.ok) { setError(requestLookupMessage(r.reason)); setFound(null); } else setFound(r);
     } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível verificar."); } finally { setBusy(false); }
   };
   const responder = async (accept: boolean) => {
@@ -64,9 +66,10 @@ function Autorizar() {
           </div>
         ) : !found ? (
           <form onSubmit={buscar} className="rounded-2xl border bg-card p-6 shadow-soft">
-            <label htmlFor="req-code" className="text-sm font-semibold">Código do médico</label>
-            <input id="req-code" inputMode="numeric" autoComplete="one-time-code" value={formatRequestCode(code)} onChange={(e) => setCode(normalizeRequestCode(e.target.value))} placeholder="000 000"
+            <label htmlFor="req-code" className="text-sm font-semibold">{REQUEST_CODE_LABEL}</label>
+            <input id="req-code" autoComplete="one-time-code" value={kind === "solicitacao" ? formatRequestCode(code) : raw} onChange={(e) => setRaw(e.target.value.toUpperCase().slice(0, 9))} placeholder="000 000"
               className="mt-3 min-h-16 w-full rounded-xl border bg-background text-center font-display text-3xl font-semibold tracking-[0.3em] outline-none focus:border-primary focus:ring-2 focus:ring-ring/20" />
+            {kind === "paciente" && <p role="status" className="mt-4 rounded-lg bg-warning-soft p-3 text-sm">Este é um <strong>código do paciente</strong> (letras e números): é você quem gera e mostra ao médico, que o digita na tela dele. Aqui vai o código de 6 números que o médico mostrou. <Link to="/compartilhar" className="font-semibold text-primary underline">Ir para Compartilhar</Link></p>}
             {error && <p role="alert" className="mt-4 flex gap-2 rounded-lg bg-danger-soft p-3 text-sm"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{error}</p>}
             <button disabled={!isRequestCode(code) || busy} className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground disabled:opacity-50">{busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}Continuar</button>
           </form>
