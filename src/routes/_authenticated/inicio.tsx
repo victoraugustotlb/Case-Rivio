@@ -1,9 +1,8 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Activity, ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, Share2, Upload, Watch } from "lucide-react";
+import { ChevronRight, Eye, EyeOff, FileText, FolderHeart, ScanLine, Share2 } from "lucide-react";
 import { AppShell } from "@/components/vita/AppShell";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { devices } from "@/lib/vita-data";
 import { documentsQuery } from "@/lib/documents";
 import { supabase } from "@/integrations/supabase/client";
 import { healthProfileQuery } from "@/lib/profile-query";
@@ -79,7 +78,7 @@ function Inicio() {
             <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
               <div><dt className="text-xs text-muted-foreground">Documentos</dt><dd className="font-display text-2xl font-semibold">{counts.total}</dd></div>
               <div><dt className="text-xs text-muted-foreground">Exames</dt><dd className="font-display text-2xl font-semibold">{counts.exames}</dd></div>
-              <div><dt className="text-xs text-muted-foreground">Dispositivos</dt><dd className="font-display text-2xl font-semibold">{devices.length}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Recentes</dt><dd className="font-display text-2xl font-semibold">{Math.min(docs.length, 4)}</dd></div>
             </dl>
             {counts.pend > 0 && (
               <Link to="/documentos" className="mt-5 flex min-h-11 items-center justify-between rounded-lg bg-warning-soft px-3 text-sm font-medium text-warning">
@@ -91,11 +90,9 @@ function Inicio() {
 
         <section aria-labelledby="add">
           <h2 id="add" className="mb-3 font-display text-xl font-semibold">Adicionar ao histórico</h2>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Escanear documento", hint: "Exame, laudo, receita", icon: ScanLine, to: "/documentos/adicionar" },
-              { label: "Enviar arquivo", hint: "PDF ou foto", icon: Upload, to: "/documentos/adicionar" },
-              { label: "Conectar wearable", hint: "Relógio, medidores", icon: Watch, to: "/saude" },
+              { label: "Adicionar documento", hint: "Exame, laudo, receita — PDF ou foto", icon: ScanLine, to: "/documentos/adicionar" },
               { label: "Ver documentos", hint: "Biblioteca completa", icon: FolderHeart, to: "/documentos" },
             ].map(({ label, hint, icon: Icon, to }) => (
               <Link key={label} to={to} className="flex min-h-28 flex-col justify-between rounded-2xl border bg-card p-4 transition-colors hover:border-primary hover:bg-primary-soft">
@@ -106,7 +103,7 @@ function Inicio() {
           </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-6">
           <section aria-labelledby="recentes">
             <h2 id="recentes" className="mb-3 font-display text-xl font-semibold">Adicionados recentemente</h2>
             <ol className="rounded-2xl border bg-card p-2">
@@ -123,18 +120,6 @@ function Inicio() {
                 </li>
               ))}
             </ol>
-          </section>
-          <section aria-labelledby="disp">
-            <h2 id="disp" className="mb-3 font-display text-xl font-semibold">Dispositivos</h2>
-            <ul className="space-y-2">
-              {devices.map((d) => (
-                <li key={d.name} className="flex items-center gap-3 rounded-2xl border bg-card p-4">
-                  <Activity className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-                  <div className="min-w-0 flex-1"><p className="truncate font-medium">{d.name}</p><p className="text-xs text-muted-foreground">Última sincronização {d.synced}</p></div>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.ok ? "bg-success-soft text-success" : "bg-warning-soft text-warning"}`}>{d.ok ? "Ativo" : "Atrasado"}</span>
-                </li>
-              ))}
-            </ul>
           </section>
         </div>
       </div>

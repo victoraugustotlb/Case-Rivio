@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Stethoscope, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useSignedInRedirect } from "@/hooks/use-signed-in-redirect";
 import { DoctorFields, type DoctorForm } from "@/components/vita/DoctorFields";
 
 export const Route = createFileRoute("/entrar")({
@@ -34,12 +35,7 @@ function Entrar() {
   const nav = useNavigate();
   const medico = perfil === "medico";
   const [doc, setDoc] = useState<DoctorForm>({ full_name: "", crm: "", uf: "SP", specialty: "" });
-  useEffect(() => {
-    const go = () => nav({ to: "/inicio", replace: true });
-    supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
-    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && (e === "SIGNED_IN" || e === "INITIAL_SESSION")) go(); });
-    return () => data.subscription.unsubscribe();
-  }, [nav]);
+  useSignedInRedirect();
 
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +48,6 @@ function Entrar() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
-        nav({ to: "/inicio" });
       }
     } catch (err) {
       const m = err instanceof Error ? err.message : "";
@@ -71,7 +66,6 @@ function Entrar() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
-        nav({ to: "/clinico" });
       }
     } catch (err) {
       const m = err instanceof Error ? err.message : "";
@@ -83,7 +77,6 @@ function Entrar() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) { setMsg({ tipo: "erro", texto: "Não foi possível entrar com o Google." }); return; }
     if (r.redirected) return;
-    nav({ to: "/inicio" });
   };
 
   const input = "mt-1 min-h-11 w-full rounded-lg border bg-card px-3";

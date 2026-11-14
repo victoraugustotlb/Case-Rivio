@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useSignedInRedirect } from "@/hooks/use-signed-in-redirect";
 import { FileUp, Share2, Stethoscope, Watch } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -18,13 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const nav = useNavigate();
-  useEffect(() => {
-    const go = () => nav({ to: "/inicio", replace: true });
-    supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
-    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && (e === "SIGNED_IN" || e === "INITIAL_SESSION")) go(); });
-    return () => data.subscription.unsubscribe();
-  }, [nav]);
+  useSignedInRedirect();
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -37,7 +31,7 @@ function Landing() {
       <main className="mx-auto max-w-6xl px-6 pb-16 pt-10">
         <section className="bg-hero rounded-3xl p-8 text-primary-foreground shadow-soft sm:p-14">
           <h1 className="max-w-3xl font-display text-4xl font-bold leading-tight sm:text-5xl">Todo o seu histórico de saúde em um só lugar.</h1>
-          <p className="mt-4 max-w-2xl text-lg opacity-90">Envie exames, laudos e receitas antigas, conecte seu relógio e mostre tudo ao médico com um código. Menos exames repetidos.</p>
+          <p className="mt-4 max-w-2xl text-lg opacity-90">Envie exames, laudos e receitas antigas e mostre tudo ao médico com um código. Menos exames repetidos.</p>
           <Link to="/entrar" className="mt-8 inline-flex min-h-12 items-center rounded-lg bg-primary-foreground px-6 font-semibold text-primary">Começar agora</Link>
         </section>
         <section className="mt-10 grid gap-4 md:grid-cols-3">
