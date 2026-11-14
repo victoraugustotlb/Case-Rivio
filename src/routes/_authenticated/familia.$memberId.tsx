@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/familia/$memberId")({
     ],
   }),
   component: Membro,
-  errorComponent: ({ error }) => <AppShell><p role="alert" className="rounded-lg bg-danger-soft p-4">{error.message}</p></AppShell>,
+  errorComponent: ({ error }) => <AppShell><p role="alert" className="rounded-lg bg-danger-soft p-4">{(error as Error).message}</p></AppShell>,
   notFoundComponent: () => <AppShell><p>Perfil não encontrado.</p></AppShell>,
 });
 

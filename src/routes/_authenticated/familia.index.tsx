@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/familia/")({
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(accountQuery),
   component: Familia,
-  errorComponent: ({ error }) => <AppShell><p role="alert" className="rounded-lg bg-danger-soft p-4">{error.message}</p></AppShell>,
+  errorComponent: ({ error }) => <AppShell><p role="alert" className="rounded-lg bg-danger-soft p-4">{(error as Error).message}</p></AppShell>,
   notFoundComponent: () => <AppShell><p>Página não encontrada.</p></AppShell>,
 });
 
@@ -74,7 +74,7 @@ function PlanFamily() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <PageTitle title="Minha família" subtitle={f.planName ? `Plano oferecido por ${f.planName}` : undefined} />
+      <PageTitle title="Minha família" subtitle={f.planName ? `Plano oferecido por ${f.planName}` : ""} />
       {err && <p role="alert" className="rounded-lg bg-danger-soft p-3 text-sm">{err}</p>}
 
       {(f.incomingRequests.length > 0 || f.accessRequests.length > 0) && (
