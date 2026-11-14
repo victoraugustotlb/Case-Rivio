@@ -18,6 +18,7 @@ const nav = [
 const moreNav = [
   { label: "Minha família", to: "/familia", icon: Users },
   { label: "Perfil", to: "/perfil", icon: User },
+  { label: "Acessos", to: "/acessos", icon: Eye },
   { label: "Conta e privacidade", to: "/plano", icon: ShieldCheck },
   { label: "Assinatura e pagamento", to: "/assinatura", icon: CreditCard },
 ] as const;

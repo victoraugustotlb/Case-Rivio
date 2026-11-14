@@ -6,12 +6,13 @@ export type VitaDoc = {
   id: string; title: string; kind: string; doc_date: string | null; source: string | null;
   origin: string; file_path: string | null; file_type: string | null; fields: DocField[];
   summary: string | null; confirmed: boolean; created_at: string;
+  status: string; uploaded_by: string | null; uploaded_by_name: string | null; note: string | null;
 };
 
 export const documentsQuery = queryOptions({
   queryKey: ["documents"],
   queryFn: async (): Promise<VitaDoc[]> => {
-    const { data, error } = await supabase.from("documents").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("documents").select("*").eq("status", "accepted").order("created_at", { ascending: false });
     if (error) throw error;
     return (data ?? []) as unknown as VitaDoc[];
   },

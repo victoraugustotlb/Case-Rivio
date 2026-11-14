@@ -55,10 +55,11 @@ const KIND_TO_CATEGORY: Record<string, ShareCategory> = {
 
 /** O médico só vê documentos da categoria autorizada e adicionados dentro do período. */
 export function docVisible(
-  doc: { kind: string; created_at: string },
+  doc: { kind: string; created_at: string; status?: string | null },
   share: { categories: string[]; period_months: number },
   now: Date = new Date(),
 ): boolean {
+  if ((doc.status ?? "accepted") !== "accepted") return false; // pendente/recusado nunca entra em códigos
   const cat = KIND_TO_CATEGORY[doc.kind];
   if (!cat || !share.categories.includes(cat)) return false;
   const limit = new Date(now);

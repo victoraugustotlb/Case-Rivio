@@ -56,9 +56,11 @@ export type Database = {
           include_profile: boolean
           patient_id: string | null
           period_months: number
+          request_upload: boolean
           share_code_id: string | null
           signals: string[]
           status: string
+          upload_granted: boolean
         }
         Insert: {
           categories?: string[]
@@ -71,9 +73,11 @@ export type Database = {
           include_profile?: boolean
           patient_id?: string | null
           period_months: number
+          request_upload?: boolean
           share_code_id?: string | null
           signals?: string[]
           status?: string
+          upload_granted?: boolean
         }
         Update: {
           categories?: string[]
@@ -86,9 +90,11 @@ export type Database = {
           include_profile?: boolean
           patient_id?: string | null
           period_months?: number
+          request_upload?: boolean
           share_code_id?: string | null
           signals?: string[]
           status?: string
+          upload_granted?: boolean
         }
         Relationships: []
       }
@@ -237,10 +243,15 @@ export type Database = {
           file_type: string | null
           id: string
           kind: string
+          note: string | null
           origin: string
           source: string | null
+          status: string
           summary: string | null
           title: string
+          uploaded_by: string | null
+          uploaded_by_name: string | null
+          uploaded_by_role: string | null
           user_id: string
         }
         Insert: {
@@ -253,10 +264,15 @@ export type Database = {
           file_type?: string | null
           id?: string
           kind?: string
+          note?: string | null
           origin?: string
           source?: string | null
+          status?: string
           summary?: string | null
           title: string
+          uploaded_by?: string | null
+          uploaded_by_name?: string | null
+          uploaded_by_role?: string | null
           user_id?: string
         }
         Update: {
@@ -269,10 +285,15 @@ export type Database = {
           file_type?: string | null
           id?: string
           kind?: string
+          note?: string | null
           origin?: string
           source?: string | null
+          status?: string
           summary?: string | null
           title?: string
+          uploaded_by?: string | null
+          uploaded_by_name?: string | null
+          uploaded_by_role?: string | null
           user_id?: string
         }
         Relationships: []
@@ -407,6 +428,42 @@ export type Database = {
           tech_lead_name?: string
           tech_lead_registry?: string
           uf?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          ref: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          ref?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          ref?: string | null
+          title?: string
           user_id?: string
         }
         Relationships: []

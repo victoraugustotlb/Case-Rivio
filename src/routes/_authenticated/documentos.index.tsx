@@ -5,6 +5,7 @@ import { AppShell, PageTitle } from "@/components/vita/AppShell";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { type DocKind } from "@/lib/vita-data";
 import { documentsQuery } from "@/lib/documents";
+import { PendingUploads } from "@/components/vita/PatientInbox";
 
 export const Route = createFileRoute("/_authenticated/documentos/")({
   head: () => ({
@@ -33,6 +34,7 @@ function Documentos() {
       <div className="mx-auto max-w-5xl">
         <PageTitle title="Meus documentos" subtitle={`${docs.length} documentos no seu histórico`}
           action={<Link to="/documentos/adicionar" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 font-semibold text-primary-foreground"><ScanLine className="h-4 w-4" aria-hidden /> Adicionar</Link>} />
+        <div className="mb-4"><PendingUploads /></div>
         <label className="flex min-h-11 items-center gap-2 rounded-lg border bg-card px-3">
           <Search className="h-4 w-4 text-muted-foreground" aria-hidden />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome" aria-label="Buscar documentos" className="w-full bg-transparent outline-none" />
@@ -54,6 +56,7 @@ function Documentos() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">{d.kind}</span>
+                  {d.uploaded_by_name && <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary">Enviado por {d.uploaded_by_name}</span>}
                   {!d.confirmed && <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] font-semibold text-warning">Conferir</span>}
                 </div>
               </Link>

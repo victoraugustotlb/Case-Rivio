@@ -11,6 +11,7 @@ import { firstAccessDestination } from "@/lib/profile";
 import { accountQuery } from "@/lib/account-query";
 import { homeFor } from "@/lib/accounts";
 import { AccessStatus } from "@/components/vita/AccessStatus";
+import { NotificationsCard, PendingUploads } from "@/components/vita/PatientInbox";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -59,6 +60,8 @@ function Inicio() {
         </section>
 
         <AccessStatus />
+        <PendingUploads />
+        <NotificationsCard />
 
         {!profile?.questionnaire_completed && <section className="flex flex-wrap items-center justify-between gap-4 border-y py-5">
           <div><h2 className="font-display text-xl font-semibold">Seu perfil de saúde</h2><p className="mt-1 text-sm text-muted-foreground">Questionário inicial · Medidas, medicamentos e histórico</p></div>

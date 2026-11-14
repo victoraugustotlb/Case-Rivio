@@ -177,7 +177,7 @@ export const getMemberRecords = createServerFn({ method: "POST" }).middleware([a
     const name = info?.get(data.memberId)?.name || "Familiar";
     if (!decision.allowed || decision.basis === "proprio") return { allowed: false as const, name, reason: decision.allowed ? "proprio" : decision.reason };
     const [{ data: docs }, { data: prof }] = await Promise.all([
-      sb.from("documents").select("id,title,kind,doc_date,source,summary,fields,created_at,file_type").eq("user_id", data.memberId).order("created_at", { ascending: false }),
+      sb.from("documents").select("id,title,kind,doc_date,source,summary,fields,created_at,file_type").eq("user_id", data.memberId).eq("status", "accepted").order("created_at", { ascending: false }),
       decision.scope === "tudo" ? sb.from("patient_profiles").select("*").eq("user_id", data.memberId).maybeSingle() : Promise.resolve({ data: null }),
     ]);
     await sb.from("access_logs").insert({ user_id: data.memberId, viewer_id: context.userId, action: "familia_resumo" });
@@ -196,7 +196,7 @@ export const openMemberDocument = createServerFn({ method: "POST" }).middleware(
     const sb = await admin();
     const { decision } = await decide(sb, context.userId, data.memberId);
     if (!decision.allowed || decision.basis === "proprio") return { ok: false as const, error: "Acesso não autorizado." };
-    const { data: doc } = await sb.from("documents").select("id,kind,file_path").eq("id", data.documentId).eq("user_id", data.memberId).maybeSingle();
+    const { data: doc } = await sb.from("documents").select("id,kind,file_path").eq("id", data.documentId).eq("user_id", data.memberId).eq("status", "accepted").maybeSingle();
     if (!doc || !kindAllowed(decision, doc.kind) || !doc.file_path?.startsWith(`${data.memberId}/`)) return { ok: false as const, error: "Documento não autorizado." };
     const { data: url } = await sb.storage.from("medical-documents").createSignedUrl(doc.file_path, 120);
     await sb.from("access_logs").insert({ user_id: data.memberId, viewer_id: context.userId, action: "familia_documento", document_id: doc.id });

@@ -15,6 +15,13 @@
       "when": 1794670701434,
       "tag": "0001_tighten_directory_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794673619074,
+      "tag": "0002_professional_area",
+      "breakpoints": true
     }
   ]
 }

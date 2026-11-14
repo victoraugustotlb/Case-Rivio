@@ -93,43 +93,46 @@ export const checkShare = createServerFn({ method: "POST" })
   });
 
 /** Abre um documento autorizado: registra em access_logs e devolve um link novo e curto. */
+export async function openDocumentForShare(code: string, documentId: string, viewerId?: string) {
+  const { admin, share, state } = await loadValidShare(code);
+  if (!share || state !== "valido") return { status: state === "valido" ? ("invalido" as const) : state };
+  const { data: doc } = await admin.from("documents").select("id,kind,created_at,file_path,status").eq("id", documentId).eq("user_id", share.user_id).maybeSingle();
+  if (!doc || !docVisible(doc, share)) return { status: "invalido" as const };
+  await admin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewerId ? "profissional_documento" : "documento", document_id: doc.id, viewer_id: viewerId ?? null });
+  let url: string | null = null;
+  if (doc.file_path && doc.file_path.startsWith(`${share.user_id}/`)) url = (await admin.storage.from("medical-documents").createSignedUrl(doc.file_path, 120)).data?.signedUrl ?? null;
+  return { status: "valido" as const, url };
+}
+
 export const openSharedDocument = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ code: z.string().min(8).max(12), documentId: z.string().uuid() }).parse(d))
-  .handler(async ({ data }) => {
-    const { admin, share, state } = await loadValidShare(data.code);
-    if (!share || state !== "valido") return { status: state === "valido" ? ("invalido" as const) : state };
-    const { data: doc } = await admin.from("documents").select("id,kind,created_at,file_path").eq("id", data.documentId).eq("user_id", share.user_id).maybeSingle();
-    if (!doc || !docVisible(doc, share)) return { status: "invalido" as const };
-    await admin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: "documento", document_id: doc.id });
-    let url: string | null = null;
-    if (doc.file_path && doc.file_path.startsWith(`${share.user_id}/`)) url = (await admin.storage.from("medical-documents").createSignedUrl(doc.file_path, 120)).data?.signedUrl ?? null;
-    return { status: "valido" as const, url };
-  });
+  .handler(async ({ data }) => openDocumentForShare(data.code, data.documentId));
+
+/** Monta a visão autorizada de um código. Com viewer, o registro identifica o profissional. */
+export async function buildOpened(rawCode: string, viewer?: { viewerId: string; action: string }) {
+  const code = normalizeCode(rawCode);
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: share } = await supabaseAdmin.from("share_codes").select("*").eq("code", code).maybeSingle();
+  if (!share) return { status: "invalido" as const };
+  const state = accessState(new Date(share.expires_at), share.revoked);
+  if (state !== "valido") return { status: state };
+  const { data: rows } = await supabaseAdmin.from("documents").select("id,title,kind,doc_date,source,origin,file_path,file_type,file_hash,fields,summary,confirmed,created_at,status,uploaded_by_name").eq("user_id", share.user_id).eq("status", "accepted").order("created_at", { ascending: false });
+  const docs = (rows ?? []).filter((d) => docVisible(d, share)).map((d) => ({ ...d, fields: (d.fields ?? []) as SharedField[], file_path: undefined, url: null as string | null }));
+  let profile: HealthProfile | null = null;
+  if (profileVisible(share)) {
+    const { data: profileRow, error: profileError } = await supabaseAdmin
+      .from("patient_profiles")
+      .select("full_name,birth_date,height_cm,weight_kg,medications,allergies,conditions,surgeries,family_history,smoking,alcohol,activity,questionnaire_completed")
+      .eq("user_id", share.user_id)
+      .maybeSingle();
+    if (profileError) throw new Error("Não foi possível carregar o perfil autorizado.");
+    profile = profileRow ? profileSchema.parse(profileRow) : null;
+  }
+  await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: viewer?.action ?? "resumo", viewer_id: viewer?.viewerId ?? null });
+  return { status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, docs };
+}
 
 /** Acesso do médico: valida o código e devolve só o que o paciente autorizou. */
 export const openShare = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ code: z.string().min(8).max(12) }).parse(d))
-  .handler(async ({ data }) => {
-    const code = normalizeCode(data.code);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: share } = await supabaseAdmin.from("share_codes").select("*").eq("code", code).maybeSingle();
-    if (!share) return { status: "invalido" as const };
-    const state = accessState(new Date(share.expires_at), share.revoked);
-    if (state !== "valido") return { status: state };
-    const { data: rows } = await supabaseAdmin.from("documents").select("id,title,kind,doc_date,source,origin,file_path,file_type,file_hash,fields,summary,confirmed,created_at").eq("user_id", share.user_id).order("created_at", { ascending: false });
-    const docs = await Promise.all((rows ?? []).filter((d) => docVisible(d, share)).map(async (d) => {
-      return { ...d, fields: (d.fields ?? []) as SharedField[], file_path: undefined, url: null as string | null };
-    }));
-    let profile: HealthProfile | null = null;
-    if (profileVisible(share)) {
-      const { data: profileRow, error: profileError } = await supabaseAdmin
-        .from("patient_profiles")
-        .select("full_name,birth_date,height_cm,weight_kg,medications,allergies,conditions,surgeries,family_history,smoking,alcohol,activity,questionnaire_completed")
-        .eq("user_id", share.user_id)
-        .maybeSingle();
-      if (profileError) throw new Error("Não foi possível carregar o perfil autorizado.");
-      profile = profileRow ? profileSchema.parse(profileRow) : null;
-    }
-    await supabaseAdmin.from("access_logs").insert({ user_id: share.user_id, share_code_id: share.id, action: "resumo" });
-    return { status: "valido" as const, session: await sessionId(share.id), code, expiresAt: share.expires_at, categories: share.categories, signals: share.signals, periodMonths: share.period_months, includeProfile: profileVisible(share), profile, docs };
-  });
+  .handler(async ({ data }) => buildOpened(data.code));

@@ -77,9 +77,12 @@ function Sparkline({ points, refMax, unit }: { points: { t: number; v: number }[
   );
 }
 
-export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onClose: () => void; onEnded: () => void }) {
+export type DocOpener = (documentId: string) => Promise<{ status: string; url?: string | null }>;
+
+export function ClinicalView({ opened, onClose, onEnded, openDocument, embedded }: { opened: Opened; onClose: () => void; onEnded: () => void; openDocument?: DocOpener; embedded?: boolean }) {
   const check = useServerFn(checkShare);
-  const openDoc = useServerFn(openSharedDocument);
+  const openShared = useServerFn(openSharedDocument);
+  const openDoc = useCallback<DocOpener>((id) => openDocument ? openDocument(id) : openShared({ data: { code: opened.code, documentId: id } }), [openDocument, openShared, opened.code]);
   const [view, setView] = useState<View>({ tab: "resumo" });
   const [now, setNow] = useState(() => Date.now());
   const endedRef = useRef(false);
@@ -123,7 +126,7 @@ export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onC
   const Source = ({ d }: { d: Doc }) => <button type="button" onClick={() => go({ tab: "doc", id: d.id })} className="text-left text-primary underline-offset-2 hover:underline">{d.title} · {fmt(docTime(d))}</button>;
 
   return (
-    <div className="min-h-screen bg-background font-sans text-[13px] text-foreground">
+    <div className={`${embedded ? "" : "min-h-screen"} bg-background font-sans text-[13px] text-foreground`}>
       <header className="sticky top-0 z-10 border-b bg-card">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2">
           <span className="flex items-center gap-1.5 font-semibold text-primary"><Stethoscope className="h-4 w-4" aria-hidden />VITA Clínico</span>
@@ -173,7 +176,7 @@ export function ClinicalView({ opened, onClose, onEnded }: { opened: Opened; onC
         )}
 
         {view.tab === "linha" && <Timeline docs={sorted} allowed={allowed} onOpen={(id) => go({ tab: "doc", id })} />}
-        {view.tab === "doc" && (() => { const d = docs.find((x) => x.id === view.id); return d ? <DocumentDetail key={d.id} doc={d} code={opened.code} openDoc={openDoc} onEnded={onEnded} onBack={() => go({ tab: "linha" })} /> : null; })()}
+        {view.tab === "doc" && (() => { const d = docs.find((x) => x.id === view.id); return d ? <DocumentDetail key={d.id} doc={d} openDoc={openDoc} onEnded={onEnded} onBack={() => go({ tab: "linha" })} /> : null; })()}
       </main>
     </div>
   );
@@ -223,19 +226,19 @@ function Timeline({ docs, allowed, onOpen }: { docs: Doc[]; allowed: Set<string>
   );
 }
 
-function DocumentDetail({ doc, code, openDoc, onEnded, onBack }: { doc: Doc; code: string; openDoc: ReturnType<typeof useServerFn<typeof openSharedDocument>>; onEnded: () => void; onBack: () => void }) {
+function DocumentDetail({ doc, openDoc, onEnded, onBack }: { doc: Doc; openDoc: DocOpener; onEnded: () => void; onBack: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [zoom, setZoom] = useState(1);
   useEffect(() => {
     let alive = true;
-    openDoc({ data: { code, documentId: doc.id } }).then((r) => {
+    openDoc(doc.id).then((r) => {
       if (!alive) return;
       if (r.status === "expirado" || r.status === "revogado") onEnded();
-      else if (r.status === "valido") setUrl(r.url);
+      else if (r.status === "valido") setUrl(r.url ?? null);
     }).finally(() => alive && setLoading(false));
     return () => { alive = false; };
-  }, [code, doc.id, openDoc, onEnded]);
+  }, [doc.id, openDoc, onEnded]);
   const isPdf = doc.file_type === "application/pdf";
   return (
     <div className="space-y-2">
