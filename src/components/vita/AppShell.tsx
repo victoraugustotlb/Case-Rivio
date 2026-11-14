@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Activity, FileUp, FolderHeart, LogOut, Home, ScanLine, Share2, User } from "lucide-react";
 
 const nav = [
@@ -19,11 +20,17 @@ function isActive(path: string, to: string) {
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setName((data.user?.user_metadata?.["full_name"] as string) || data.user?.email || ""));
   }, []);
-  const sair = async () => { await supabase.auth.signOut(); navigate({ to: "/entrar" }); };
+  const sair = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    await navigate({ to: "/entrar", replace: true });
+  };
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-sidebar p-5 text-sidebar-foreground lg:flex">
